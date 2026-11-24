@@ -37,6 +37,7 @@ function renderDaylog(box, S) {
       h('br'), `inbox 待处理 ${st.inbox || 0} 天`, st.failed ? h('span', { class: 'bad', text: ` · 处理失败 ${st.failed} 个（.json.failed）` }) : null,
       ` · 最新日报 ${st.last_report || '—'}`, st.busy ? h('span', { class: 'gold', text: ' · 有任务正在跑' }) : null,
       st.status_texts_error ? [h('br'), h('span', { class: 'bad', text: 'status-texts.json 解析失败：' + st.status_texts_error })] : null),
+    h('div', { style: 'margin:8px 0' }, chk('接管 daylog 写库与定时任务（单容器全新部署请保持开启；与旧 daylog 共用库时关闭）', 'dl_writer', st.writer)),
     h('div', { class: 'row' }, run('pending', '处理 inbox'), run('weekly', '生成周报'), run('icu', '同步 Intervals.icu'), run('test_tg', '发一条测试消息'),
       h('button', { class: 'small', text: '刷新日志', onclick: loadLog })),
     h('div', { style: 'margin-top:10px' }, h('label', { text: '日志（logs/app.log 最后一段）' }), logBox));
@@ -117,6 +118,7 @@ function renderDaylog(box, S) {
         music: { enabled: v.mu_on.checked, api_base: v.mu_base.value },
         app_names: appNames, categories: cats, has_categories: true,
       },
+      writer: v.dl_writer.checked,
       secrets: {}, clear: [],
     };
     for (const [name, s] of Object.entries(dsec)) {
@@ -132,7 +134,9 @@ function renderDaylog(box, S) {
     finally { save.disabled = false; }
   });
   const wins = h('div', {}, report, privacy, health);
-  wins.addEventListener('input', () => { msg.textContent = 'daylog 设置有改动还没保存'; msg.className = 'gold'; });
+  const markDirty = () => { msg.textContent = 'daylog 设置有改动还没保存'; msg.className = 'gold'; };
+  wins.addEventListener('input', markDirty);
+  statusWin.addEventListener('change', markDirty);
   box.replaceChildren(statusWin, wins, h('section', { class: 'win' }, h('div', { class: 'row' }, save, msg)));
 }
 

@@ -272,3 +272,34 @@ func TestSegments(t *testing.T) {
 	rows.Close()
 	eq(t, "分段与补时长", strings.Join(got, ","), "code:60,chrome:0,chrome:0")
 }
+
+func TestFreshDaylogAutoCreate(t *testing.T) {
+	t.Setenv("DAYLOG_WRITER", "")
+	if !configFromEnv().DaylogWriter {
+		t.Fatal("全新部署 configFromEnv 默认应开启 DaylogWriter")
+	}
+	t.Setenv("DAYLOG_WRITER", "false")
+	if configFromEnv().DaylogWriter {
+		t.Fatal("显式设置 DAYLOG_WRITER=false 时应关闭")
+	}
+	dir := t.TempDir()
+	c := &Config{}
+	fillDefaults(c)
+	c.Daylog = normalizeDaylog(nil)
+	asM(c.Daylog["site"])["owner"] = "小明"
+	c.DaylogWriter = true
+	c.DaylogDB = filepath.Join(dir, "nested", "data", "app.db")
+	setConfig(c)
+	resetDaylogDB()
+	t.Cleanup(resetDaylogDB)
+
+	db := daylogDB()
+	if db == nil {
+		t.Fatal("全新嵌套路径下 daylogDB 应自动建目录并初始化数据库")
+	}
+	feed := getDaylogFeed(db)
+	if feed == nil || !truthy(feed["ok"]) {
+		t.Fatalf("getDaylogFeed 失败: %v", feed)
+	}
+	eq(t, "空库文案用配置的 owner", toStr(asM(feed["view"])["now"]), "还没有收到 小明 的活动")
+}

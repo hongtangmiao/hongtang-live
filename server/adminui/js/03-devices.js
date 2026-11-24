@@ -106,7 +106,9 @@ function renderDevices(box, D) {
   box.replaceChildren(h('section', { class: 'win' },
     h('h2', { text: '设备' }),
     h('p', { class: 'hint', text: '电脑托盘程序和安卓 App 都在这里配对。每台设备一个口令，丢了 / 不用了就停用或删除，不影响其他设备。' }),
-    h('p', { class: 'hint' }, '安卓 App 安装包：', h('a', { href: '/app/hongtang-live.apk', text: location.origin + '/app/hongtang-live.apk' }), '（手机浏览器打开就能下载）'),
+    D.apk_ready
+      ? h('p', { class: 'hint' }, '安卓 App 安装包：', h('a', { href: '/app/hongtang-live.apk', text: location.origin + '/app/hongtang-live.apk' }), '（手机浏览器打开就能下载）')
+      : h('p', { class: 'hint', text: '安卓 App 安装包：尚未上传（将编译好的 APK 放到 data/downloads/hongtang-live.apk 后即可通过 /app/hongtang-live.apk 下载）' }),
     list,
     h('div', { style: 'margin-top:16px' }, h('label', { text: '添加设备' }),
       h('div', { class: 'grid' }, fNew, h('div', {}, h('label', { text: '类型' }), kSel), h('div', { class: 'full' }, fBase)),

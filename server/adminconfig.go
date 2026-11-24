@@ -273,19 +273,7 @@ func afterConfigChange(old, c *Config) {
 		wallMu.Unlock()
 	}
 	if old.DaylogDB != c.DaylogDB {
-		dbMu.Lock()
-		if dbHandle != nil {
-			dbHandle.Close()
-			dbHandle = nil
-		}
-		dbFailedAt = time.Time{}
-		dbMu.Unlock()
-		histMu.Lock()
-		histData = nil
-		histMu.Unlock()
-		feedMu.Lock()
-		feedData = nil
-		feedMu.Unlock()
+		resetDaylogDB()
 	}
 	srv.mu.Lock()
 	srv.disks = nil

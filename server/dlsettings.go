@@ -140,6 +140,7 @@ type dlPatch struct {
 		} `json:"categories"`
 		HasCategories bool `json:"has_categories"`
 	} `json:"daylog"`
+	Writer  *bool             `json:"writer"`
 	Secrets map[string]string `json:"secrets"`
 	Clear   []string          `json:"clear"`
 }
@@ -354,6 +355,10 @@ func handleDaylogSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c := cloneConfig(conf())
+	oldWriter := c.DaylogWriter
+	if p.Writer != nil {
+		c.DaylogWriter = *p.Writer
+	}
 	d := deepCopyM(c.Daylog).(map[string]any)
 	if err := applyDlPatch(d, &p); err != nil {
 		writeJSON(w, 400, M{"ok": false, "error": err.Error()})
@@ -363,6 +368,9 @@ func handleDaylogSettings(w http.ResponseWriter, r *http.Request) {
 	if err := commitConfig(c); err != nil {
 		writeJSON(w, 500, M{"ok": false, "error": err.Error()})
 		return
+	}
+	if oldWriter != c.DaylogWriter {
+		resetDaylogDB()
 	}
 	dlLog("设置页修改了 daylog 配置")
 	writeJSON(w, 200, M{"ok": true, "settings": dlSettingsView()})

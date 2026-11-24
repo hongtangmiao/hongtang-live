@@ -205,6 +205,8 @@ func configFromEnv() *Config {
 	c.Jellyfin.Key = g("JF_KEY")
 	c.Jellyfin.User = g("JF_USER")
 	c.DaylogDB = g("DAYLOG_DB")
+	dw := strings.ToLower(g("DAYLOG_WRITER"))
+	c.DaylogWriter = dw != "false" && dw != "0" && dw != "no" && dw != "off"
 	c.Stats.HostProc = g("HOST_PROC")
 	c.Stats.HostRoot = g("HOST_ROOT")
 	// 默认设备显示名：启动后可在设置页修改

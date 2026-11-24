@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -276,7 +278,8 @@ func devicesAdminList() M {
 	for _, p := range pendingCodes() {
 		pend = append(pend, M{"code": p.Code, "name": p.Name, "kind": p.Kind, "expires": isoSec(p.Expires.In(loc))})
 	}
-	return M{"ok": true, "devices": list, "pending": pend, "kinds": deviceKinds, "scopes": allScopes}
+	_, apkErr := os.Stat(filepath.Join(dataDir, "downloads", "hongtang-live.apk"))
+	return M{"ok": true, "devices": list, "pending": pend, "kinds": deviceKinds, "scopes": allScopes, "apk_ready": apkErr == nil}
 }
 
 func findDeviceLocked(id string) *Device {

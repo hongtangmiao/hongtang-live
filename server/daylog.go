@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 	"math"
+	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -39,6 +41,13 @@ func daylogDB() *sql.DB {
 	writer := conf().DaylogWriter
 	dsn := "file:" + path + "?mode=ro&_pragma=busy_timeout(3000)&_pragma=query_only(1)"
 	if writer {
+		if dir := filepath.Dir(path); dir != "" && dir != "." {
+			if err := os.MkdirAll(dir, 0o755); err != nil {
+				log.Printf("[daylog] mkdir %s failed: %v", dir, err)
+				dbFailedAt = time.Now()
+				return nil
+			}
+		}
 		dsn = "file:" + path + "?_pragma=busy_timeout(5000)&_txlock=immediate"
 	}
 	db, err := sql.Open("sqlite", dsn)
@@ -60,6 +69,22 @@ func daylogDB() *sql.DB {
 	dbFailedAt = time.Time{}
 	dbHandle = db
 	return db
+}
+
+func resetDaylogDB() {
+	dbMu.Lock()
+	if dbHandle != nil {
+		dbHandle.Close()
+		dbHandle = nil
+	}
+	dbFailedAt = time.Time{}
+	dbMu.Unlock()
+	histMu.Lock()
+	histData = nil
+	histMu.Unlock()
+	feedMu.Lock()
+	feedData = nil
+	feedMu.Unlock()
 }
 
 /* ---------------- 文案格式（与 daylog/app 一致） ---------------- */
@@ -392,8 +417,9 @@ func getDaylogFeed(db *sql.DB) M {
 	}
 
 	var view M
+	owner := dOwner()
 	if cur == nil {
-		view = M{"now": "还没有收到红糖的活动", "stale": true, "dur_text": "", "cat": "", "label": "", "face": faceFor(true, false)}
+		view = M{"now": "还没有收到 " + owner + " 的活动", "stale": true, "dur_text": "", "cat": "", "label": "", "face": faceFor(true, false)}
 	} else {
 		endMs, endOK := msOf(or(cur.EndTS, cur.TS))
 		startMs, startOK := msOf(cur.TS)
@@ -417,7 +443,7 @@ func getDaylogFeed(db *sql.DB) M {
 			if ago == "刚刚" {
 				d = "最后活动 刚刚"
 			}
-			view = M{"now": meow("红糖不在电脑前"), "stale": true, "dur_text": d, "cat": cur.Cat, "label": lastPlain, "face": faceFor(true, lastPlain != "")}
+			view = M{"now": meow(owner + " 不在电脑前"), "stale": true, "dur_text": d, "cat": cur.Cat, "label": lastPlain, "face": faceFor(true, lastPlain != "")}
 		} else {
 			view = M{"now": liveFull, "stale": false, "dur_text": "已经 " + fmtMin(run), "cat": cur.Cat, "label": liveFull, "face": faceFor(false, liveFull != "")}
 		}
