@@ -218,20 +218,20 @@ func faceFor(stale, hasLabel bool) string {
 /* ---------------- /api/daylog/feed ---------------- */
 
 type liveRow struct {
-	ID                                          int64
-	Day, TS, EndTS, App, Label, LabelPlain, Cat string
-	Dur                                         float64
+	ID                                                int64
+	Day, TS, EndTS, App, Label, LabelPlain, Cat, Host string
+	Dur                                               float64
 }
 
-const liveCols = "id, day, ts, end_ts, app, label, label_plain, cat, dur"
+const liveCols = "id, day, ts, end_ts, app, label, label_plain, cat, host, dur"
 
 func scanLive(sc interface{ Scan(...any) error }) (liveRow, error) {
 	var r liveRow
 	var dur sql.NullFloat64
-	var day, ts, end, app, label, plain, cat sql.NullString
-	err := sc.Scan(&r.ID, &day, &ts, &end, &app, &label, &plain, &cat, &dur)
+	var day, ts, end, app, label, plain, cat, host sql.NullString
+	err := sc.Scan(&r.ID, &day, &ts, &end, &app, &label, &plain, &cat, &host, &dur)
 	r.Day, r.TS, r.EndTS, r.App = day.String, ts.String, end.String, app.String
-	r.Label, r.LabelPlain, r.Cat, r.Dur = label.String, plain.String, cat.String, dur.Float64
+	r.Label, r.LabelPlain, r.Cat, r.Host, r.Dur = label.String, plain.String, cat.String, host.String, dur.Float64
 	return r, err
 }
 
@@ -482,9 +482,7 @@ func getDaylogFeed(db *sql.DB) M {
 	}
 	var apps []*appAgg
 	appIdx := map[string]*appAgg{}
-	var catNames []string
-	catSec := map[string]float64{}
-	total := 0.0
+	spans := make([]liveSpan, 0, len(rows))
 	for _, r := range rows {
 		sMs, sOK := msOf(r.TS)
 		eMs, eOK := msOf(or(r.EndTS, r.TS))
@@ -494,15 +492,11 @@ func getDaylogFeed(db *sql.DB) M {
 		}
 		sec := maxF(r.Dur, span)
 		if r.ID == lastID && !viewStale && sOK {
-			liveSpan := maxF(0, math.Floor((nowMsv-sMs)/1000))
-			sec = maxF(sec, minF(liveSpan, 300))
+			liveSpanSec := maxF(0, math.Floor((nowMsv-sMs)/1000))
+			sec = maxF(sec, minF(liveSpanSec, 300))
 		}
-		total += sec
 		cat := or(r.Cat, "其他")
-		if _, ok := catSec[cat]; !ok {
-			catNames = append(catNames, cat)
-		}
-		catSec[cat] += sec
+		spans = append(spans, liveSpan{ts: r.TS, endTS: r.EndTS, host: r.Host, cat: cat, dur: int64(sec)})
 		a := appIdx[r.App]
 		if a == nil {
 			a = &appAgg{app: r.App, lastTS: r.TS, label: r.Label, plain: or(r.LabelPlain, r.Label), cat: cat, id: r.ID}
@@ -514,6 +508,8 @@ func getDaylogFeed(db *sql.DB) M {
 			a.lastTS, a.label, a.plain, a.cat, a.id = r.TS, r.Label, or(r.LabelPlain, r.Label), cat, r.ID
 		}
 	}
+	totDedup, catDedup := dedupLiveTotals(today, spans)
+	total := float64(totDedup)
 	detailed := !viewStale
 	sort.SliceStable(apps, func(i, j int) bool {
 		if apps[i].total != apps[j].total {
@@ -535,8 +531,8 @@ func getDaylogFeed(db *sql.DB) M {
 			"total_sec": a.total, "total": fmtMin(a.total), "clock": fmtClock(a.lastTS), "cur": isCur && detailed})
 	}
 	cats := []M{}
-	for _, name := range catNames {
-		sec := catSec[name]
+	for name, s := range catDedup {
+		sec := float64(s)
 		pct := 0.0
 		if total > 0 {
 			pct = maxF(2, jsRound(sec/total*100))

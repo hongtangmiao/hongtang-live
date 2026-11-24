@@ -35,6 +35,68 @@ func spanMin(a, b string) float64 {
 	return 1
 }
 
+func saveMusicCover(title, artist string, e M) {
+	cover := httpsURL(toStr(e["cover"]))
+	if cover == "" || title == "" {
+		return
+	}
+	db, err := dlWriter()
+	if err != nil {
+		return
+	}
+	sid := int64(toNum(e["song_id"]))
+	dlWriteMu.Lock()
+	defer dlWriteMu.Unlock()
+	_, _ = db.Exec("UPDATE music SET cover=?, album=COALESCE(NULLIF(?, ''), album), url=COALESCE(NULLIF(?, ''), url), song_id=CASE WHEN ? > 0 THEN ? ELSE song_id END WHERE title=? AND artist=? AND cover=''",
+		cover, toStr(e["album"]), toStr(e["url"]), sid, sid, title, artist)
+}
+
+var (
+	bfMu      sync.Mutex
+	bfRunning bool
+	bfLast    time.Time
+)
+
+func backfillMusicCovers(items []musicRow) {
+	if len(items) == 0 {
+		return
+	}
+	if strings.TrimRight(or(dStr(dlCfg(), "music", "api_base"), conf().NetEase.API), "/") == "" {
+		return
+	}
+	bfMu.Lock()
+	if bfRunning || time.Since(bfLast) < 2*time.Minute {
+		bfMu.Unlock()
+		return
+	}
+	bfRunning = true
+	bfLast = time.Now()
+	bfMu.Unlock()
+	go func() {
+		defer func() {
+			bfMu.Lock()
+			bfRunning = false
+			bfMu.Unlock()
+		}()
+		updated := false
+		for i, r := range items {
+			if i >= 25 {
+				break
+			}
+			e := enrichMusic(M{"title": r.Title, "artist": r.Artist, "album": r.Album})
+			if truthy(e["cover"]) {
+				saveMusicCover(r.Title, r.Artist, e)
+				updated = true
+			}
+		}
+		if updated {
+			histMu.Lock()
+			histData = nil
+			histMu.Unlock()
+		}
+	}()
+}
+
 // currentMusic：优先 devices.music；清空或过期就用最近一条有效播放记录（标成没在放）
 func currentMusic() any {
 	db := daylogDB()
@@ -88,7 +150,14 @@ func currentMusic() any {
 		if ms, ok := msOf(last.String); ok {
 			ago = maxF(0, jsRound((nowMs()-ms)/60000))
 		}
-		return M{"title": title.String, "sub": artist.String, "album": album.String, "cover": httpsURL(cover.String), "url": u.String,
+		cv := httpsURL(cover.String)
+		if cv == "" {
+			if e := enrichMusic(M{"title": title.String, "artist": artist.String, "album": album.String}); truthy(e["cover"]) {
+				cv = httpsURL(toStr(e["cover"]))
+				saveMusicCover(title.String, artist.String, e)
+			}
+		}
+		return M{"title": title.String, "sub": artist.String, "album": album.String, "cover": cv, "url": u.String,
 			"song_id": sid.Int64, "last_seen": last.String, "ago": ago, "playing": false}
 	}
 	return nil
@@ -141,14 +210,35 @@ func musicHistory() M {
 		if isNoiseMusic(title.String, artist.String) {
 			continue
 		}
-		r = musicRow{Day: day.String, Title: title.String, Artist: artist.String, Album: album.String, Cover: cover.String, URL: u.String,
+		r = musicRow{Day: day.String, Title: title.String, Artist: artist.String, Album: album.String, Cover: httpsURL(cover.String), URL: u.String,
 			FirstTS: first.String, LastTS: last.String, Plays: plays.Float64, Minutes: spanMin(first.String, last.String)}
+		if r.Cover == "" {
+			musicCacheMu.Lock()
+			if hit, ok := musicCache[r.Title+"|"+r.Artist]; ok && truthy(hit.v["cover"]) {
+				r.Cover = httpsURL(toStr(hit.v["cover"]))
+			}
+			musicCacheMu.Unlock()
+		}
 		if r.Plays == 0 {
 			r.Plays = 1
 		}
 		list = append(list, r)
 	}
 	rows.Close()
+
+	// 历史记录里缺封面的歌（最近 25 首）在后台补拉并写回 SQLite
+	var missing []musicRow
+	seenMiss := map[string]bool{}
+	for _, r := range list {
+		k := r.Title + "|" + r.Artist
+		if r.Cover == "" && !seenMiss[k] {
+			seenMiss[k] = true
+			missing = append(missing, r)
+		}
+	}
+	if len(missing) > 0 {
+		backfillMusicCovers(missing)
+	}
 
 	sumPlays := func(a []musicRow) (p, m float64) {
 		for _, x := range a {

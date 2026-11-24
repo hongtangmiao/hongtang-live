@@ -440,3 +440,21 @@ func TestHRDeviceOnline(t *testing.T) {
 	}
 	t.Error("设备栏里没有心率设备")
 }
+
+func TestMultiDeviceNoDoubleCount(t *testing.T) {
+	setupDevices(t)
+	_, _ = pairOK(t, "windows", "pc1")
+	_, _ = pairOK(t, "android", "ph1")
+	day := "2026-10-15"
+	db := daylogDB()
+	// 电脑 01:00–02:00（1h），手机 01:15–02:15（1h，与电脑重叠 45m）→ 合计应为 1h15m = 4500s
+	_, _ = db.Exec("INSERT INTO live(day, ts, end_ts, host, app, label, label_plain, cat, title, dur) VALUES (?,?,?,?,?,?,?,?,?,?)",
+		day, day+"T01:00:00+08:00", day+"T02:00:00+08:00", "pc1", "code", "VS Code", "VS Code", "写代码", "", 3600)
+	_, _ = db.Exec("INSERT INTO live(day, ts, end_ts, host, app, label, label_plain, cat, title, dur) VALUES (?,?,?,?,?,?,?,?,?,?)",
+		day, day+"T01:15:00+08:00", day+"T02:15:00+08:00", "ph1", "chrome", "Chrome", "Chrome", "浏览", "", 3600)
+	tot := dayTotals(day)
+	eq(t, "多设备重叠时段不重复计算", tot.Total, int64(4500))
+	if len(tot.Cats) != 2 || tot.Cats[0]["name"] != "写代码" || tot.Cats[0]["sec"] != int64(3600) || tot.Cats[1]["sec"] != int64(900) {
+		t.Errorf("分类应电脑优先、手机只计非重叠部分: %v", tot.Cats)
+	}
+}

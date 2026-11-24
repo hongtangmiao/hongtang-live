@@ -532,19 +532,30 @@ func dayTotals(day string) dayTotal {
 	if db == nil {
 		return out
 	}
-	if rows, err := db.Query("SELECT cat, SUM(dur) AS sec FROM live WHERE day=? GROUP BY cat ORDER BY sec DESC", day); err == nil {
+	var spans []liveSpan
+	if rows, err := db.Query("SELECT ts, end_ts, host, cat, dur FROM live WHERE day=? ORDER BY id ASC", day); err == nil {
 		for rows.Next() {
-			var c string
-			var s sql.NullInt64
-			if rows.Scan(&c, &s) == nil {
-				out.Cats = append(out.Cats, M{"name": c, "sec": s.Int64})
+			var sp liveSpan
+			var dur sql.NullInt64
+			if rows.Scan(&sp.ts, &sp.endTS, &sp.host, &sp.cat, &dur) == nil {
+				sp.dur = dur.Int64
+				spans = append(spans, sp)
 			}
 		}
 		rows.Close()
 	}
-	var tot sql.NullInt64
-	_ = db.QueryRow("SELECT SUM(dur) FROM live WHERE day=?", day).Scan(&tot)
-	out.Total = tot.Int64
+	tot, catSec := dedupLiveTotals(day, spans)
+	out.Total = tot
+	for name, s := range catSec {
+		out.Cats = append(out.Cats, M{"name": name, "sec": s})
+	}
+	sort.SliceStable(out.Cats, func(i, j int) bool {
+		a, b := out.Cats[i]["sec"].(int64), out.Cats[j]["sec"].(int64)
+		if a != b {
+			return a > b
+		}
+		return toStr(out.Cats[i]["name"]) < toStr(out.Cats[j]["name"])
+	})
 	_ = db.QueryRow("SELECT COUNT(DISTINCT app) FROM live WHERE day=?", day).Scan(&out.Apps)
 	var last sql.NullString
 	_ = db.QueryRow("SELECT MAX(end_ts) FROM live WHERE day=?", day).Scan(&last)

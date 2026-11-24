@@ -159,12 +159,39 @@ func enrichMusic(m M) M {
 		cleaned := pyStrip(reBracket.ReplaceAllString(title, ""))
 		seen := map[string]bool{}
 		hdr := map[string]string{"User-Agent": browserUA}
+		ckParam := ""
+		if ck, _ := getOwner(); ck != "" {
+			ckParam = "&cookie=" + formEscape(ck)
+		}
 		for _, q := range []string{pyStrip(title + " " + artist), pyStrip(title), pyStrip(cleaned + " " + artist)} {
 			if q == "" || seen[q] {
 				continue
 			}
 			seen[q] = true
-			found, err := fetchJSONOnce(base+"/search?keywords="+pyQuote(q)+"&type=1&limit=5", hdr, 8*time.Second)
+			// 优先 /cloudsearch（直接带 al.picUrl，一次请求拿全）
+			if cs, err := fetchJSONOnce(base+"/cloudsearch?keywords="+pyQuote(q)+"&type=1&limit=5"+ckParam, hdr, 8*time.Second); err == nil {
+				matched := false
+				for _, raw := range asA(asM(cs["result"])["songs"]) {
+					s0 := asM(raw)
+					if s0 == nil || !sameSongName(toStr(s0["name"]), title) {
+						continue
+					}
+					sid := s0["id"]
+					al := asM(s0["al"])
+					pic := httpsURL(toStr(al["picUrl"]))
+					out["cover"] = pic
+					out["album"] = or(toStr(al["name"]), album)
+					out["song_id"] = sid
+					out["url"] = "https://music.163.com/song?id=" + toStr(sid)
+					matched = true
+					break
+				}
+				if matched {
+					break
+				}
+			}
+			// 兜底：/search + /song/detail
+			found, err := fetchJSONOnce(base+"/search?keywords="+pyQuote(q)+"&type=1&limit=5"+ckParam, hdr, 8*time.Second)
 			if err != nil {
 				continue
 			}
@@ -189,7 +216,7 @@ func enrichMusic(m M) M {
 			if len(ids) == 0 {
 				continue
 			}
-			detail, err := fetchJSONOnce(base+"/song/detail?ids="+strings.Join(ids, ","), hdr, 8*time.Second)
+			detail, err := fetchJSONOnce(base+"/song/detail?ids="+strings.Join(ids, ",")+ckParam, hdr, 8*time.Second)
 			if err != nil {
 				continue
 			}
