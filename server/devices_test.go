@@ -378,23 +378,33 @@ func TestPhoneAndMultiDevice(t *testing.T) {
 	_ = daylogDB().QueryRow("SELECT title FROM live WHERE host='phone'").Scan(&title)
 	eq(t, "包名不保存", title, "")
 
-	// 电脑先在用，手机后切过应用 → 显示手机
+	// 电脑在线时优先显示电脑（即使手机后来切过应用）
 	call(t, "POST", "/api/v1/report", pc, M{"activity": M{"app": "Code.exe", "title": "x"}}, nil)
 	time.Sleep(1100 * time.Millisecond)
 	call(t, "POST", "/api/v1/report", ph, M{"activity": M{"app": "微信", "package": "com.tencent.mm"}}, nil)
-	call(t, "POST", "/api/v1/report", pc, M{"activity": M{"app": "Code.exe", "title": "x"}}, nil) // 电脑最后一条，但没切应用
 	v := currentView()
-	if !strings.Contains(toStr(v["now"]), "微信") {
-		t.Errorf("最近切过应用的是手机: %v", v["now"])
-	}
-	// 手机熄屏 → 回到电脑
-	call(t, "POST", "/api/v1/report", ph, M{"activity": M{"idle": true}}, nil)
-	v = currentView()
 	if !strings.Contains(toStr(v["now"]), "VS Code") && !strings.Contains(toStr(v["now"]), "Code") {
-		t.Errorf("手机离开后显示电脑: %v", v["now"])
+		t.Errorf("电脑在线时应优先显示电脑: %v", v["now"])
+	}
+	feed := getDaylogFeed(daylogDB())
+	if fv := asM(feed["view"]); fv["stale"] != false || (!strings.Contains(toStr(fv["now"]), "VS Code") && !strings.Contains(toStr(fv["now"]), "Code")) {
+		t.Errorf("首页 feed 电脑在线时也应优先显示电脑: %v", fv)
+	}
+	// 手机熄屏不会把在线的电脑标成离开
+	call(t, "POST", "/api/v1/report", ph, M{"activity": M{"idle": true}}, nil)
+	feed = getDaylogFeed(daylogDB())
+	if fv := asM(feed["view"]); fv["stale"] != false {
+		t.Errorf("手机离开不应影响电脑在线状态: %v", fv)
+	}
+	// 电脑离开、手机在线 → 显示手机
+	call(t, "POST", "/api/v1/report", ph, M{"activity": M{"app": "微信", "package": "com.tencent.mm"}}, nil)
+	call(t, "POST", "/api/v1/report", pc, M{"activity": M{"idle": true}}, nil)
+	v = currentView()
+	if !strings.Contains(toStr(v["now"]), "微信") {
+		t.Errorf("电脑离开后显示手机: %v", v["now"])
 	}
 	// 两台都离开：和原来一样看最后一条（还没过 stale_sec，所以照样显示）
-	call(t, "POST", "/api/v1/report", pc, M{"activity": M{"idle": true}}, nil)
+	call(t, "POST", "/api/v1/report", ph, M{"activity": M{"idle": true}}, nil)
 	if v := currentView(); v["stale"] != false {
 		t.Errorf("都离开但没过期：照原来的规矩: %v", v)
 	}

@@ -171,7 +171,7 @@ function homeMusicCardHtml() {
     ${!hasSong ? `<div class="empty">${ICON.empty}<span>${t('ne_empty')}</span></div>` : `
       <div class="hm-mx-row">
         ${cover
-          ? `<img class="hm-mx-cover" src="${esc(cover)}" alt="" loading="lazy" onerror="this.style.opacity='0'">`
+          ? `<img class="hm-mx-cover" src="${esc(cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.opacity='0'">`
           : `<span class="hm-mx-cover is-glyph">♪</span>`}
         <div class="hm-mx-body">
           <div class="hm-mx-title" title="${esc(n.title)}">${esc(n.title)}</div>
@@ -230,25 +230,52 @@ function homeSysCardHtml() {
 
 function homeAnimeCardHtml() {
   if (viState.loading && !viState.data) {
-    return `<section class="card hm-card hm-link is-wide" data-go="videos">
+    return `<section class="card hm-card hm-link" data-go="videos" data-vi-go="all">
       <div class="hm-card-head">
         <span class="hm-card-title">${ICON.videos}<span>${t('hm_watching')}</span></span>
-        <a class="hm-more" href="#videos">${t('hm_more')}</a>
+        <a class="hm-more" href="#videos" data-vi-go="all">${t('hm_more')}</a>
       </div>
       <div class="hm-vi-grid">
-        ${Array.from({ length: 6 }, () => `<div class="mu-skel" style="aspect-ratio:3/4"></div>`).join('')}
+        ${Array.from({ length: 4 }, () => `<div class="mu-skel" style="aspect-ratio:2/3"></div>`).join('')}
       </div>
     </section>`;
   }
   const items = (viState.data && Array.isArray(viState.data.items))
-    ? viState.data.items.filter(x => x.status === 'watching').slice(0, 6)
+    ? viState.data.items.filter(x => x.status === 'watching').slice(0, 4)
     : [];
-  return `<section class="card hm-card hm-link is-wide" data-go="videos">
+  return `<section class="card hm-card hm-link" data-go="videos" data-vi-go="all">
     <div class="hm-card-head">
       <span class="hm-card-title">${ICON.videos}<span>${t('hm_watching')}</span></span>
-      <a class="hm-more" href="#videos">${t('hm_more')}</a>
+      <a class="hm-more" href="#videos" data-vi-go="all">${t('hm_more')}</a>
     </div>
     ${!items.length ? `<div class="empty">${ICON.empty}<span>${t('hm_watching_empty')}</span></div>` : `
+      <div class="hm-vi-grid">
+        ${items.map(viCardHtml).join('')}
+      </div>`}
+  </section>`;
+}
+
+function homeRecAnimeCardHtml() {
+  if (viState.loading && !viState.data) {
+    return `<section class="card hm-card hm-link" data-go="videos" data-vi-go="recommended">
+      <div class="hm-card-head">
+        <span class="hm-card-title">${ICON.star}<span>${t('hm_recommend')}</span></span>
+        <a class="hm-more" href="#videos" data-vi-go="recommended">${t('hm_more')}</a>
+      </div>
+      <div class="hm-vi-grid">
+        ${Array.from({ length: 4 }, () => `<div class="mu-skel" style="aspect-ratio:2/3"></div>`).join('')}
+      </div>
+    </section>`;
+  }
+  const items = (viState.data && Array.isArray(viState.data.items))
+    ? viRecommendedItems(viState.data.items).slice(0, 4)
+    : [];
+  return `<section class="card hm-card hm-link" data-go="videos" data-vi-go="recommended">
+    <div class="hm-card-head">
+      <span class="hm-card-title">${ICON.star}<span>${t('hm_recommend')}</span></span>
+      <a class="hm-more" href="#videos" data-vi-go="recommended">${t('hm_more')}</a>
+    </div>
+    ${!items.length ? `<div class="empty">${ICON.empty}<span>${t('hm_recommend_empty')}</span></div>` : `
       <div class="hm-vi-grid">
         ${items.map(viCardHtml).join('')}
       </div>`}
@@ -268,6 +295,11 @@ function paintHomeCards() {
   if (vb) {
     vb.innerHTML = homeAnimeCardHtml();
     viBindFallbackTimers(vb);
+  }
+  const rb = $('#hmRecAnimeBox');
+  if (rb) {
+    rb.innerHTML = homeRecAnimeCardHtml();
+    viBindFallbackTimers(rb);
   }
 }
 
@@ -383,6 +415,9 @@ function pageHome() {
     <div id="hmNowBox" class="hm-slot">${homeNowCardHtml()}</div>
     <div id="hmMusicBox" class="hm-slot">${homeMusicCardHtml()}</div>
     <div id="hmSysBox" class="hm-slot">${homeSysCardHtml()}</div>
-    <div id="hmAnimeBox" class="hm-slot is-wide">${homeAnimeCardHtml()}</div>
+    <div class="hm-anime-pair">
+      <div id="hmAnimeBox" class="hm-slot">${homeAnimeCardHtml()}</div>
+      <div id="hmRecAnimeBox" class="hm-slot">${homeRecAnimeCardHtml()}</div>
+    </div>
   </div>`;
 }

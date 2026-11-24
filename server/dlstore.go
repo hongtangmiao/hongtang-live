@@ -220,6 +220,9 @@ func musicOf(maxAge float64) M {
 	if json.Unmarshal([]byte(music), &m) != nil {
 		return nil
 	}
+	if c := toStr(m["cover"]); c != "" {
+		m["cover"] = httpsURL(c)
+	}
 	return m
 }
 
@@ -344,15 +347,15 @@ func addMusic(day, ts string, m M) error {
 		if !(ok && gap <= 600) {
 			plays++
 		}
-		_, err = db.Exec("UPDATE music SET last_ts=?, plays=?, album=?, cover=?, url=?, song_id=? WHERE day=? AND title=? AND artist=?",
-			ts, plays, toStr(m["album"]), toStr(m["cover"]), toStr(m["url"]), sid, day, title, artist)
+		_, err = db.Exec("UPDATE music SET last_ts=?, plays=?, album=COALESCE(NULLIF(?, ''), album), cover=COALESCE(NULLIF(?, ''), cover), url=COALESCE(NULLIF(?, ''), url), song_id=CASE WHEN ? > 0 THEN ? ELSE song_id END WHERE day=? AND title=? AND artist=?",
+			ts, plays, toStr(m["album"]), httpsURL(toStr(m["cover"])), toStr(m["url"]), sid, sid, day, title, artist)
 		return err
 	}
 	if err != sql.ErrNoRows {
 		return err
 	}
 	_, err = db.Exec("INSERT INTO music(day, title, artist, album, song_id, cover, url, first_ts, last_ts, plays) VALUES (?,?,?,?,?,?,?,?,?,1)",
-		day, title, artist, toStr(m["album"]), sid, toStr(m["cover"]), toStr(m["url"]), ts, ts)
+		day, title, artist, toStr(m["album"]), sid, httpsURL(toStr(m["cover"])), toStr(m["url"]), ts, ts)
 	return err
 }
 
@@ -394,8 +397,8 @@ func currentRow() *curRow {
 		return nil
 	}
 	var r curRow
-	if db.QueryRow("SELECT id, ts, end_ts, app, label, label_plain, cat FROM live ORDER BY id DESC LIMIT 1").
-		Scan(&r.ID, &r.TS, &r.EndTS, &r.App, &r.Label, &r.LabelPlain, &r.Cat) != nil {
+	if db.QueryRow("SELECT id, ts, end_ts, app, label, label_plain, cat, host FROM live ORDER BY id DESC LIMIT 1").
+		Scan(&r.ID, &r.TS, &r.EndTS, &r.App, &r.Label, &r.LabelPlain, &r.Cat, &r.Host) != nil {
 		return nil
 	}
 	return &r
@@ -444,6 +447,16 @@ func appTotals(day string) []*appTotal {
 	var lastID int64 = -1
 	if len(all) > 0 {
 		lastID = all[len(all)-1].id
+		if day == todayKey() {
+			if cur := pickCurrent(float64(dInt(dlCfg(), 180, "live", "stale_sec"))); cur != nil {
+				for _, x := range all {
+					if x.id == cur.ID {
+						lastID = cur.ID
+						break
+					}
+				}
+			}
+		}
 	}
 	now := time.Now()
 	var order []*appTotal

@@ -17,7 +17,7 @@ import (
 // dlDefaultsJSON 就是 daylog/app/settings.py 里的 DEFAULTS
 const dlDefaultsJSON = `{
  "site": {"title": "今天在干嘛", "subtitle": "实时状态面板", "owner": "我"},
- "analysis": {"enabled": true, "api_base": "https://api.deepseek.com", "api_key": "", "model": "deepseek-flash",
+ "analysis": {"enabled": true, "api_base": "https://api.deepseek.com", "api_key": "", "model": "deepseek-chat",
    "max_output_tokens": 8000, "temperature": 0.5, "timeout_sec": 240, "daily_time": "00:10", "weekly_time": "Mon 00:40"},
  "report": {"title_max_chars": 80, "max_timeline_rows": 300, "max_payload_chars": 26000, "top_apps": 15,
    "top_domains": 15, "max_sessions": 25, "ocr_chars_per_screen": 240, "max_screens": 400},
@@ -104,6 +104,12 @@ func normalizeDaylog(d M) M {
 			if toStr(p) == oldMailPattern {
 				pats[i] = newMailPattern
 			}
+		}
+	}
+	if an := asM(d["analysis"]); an != nil {
+		base := strings.ToLower(toStr(an["api_base"]))
+		if toStr(an["model"]) == "deepseek-flash" && (base == "" || strings.Contains(base, "deepseek.com")) {
+			an["model"] = "deepseek-chat"
 		}
 	}
 	return d

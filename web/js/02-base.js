@@ -201,7 +201,11 @@ const NET = {
   },
 };
 
-const pic = (url, size = 80) => (url ? String(url).replace(/^http:/, 'https:') + '?param=' + size + 'y' + size : '');
+const pic = (url, size = 80) => {
+  if (!url) return '';
+  const u = String(url).replace(/^http:/, 'https:');
+  return u.includes('?') ? u : u + '?param=' + size + 'y' + size;
+};
 const fmtCount = (n) => {
   const v = Number(n) || 0;
   if (v >= 100000000) return (v / 100000000).toFixed(1) + ' 億';

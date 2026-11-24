@@ -90,6 +90,17 @@ function viCardHtml(it) {
   return `<div class="vi-card">${inner}</div>`;
 }
 
+function viRecommendedItems(list) {
+  return (list || [])
+    .filter(x => Number(x.rate) > 0)
+    .slice()
+    .sort((a, b) =>
+      (Number(b.rate) - Number(a.rate))
+      || ((Number(b.score) || 0) - (Number(a.score) || 0))
+      || String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''))
+    );
+}
+
 function videosContent() {
   if (viState.loading && !viState.data) {
     return `<div class="vi-grid">
@@ -105,20 +116,28 @@ function videosContent() {
   const srcs = d.sources || {};
   const bgmOn = !!(srcs.bgm && srcs.bgm.ok);
   const jfOn = !!(srcs.jellyfin && srcs.jellyfin.ok);
+  const allItems = d.items || [];
+  const recTotal = allItems.filter(x => Number(x.rate) > 0).length;
 
-  const items = (d.items || []).filter(it => {
-    if (viState.statusFilter !== 'all' && it.status !== viState.statusFilter) return false;
-    if (viState.sourceFilter !== 'all' && !(it.sources || []).includes(viState.sourceFilter)) return false;
-    return true;
-  });
-
-  const watching = items.filter(x => x.status === 'watching');
-  const watched = items.filter(x => x.status === 'watched');
+  const bySrc = allItems.filter(it =>
+    viState.sourceFilter === 'all' || (it.sources || []).includes(viState.sourceFilter)
+  );
+  const recommended = viRecommendedItems(bySrc);
+  const watching = (viState.statusFilter === 'all' || viState.statusFilter === 'watching')
+    ? bySrc.filter(x => x.status === 'watching') : [];
+  const watched = (viState.statusFilter === 'all' || viState.statusFilter === 'watched')
+    ? bySrc.filter(x => x.status === 'watched') : [];
+  const recShown = viState.statusFilter === 'recommended'
+    ? recommended
+    : (viState.statusFilter === 'all' ? recommended.slice(0, 12) : []);
+  const hasAny = watching.length || recShown.length || watched.length;
 
   const stChip = (k, label) =>
     `<button class="pill${viState.statusFilter === k ? ' on' : ''}" type="button" data-vi-status="${k}">${label}</button>`;
   const srcChip = (k, label) =>
     `<button class="mx-chip${viState.sourceFilter === k ? ' on' : ''}" type="button" data-vi-src="${k}">${label}</button>`;
+  const recMore = (viState.statusFilter === 'all' && recommended.length > recShown.length)
+    ? `<button class="mx-chip" type="button" data-vi-status="recommended">${t('hm_more')}</button>` : '';
 
   return `
     <div class="vi-head">
@@ -139,6 +158,7 @@ function videosContent() {
       <div class="pill-group">
         ${stChip('all', `${t('vi_all')} (${stats.total || 0})`)}
         ${stChip('watching', `${t('vi_watching')} (${stats.watching || 0})`)}
+        ${stChip('recommended', `${t('vi_recommend')} (${recTotal})`)}
         ${stChip('watched', `${t('vi_watched')} (${stats.watched || 0})`)}
       </div>
       <div class="mx-chips vi-src-chips">
@@ -147,11 +167,15 @@ function videosContent() {
         ${srcChip('jellyfin', 'Jellyfin')}
       </div>
     </div>
-    ${!items.length ? `<div class="empty">${ICON.empty}<span>${t('vi_empty')}</span></div>` : `
+    ${!hasAny ? `<div class="empty">${ICON.empty}<span>${t('vi_empty')}</span></div>` : `
       <div class="vi-body">
         ${watching.length ? `
           ${mxSec(ICON.videos, `${t('vi_watching')} (${watching.length})`)}
           <div class="vi-grid">${watching.map(viCardHtml).join('')}</div>
+        ` : ''}
+        ${recShown.length ? `
+          ${mxSec(ICON.heart, `${t('vi_recommend')} (${recommended.length})`, recMore)}
+          <div class="vi-grid">${recShown.map(viCardHtml).join('')}</div>
         ` : ''}
         ${watched.length ? `
           ${mxSec(ICON.star, `${t('vi_watched')} (${watched.length})`)}

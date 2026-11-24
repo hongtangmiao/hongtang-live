@@ -50,7 +50,7 @@ function renderDaylog(box, S) {
     h('div', { class: 'grid' },
       h('div', { class: 'full' }, chk('生成 AI 分析', 'an_on', g(d, 'analysis', 'enabled'))),
       f('API 地址', 'an_base', g(d, 'analysis', 'api_base'), { placeholder: 'https://api.deepseek.com' }),
-      f('模型', 'an_model', g(d, 'analysis', 'model'), { placeholder: 'deepseek-flash' }),
+      f('模型', 'an_model', g(d, 'analysis', 'model'), { placeholder: 'deepseek-chat' }),
       dsecret('DeepSeek API Key', 'analysis.api_key', '服务器环境变量 DEEPSEEK_API_KEY 有值时优先用环境变量'),
       f('最大输出 token', 'an_tok', g(d, 'analysis', 'max_output_tokens'), { type: 'number', min: 500, max: 16000, step: 500 }),
       f('日报时间（每天）', 'an_daily', g(d, 'analysis', 'daily_time'), { placeholder: '00:10' }),

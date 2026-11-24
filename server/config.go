@@ -205,6 +205,7 @@ func configFromEnv() *Config {
 	c.Jellyfin.Key = g("JF_KEY")
 	c.Jellyfin.User = g("JF_USER")
 	c.DaylogDB = g("DAYLOG_DB")
+	c.DaylogRoot = g("DAYLOG_ROOT")
 	dw := strings.ToLower(g("DAYLOG_WRITER"))
 	c.DaylogWriter = dw != "false" && dw != "0" && dw != "no" && dw != "off"
 	c.Stats.HostProc = g("HOST_PROC")

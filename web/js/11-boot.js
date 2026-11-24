@@ -53,6 +53,10 @@ $$('[data-route]').forEach(el => el.addEventListener('click', () => {
 }));
 
 document.addEventListener('click', (e) => {
+  const viGo = e.target.closest('[data-vi-go]');
+  if (viGo && typeof viState !== 'undefined') {
+    viState.statusFilter = viGo.dataset.viGo || 'all';
+  }
   const hmCard = e.target.closest('.hm-link[data-go]');
   if (hmCard && !e.target.closest('a[href], button')) {
     location.hash = '#' + hmCard.dataset.go;

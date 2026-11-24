@@ -128,6 +128,13 @@ var browserSourceRE = regexp.MustCompile(`(?i)chrome|msedge|edge|firefox|brave|o
 
 func looksLikeBrowser(source string) bool { return browserSourceRE.MatchString(source) }
 
+func httpsURL(u string) string {
+	if strings.HasPrefix(u, "http://") {
+		return "https://" + u[7:]
+	}
+	return u
+}
+
 func enrichMusic(m M) M {
 	title, artist, album := pyStrip(toStr(m["title"])), pyStrip(toStr(m["artist"])), pyStrip(toStr(m["album"]))
 	if title == "" {
@@ -135,13 +142,19 @@ func enrichMusic(m M) M {
 	}
 	key := title + "|" + artist
 	musicCacheMu.Lock()
-	if hit, ok := musicCache[key]; ok && time.Since(hit.at) < time.Hour {
-		musicCacheMu.Unlock()
-		return hit.v
+	if hit, ok := musicCache[key]; ok {
+		ttl := time.Hour
+		if !truthy(hit.v["cover"]) {
+			ttl = 2 * time.Minute // 没拿到封面时短缓存，避免偶发失败一直无封面
+		}
+		if time.Since(hit.at) < ttl {
+			musicCacheMu.Unlock()
+			return hit.v
+		}
 	}
 	musicCacheMu.Unlock()
 	out := M{"title": title, "artist": artist, "album": album, "cover": "", "url": "", "song_id": 0}
-	base := strings.TrimRight(dStr(dlCfg(), "music", "api_base"), "/")
+	base := strings.TrimRight(or(dStr(dlCfg(), "music", "api_base"), conf().NetEase.API), "/")
 	if base != "" {
 		cleaned := pyStrip(reBracket.ReplaceAllString(title, ""))
 		seen := map[string]bool{}
@@ -159,7 +172,8 @@ func enrichMusic(m M) M {
 			if len(songs) == 0 || songs[0] == nil {
 				continue
 			}
-			sid := asM(songs[0])["id"]
+			song0 := asM(songs[0])
+			sid := song0["id"]
 			detail, err := fetchJSONOnce(base+"/song/detail?ids="+toStr(sid), hdr, 8*time.Second)
 			if err != nil {
 				continue
@@ -173,7 +187,8 @@ func enrichMusic(m M) M {
 				continue
 			}
 			al := asM(s0["al"])
-			out["cover"] = toStr(al["picUrl"])
+			pic := or(toStr(al["picUrl"]), toStr(asM(song0["album"])["picUrl"]))
+			out["cover"] = httpsURL(pic)
 			out["album"] = or(toStr(al["name"]), album)
 			out["song_id"] = sid
 			out["url"] = "https://music.163.com/song?id=" + toStr(sid)

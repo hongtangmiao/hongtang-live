@@ -395,3 +395,15 @@ func TestRecomputeReports(t *testing.T) {
 	eq(t, "别的字段不同就跳过", recomputeOne(d2, true).Status, "跳过")
 	eq(t, "没有 raw 就跳过", recomputeOne("2026-01-01", true).Status, "跳过")
 }
+
+func TestDeepSeekModelMigrationAndPendingInbox(t *testing.T) {
+	root := setupRoot(t)
+	n := normalizeDaylog(M{"analysis": M{"api_base": "https://api.deepseek.com", "model": "deepseek-flash"}})
+	eq(t, "无效默认模型迁移为 deepseek-chat", dStr(n, "analysis", "model"), "deepseek-chat")
+	eq(t, "空 inbox 无待处理", hasPendingInbox(), false)
+	today := todayKey()
+	_ = os.WriteFile(filepath.Join(root, "inbox", today+".json"), []byte(`{"date":"`+today+`"}`), 0o644)
+	eq(t, "当天不算待处理", hasPendingInbox(), false)
+	_ = os.WriteFile(filepath.Join(root, "inbox", "2026-10-01.json"), []byte(`{"date":"2026-10-01"}`), 0o644)
+	eq(t, "过去日期算待处理", hasPendingInbox(), true)
+}

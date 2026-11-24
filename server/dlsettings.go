@@ -214,7 +214,7 @@ func applyDlPatch(d M, p *dlPatch) error {
 		if a.Temperature < 0 || a.Temperature > 2 {
 			return errors.New("temperature 要在 0 到 2 之间")
 		}
-		for k, v := range map[string]any{"enabled": a.Enabled, "api_base": or(base, "https://api.deepseek.com"), "model": or(model, "deepseek-flash"),
+		for k, v := range map[string]any{"enabled": a.Enabled, "api_base": or(base, "https://api.deepseek.com"), "model": or(model, "deepseek-chat"),
 			"max_output_tokens": float64(a.MaxOutputTokens), "temperature": a.Temperature, "daily_time": a.DailyTime, "weekly_time": a.WeeklyTime} {
 			setPath(d, []string{"analysis", k}, v)
 		}

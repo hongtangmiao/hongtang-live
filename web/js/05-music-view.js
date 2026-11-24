@@ -8,7 +8,7 @@ const mxTile = (icon, value, label, cls) => `
 const mxHero = o => `
   <div class="mx-hero">
     ${o.cover
-      ? `<img class="mx-cover" onerror="this.style.opacity='0'" src="${esc(o.cover)}" alt="" loading="lazy">`
+      ? `<img class="mx-cover" onerror="this.style.opacity='0'" src="${esc(o.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
       : `<span class="mx-cover mx-cover-glyph">${o.glyph || '♪'}</span>`}
     <div class="mx-hbody">
       <div class="mx-label">${o.labelIcon ? `<i>${o.labelIcon}</i>` : ''}${o.label || ''}</div>
@@ -22,7 +22,7 @@ const mxSec = (icon, text, right) => `
   <div class="mx-sec"><span class="mx-sec-t"><i>${icon}</i>${text}</span>${right || ''}</div>`;
 
 const mxThumb = src => src
-  ? `<img class="th" onerror="this.style.opacity='0'" src="${esc(src)}" alt="" loading="lazy">`
+  ? `<img class="th" onerror="this.style.opacity='0'" src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
   : `<span class="th glyph">♪</span>`;
 
 const mxEmpty = () => `<div class="empty">${ICON.empty}<span>${t('ne_empty')}</span></div>`;

@@ -219,6 +219,29 @@ b, strong, h1, h2, h3, h4, [class*="title"], [class*="name"] { font-weight: 400 
 .vi-rate.mine { color: var(--px-gold) !important; border-color: var(--px-gold) !important; }
 .vi-rate.dim { color: var(--px-line) !important; }
 
+/* 首页番剧：并排两张卡（正在追番 + 我推荐的番），海报更紧凑 */
+.hm-anime-pair {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+.hm-anime-pair .hm-vi-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.hm-anime-pair .vi-card { padding: 5px; gap: 5px; }
+.hm-anime-pair .vi-title { font-size: 12px; line-height: 1.3; }
+.hm-anime-pair .vi-orig { display: none; }
+.hm-anime-pair .vi-meta { gap: 4px; flex-wrap: wrap; padding-top: 2px; }
+@media (max-width: 960px) {
+  .hm-anime-pair { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .hm-anime-pair .hm-vi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 /* ---------- 骨架屏 / toast ---------- */
 .mu-skel, [class*="skel"] { background: var(--px-win-2) !important; animation: none !important; }
 .toast, html[data-theme="dark"] .toast { background: var(--px-win) !important; color: var(--px-line) !important; border: 2px solid var(--px-frame); }

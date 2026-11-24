@@ -368,7 +368,7 @@ func chatJSON(cfg M, system, user string) (*OM, error) {
 		temp = v
 	}
 	timeout := time.Duration(dInt(cfg, 240, "analysis", "timeout_sec")) * time.Second
-	model := or(dStr(cfg, "analysis", "model"), "deepseek-flash")
+	model := or(dStr(cfg, "analysis", "model"), "deepseek-chat")
 
 	last := ""
 	for attempt := 0; attempt < 3; attempt++ {

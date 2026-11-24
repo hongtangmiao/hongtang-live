@@ -51,8 +51,9 @@ function nwMediaHtml(d) {
   if (!items.length) return '';
   return `<div class="nw-media" data-count="${items.length}">${items.map(it => {
     const music = it.kind === 'music';
-    const cover = nwUrl(it.cover)
-      ? `<img src="${esc(it.cover)}" alt="" referrerpolicy="no-referrer" loading="lazy">`
+    const coverSrc = nwUrl(it.cover) ? pic(it.cover, 140) : '';
+    const cover = coverSrc
+      ? `<img src="${esc(coverSrc)}" alt="" referrerpolicy="no-referrer" loading="lazy">`
       : `<span>${music ? '♪' : '▶'}</span>`;
     const url = nwUrl(it.url);
     return `<article class="card nw-mcard" data-kind="${music ? 'music' : 'live'}">

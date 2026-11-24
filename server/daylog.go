@@ -351,7 +351,7 @@ func buildMedia(db *sql.DB, now float64) []M {
 				var m M
 				if decodeJSON([]byte(music.String), &m) == nil && truthy(m["title"]) {
 					items = append(items, M{"kind": "music", "key": "music", "title": toStr(m["title"]),
-						"sub": toStr(m["artist"]), "url": toStr(m["url"]), "cover": toStr(m["cover"])})
+						"sub": toStr(m["artist"]), "url": toStr(m["url"]), "cover": httpsURL(toStr(m["cover"]))})
 				}
 			}
 		}
@@ -400,20 +400,23 @@ func getDaylogFeed(db *sql.DB) M {
 	nowMsv := float64(now.UnixMilli())
 	today := dayOf(now)
 	yesterday := dayOf(now.Add(-24 * time.Hour))
-	const staleSec = 180
+	staleSec := float64(dInt(dlCfg(), 180, "live", "stale_sec"))
 
-	var cur *liveRow
-	if r, err := scanLive(db.QueryRow("SELECT " + liveCols + " FROM live ORDER BY id DESC LIMIT 1")); err == nil {
-		cur = &r
-	} else if err != sql.ErrNoRows {
-		return nil
-	}
+	cur := pickCurrent(staleSec)
 	var devSeen, devApp sql.NullString
 	hasDev := false
-	if err := db.QueryRow("SELECT last_seen, last_app FROM devices ORDER BY last_seen DESC LIMIT 1").Scan(&devSeen, &devApp); err == nil {
-		hasDev = true
-	} else if err != sql.ErrNoRows {
-		return nil
+	if cur != nil && cur.Host != "" {
+		if err := db.QueryRow("SELECT last_seen, last_app FROM devices WHERE host = ?", cur.Host).Scan(&devSeen, &devApp); err == nil {
+			hasDev = true
+		} else if err != sql.ErrNoRows {
+			return nil
+		}
+	} else {
+		if err := db.QueryRow("SELECT last_seen, last_app FROM devices ORDER BY last_seen DESC LIMIT 1").Scan(&devSeen, &devApp); err == nil {
+			hasDev = true
+		} else if err != sql.ErrNoRows {
+			return nil
+		}
 	}
 
 	var view M
@@ -463,6 +466,14 @@ func getDaylogFeed(db *sql.DB) M {
 	var lastID int64 = -1
 	if len(rows) > 0 {
 		lastID = rows[len(rows)-1].ID
+		if cur != nil {
+			for _, r := range rows {
+				if r.ID == cur.ID {
+					lastID = cur.ID
+					break
+				}
+			}
+		}
 	}
 	type appAgg struct {
 		app, lastTS, label, plain, cat string

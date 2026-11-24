@@ -56,7 +56,15 @@ func currentMusic() any {
 			if truthy(m["song_id"]) {
 				sid = m["song_id"]
 			}
-			return M{"title": toStr(m["title"]), "sub": toStr(m["artist"]), "album": toStr(m["album"]), "cover": toStr(m["cover"]),
+			title, artist := toStr(m["title"]), toStr(m["artist"])
+			cover := httpsURL(toStr(m["cover"]))
+			if cover == "" {
+				var histCover sql.NullString
+				if db.QueryRow("SELECT cover FROM music WHERE title=? AND artist=? AND cover != '' ORDER BY last_ts DESC LIMIT 1", title, artist).Scan(&histCover) == nil {
+					cover = httpsURL(histCover.String)
+				}
+			}
+			return M{"title": title, "sub": artist, "album": toStr(m["album"]), "cover": cover,
 				"url": toStr(m["url"]), "song_id": sid, "last_seen": ref, "ago": ago, "playing": playing}
 		}
 	}
@@ -75,7 +83,7 @@ func currentMusic() any {
 		if ms, ok := msOf(last.String); ok {
 			ago = maxF(0, jsRound((nowMs()-ms)/60000))
 		}
-		return M{"title": title.String, "sub": artist.String, "album": album.String, "cover": cover.String, "url": u.String,
+		return M{"title": title.String, "sub": artist.String, "album": album.String, "cover": httpsURL(cover.String), "url": u.String,
 			"song_id": sid.Int64, "last_seen": last.String, "ago": ago, "playing": false}
 	}
 	return nil

@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -110,10 +111,26 @@ func pyWeekNum(t time.Time) int {
 	return (yd + 7 - wd) / 7
 }
 
+// hasPendingInbox：inbox 里有没有已经结束的日期（昨天及以前）等着生成日报
+func hasPendingInbox() bool {
+	if dlRoot() == "" {
+		return false
+	}
+	files, _ := filepath.Glob(dlPath("inbox", "*.json"))
+	today := todayKey()
+	for _, f := range files {
+		day := strings.TrimSuffix(filepath.Base(f), ".json")
+		if reDay.MatchString(day) && day < today {
+			return true
+		}
+	}
+	return false
+}
+
 func startScheduler() {
 	go func() {
 		done := map[string]bool{}
-		var icuLast time.Time
+		var icuLast, inboxLast time.Time
 		for {
 			func() {
 				defer func() {
@@ -128,17 +145,24 @@ func startScheduler() {
 				cfg := dlCfg()
 				now := time.Now().In(loc)
 				hm := now.Format("15:04")
-				if hm == or(dStr(cfg, "analysis", "daily_time"), "00:10") {
-					k := "d:" + now.Format("2006-01-02")
-					if !done[k] {
-						done[k] = true
-						dlLog("定时任务：处理 inbox")
-						runLock.Lock()
-						runPending(false, true)
-						runLock.Unlock()
-						pruneLive(90)
-						pruneHealthLive(30)
-					}
+				dailyTime := or(dStr(cfg, "analysis", "daily_time"), "00:10")
+				k := "d:" + now.Format("2006-01-02")
+				if hm >= dailyTime && !done[k] {
+					done[k] = true
+					inboxLast = time.Now()
+					dlLog("定时任务：处理 inbox")
+					runLock.Lock()
+					runPending(false, true)
+					runLock.Unlock()
+					pruneLive(90)
+					pruneHealthLive(30)
+				} else if hm >= dailyTime && time.Since(inboxLast) > 10*time.Minute && hasPendingInbox() {
+					// 电脑过点才开机上传昨天的数据时，不用再干等 24 小时
+					inboxLast = time.Now()
+					dlLog("定时任务：发现待处理 inbox")
+					runLock.Lock()
+					runPending(false, true)
+					runLock.Unlock()
 				}
 				if parts := strings.Fields(or(dStr(cfg, "analysis", "weekly_time"), "Mon 00:40")); len(parts) == 2 {
 					if hm == parts[1] && weekdayAbbr[now.Weekday()] == parts[0] {

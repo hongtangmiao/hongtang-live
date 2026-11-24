@@ -25,13 +25,26 @@ const blackListenSec = 120
 
 /*
  * 不止一台设备在报的时候（电脑 + 手机），「此刻」显示哪一台：
- *   还在用（没过 stale_sec、也没报「离开」）的设备里，最近切过应用的那台；都不在用就和原来一样看最后一条
+ *   还在用（没过 stale_sec、也没报「离开」）的设备里，电脑（windows / linux）优先于手机（android）；
+ *   同优先级里选最近切过应用的那台；都不在用就和原来一样看最后一条。
  * 只有一台设备时结果和原来完全一样。
  */
 var (
 	idleMu    sync.Mutex
 	idleHosts = map[string]bool{}
 )
+
+func hostPriority(host string) int {
+	kind, _ := deviceByHost(host)
+	switch kind {
+	case "windows", "linux":
+		return 2
+	case "android":
+		return 0
+	default:
+		return 1
+	}
+}
 
 func setHostIdle(host string, idle bool) {
 	idleMu.Lock()
@@ -81,13 +94,15 @@ func pickCurrent(staleSec float64) *curRow {
 		return cur
 	}
 	var best *curRow
+	bestPrio := -1
 	for _, r := range all {
 		end, ok := pyAware(r.EndTS)
 		if !ok || time.Since(end).Seconds() > staleSec || hostIdle(r.Host) {
 			continue
 		}
-		if best == nil || r.TS > best.TS || (r.TS == best.TS && r.ID > best.ID) {
-			best = r
+		p := hostPriority(r.Host)
+		if best == nil || p > bestPrio || (p == bestPrio && (r.TS > best.TS || (r.TS == best.TS && r.ID > best.ID))) {
+			best, bestPrio = r, p
 		}
 	}
 	if best != nil {
