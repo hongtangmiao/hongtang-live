@@ -5,14 +5,12 @@
 const PANELS = {
   home:      { key: 'nav_home',      sub: null,          render: pageHome },
   now:       { key: 'nav_now',       sub: 'nw_sub',      render: pageNow },
-  tweets:    { key: 'nav_tweets',    sub: 'tw_sub',      render: pageTweets },
   music:     { key: 'nav_music',     sub: 'mu_sub',      render: pageMusic },
-  illust:    { key: 'nav_illust',    sub: 'il_sub',      render: pageIllust },
   videos:    { key: 'nav_videos',    sub: 'vi_sub',      render: pageVideos },
   account:   { key: 'nav_account',   sub: null,          render: pageAccount },
   stats:     { key: 'nav_stats',     sub: null,          render: pageStats, crumb: 'crumb_server' },
 };
-const ALIAS = { tsubuyaki: 'tweets', video: 'videos', illusts: 'illust', about: 'account', ima: 'now', live: 'now' };
+const ALIAS = { video: 'videos', about: 'account', ima: 'now', live: 'now' };
 
 function currentRoute() {
   const def = window.HL_DEFAULT_ROUTE === 'now' ? 'now' : 'home';   // live.xxx（原 daylog 的域名）默认进「此刻」
@@ -101,7 +99,6 @@ function render(keepScroll) {
   if (route === 'home') loadHome();
   if (route === 'music') loadMusic();
   if (route === 'videos') loadVideos();
-  if (route === 'tweets') { loadDaylog(true); startDlLive(); }
   if (route === 'now') { loadNow(); startNowLive(); } else stopNowLive();
 
   /* 网易云ログイン導線 */

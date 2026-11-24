@@ -220,9 +220,23 @@ func musicOf(maxAge float64) M {
 	if json.Unmarshal([]byte(music), &m) != nil {
 		return nil
 	}
-	if c := toStr(m["cover"]); c != "" {
-		m["cover"] = httpsURL(c)
+	cover := httpsURL(toStr(m["cover"]))
+	title, artist := toStr(m["title"]), toStr(m["artist"])
+	if cover == "" && title != "" {
+		var histCover sql.NullString
+		if db.QueryRow("SELECT cover FROM music WHERE title=? AND artist=? AND cover != '' ORDER BY last_ts DESC LIMIT 1", title, artist).Scan(&histCover) == nil {
+			cover = httpsURL(histCover.String)
+		}
 	}
+	if cover == "" && title != "" {
+		if e := enrichMusic(m); truthy(e["cover"]) {
+			cover = httpsURL(toStr(e["cover"]))
+			if !truthy(m["url"]) && truthy(e["url"]) {
+				m["url"] = e["url"]
+			}
+		}
+	}
+	m["cover"] = cover
 	return m
 }
 

@@ -33,22 +33,24 @@ function viBindFallbackTimers(scope) {
   });
 }
 
-function viCardHtml(it) {
+function viCardHtml(it, preferMine = false) {
   const srcs = Array.isArray(it.sources) ? it.sources : [];
   const badges = [
     srcs.includes('bgm') ? `<span class="vi-src-tag bgm">BGM</span>` : '',
     srcs.includes('jellyfin') ? `<span class="vi-src-tag jf">JF</span>` : '',
   ].filter(Boolean).join('');
 
-  // 评分：默认显示大众分（bgm.tv / Jellyfin），鼠标移到卡片上换成自己的分。
-  // 两个都放在 DOM 里叠在同一格，靠 CSS 过渡切换，宽度不会跳。
+  // 评分：默认显示大众分（bgm.tv / Jellyfin），鼠标移到卡片上换成自己的分；
+  // 推荐区（preferMine=true）反过来默认显示我的评分，悬停换大众分。
   const onlyJf = !srcs.includes('bgm');
   const scoreTxt = it.score > 0 ? Number(it.score).toFixed(1) : '';
   const scoreLabel = onlyJf ? t('vi_jf_score') : t('vi_bgm_score');
   let rating = '';
   if (scoreTxt && it.rate > 0) {
-    const tip = `${t('vi_all_rate')} ${scoreLabel} ${scoreTxt} · ${t('vi_my_rate')} ${it.rate}`;
-    rating = `<span class="vi-rate both" title="${esc(tip)}"><span class="vi-r all">★ ${scoreTxt}</span><span class="vi-r mine">★ ${esc(String(it.rate))}</span></span>`;
+    const tip = preferMine
+      ? `${t('vi_my_rate')} ${it.rate} · ${scoreLabel} ${scoreTxt}`
+      : `${t('vi_all_rate')} ${scoreLabel} ${scoreTxt} · ${t('vi_my_rate')} ${it.rate}`;
+    rating = `<span class="vi-rate both${preferMine ? ' prefer-mine' : ''}" title="${esc(tip)}"><span class="vi-r all">★ ${scoreTxt}</span><span class="vi-r mine">★ ${esc(String(it.rate))}</span></span>`;
   } else if (it.rate > 0) {
     rating = `<span class="vi-rate mine" title="${esc(t('vi_my_rate') + ' ' + it.rate)}">★ ${esc(String(it.rate))}</span>`;
   } else if (scoreTxt) {
@@ -175,7 +177,7 @@ function videosContent() {
         ` : ''}
         ${recShown.length ? `
           ${mxSec(ICON.heart, `${t('vi_recommend')} (${recommended.length})`, recMore)}
-          <div class="vi-grid">${recShown.map(viCardHtml).join('')}</div>
+          <div class="vi-grid">${recShown.map(it => viCardHtml(it, true)).join('')}</div>
         ` : ''}
         ${watched.length ? `
           ${mxSec(ICON.star, `${t('vi_watched')} (${watched.length})`)}

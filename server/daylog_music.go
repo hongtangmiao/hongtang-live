@@ -64,6 +64,11 @@ func currentMusic() any {
 					cover = httpsURL(histCover.String)
 				}
 			}
+			if cover == "" {
+				if e := enrichMusic(m); truthy(e["cover"]) {
+					cover = httpsURL(toStr(e["cover"]))
+				}
+			}
 			return M{"title": title, "sub": artist, "album": toStr(m["album"]), "cover": cover,
 				"url": toStr(m["url"]), "song_id": sid, "last_seen": ref, "ago": ago, "playing": playing}
 		}

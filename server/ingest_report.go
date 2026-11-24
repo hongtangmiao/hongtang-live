@@ -164,35 +164,54 @@ func enrichMusic(m M) M {
 				continue
 			}
 			seen[q] = true
-			found, err := fetchJSONOnce(base+"/search?keywords="+pyQuote(q)+"&type=1&limit=1", hdr, 8*time.Second)
+			found, err := fetchJSONOnce(base+"/search?keywords="+pyQuote(q)+"&type=1&limit=5", hdr, 8*time.Second)
 			if err != nil {
 				continue
 			}
 			songs := asA(asM(found["result"])["songs"])
-			if len(songs) == 0 || songs[0] == nil {
+			if len(songs) == 0 {
 				continue
 			}
-			song0 := asM(songs[0])
-			sid := song0["id"]
-			detail, err := fetchJSONOnce(base+"/song/detail?ids="+toStr(sid), hdr, 8*time.Second)
+			var ids []string
+			songByID := map[string]M{}
+			for _, raw := range songs {
+				sm := asM(raw)
+				if sm == nil {
+					continue
+				}
+				sid := toStr(sm["id"])
+				if sid == "" {
+					continue
+				}
+				ids = append(ids, sid)
+				songByID[sid] = sm
+			}
+			if len(ids) == 0 {
+				continue
+			}
+			detail, err := fetchJSONOnce(base+"/song/detail?ids="+strings.Join(ids, ","), hdr, 8*time.Second)
 			if err != nil {
 				continue
 			}
-			s0 := M{}
-			if ss := asA(detail["songs"]); len(ss) > 0 && asM(ss[0]) != nil {
-				s0 = asM(ss[0])
+			matched := false
+			for _, raw := range asA(detail["songs"]) {
+				s0 := asM(raw)
+				if s0 == nil || !sameSongName(toStr(s0["name"]), title) {
+					continue
+				}
+				sid := s0["id"]
+				al := asM(s0["al"])
+				pic := or(toStr(al["picUrl"]), toStr(asM(songByID[toStr(sid)]["album"])["picUrl"]))
+				out["cover"] = httpsURL(pic)
+				out["album"] = or(toStr(al["name"]), album)
+				out["song_id"] = sid
+				out["url"] = "https://music.163.com/song?id=" + toStr(sid)
+				matched = true
+				break
 			}
-			// 搜到的第一条未必是同一首，名字差太多就当没匹配上，继续换关键词试
-			if !sameSongName(toStr(s0["name"]), title) {
-				continue
+			if matched {
+				break
 			}
-			al := asM(s0["al"])
-			pic := or(toStr(al["picUrl"]), toStr(asM(song0["album"])["picUrl"]))
-			out["cover"] = httpsURL(pic)
-			out["album"] = or(toStr(al["name"]), album)
-			out["song_id"] = sid
-			out["url"] = "https://music.163.com/song?id=" + toStr(sid)
-			break
 		}
 	}
 	if !truthy(out["url"]) {

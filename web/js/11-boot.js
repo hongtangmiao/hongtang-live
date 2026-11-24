@@ -3,8 +3,7 @@
 // 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 /* ---------------- bottom nav (mobile) ---------------- */
 function buildBottomNav() {
-  const items = [['home', 'nav_home'], ['now', 'nav_now'], ['music', 'nav_music'],
-                 ['illust', 'nav_illust'], ['videos', 'nav_videos'], ['tweets', 'nav_tweets']];
+  const items = [['home', 'nav_home'], ['now', 'nav_now'], ['music', 'nav_music'], ['videos', 'nav_videos']];
   const nav = document.createElement('nav');
   nav.className = 'bottom-nav';
   nav.setAttribute('aria-label', 'ボトムナビゲーション');

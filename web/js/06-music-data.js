@@ -36,7 +36,6 @@ function stopMxLive() {
 }
 function startMxLive() {
   stopMxLive();
-  stopDlLive();
   if (!NET.proxy) return;
   mxLiveTimer = setInterval(async () => {
     if (document.hidden) return;
@@ -215,8 +214,4 @@ function bindMusic() {
 
 function pageMusic() {
   return `<div id="muRoot">${musicSkeleton()}</div>`;
-}
-
-function pageIllust() {
-  return `<div class="empty">${ICON.empty}<span>${t('coming_soon')}</span></div>`;
 }

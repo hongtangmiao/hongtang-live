@@ -218,6 +218,13 @@ b, strong, h1, h2, h3, h4, [class*="title"], [class*="name"] { font-weight: 400 
 .vi-rate .vi-r.mine { color: var(--px-gold); }
 .vi-rate.mine { color: var(--px-gold) !important; border-color: var(--px-gold) !important; }
 .vi-rate.dim { color: var(--px-line) !important; }
+/* 我推荐的番：默认显示我的评分，悬停换成大众分 */
+.vi-rate.both.prefer-mine { border-color: var(--px-gold) !important; }
+.vi-rate.both.prefer-mine .vi-r.mine { opacity: 1; transform: translateY(0); }
+.vi-rate.both.prefer-mine .vi-r.all { opacity: 0; transform: translateY(-4px); }
+.vi-card:hover .vi-rate.both.prefer-mine { border-color: var(--px-frame) !important; }
+.vi-card:hover .vi-rate.both.prefer-mine .vi-r.mine { opacity: 0; transform: translateY(4px); }
+.vi-card:hover .vi-rate.both.prefer-mine .vi-r.all { opacity: 1; transform: translateY(0); }
 
 /* 首页番剧：并排两张卡（正在追番 + 我推荐的番），海报更紧凑 */
 .hm-anime-pair {

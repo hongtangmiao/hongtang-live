@@ -3,14 +3,6 @@
 // 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 /* ---------------- panels ---------------- */
 const dlState = { loading: false, data: null, error: null };
-let dlTimer = null;
-
-function stopDlLive() {
-  if (dlTimer) {
-    clearInterval(dlTimer);
-    dlTimer = null;
-  }
-}
 
 function fmtSleepMin(min) {
   const m = Math.max(0, Math.round(Number(min) || 0));
@@ -21,7 +13,7 @@ function fmtSleepMin(min) {
 
 function healthCardHtml() {
   if (dlState.loading && !dlState.data) {
-    return `<section class="card hm-health hm-link" data-go="tweets">
+    return `<section class="card hm-health hm-link" data-go="now">
       <div class="hm-health-head">
         <span class="hm-health-title">${ICON.heart}<span>${t('hl_title')}</span></span>
         <span class="hm-health-meta">${t('hl_src')}</span>
@@ -34,7 +26,7 @@ function healthCardHtml() {
   const d = dlState.data;
   const h = d && d.health;
   if (!d || !d.ok || !h || !h.available) {
-    return `<section class="card hm-health hm-link" data-go="tweets">
+    return `<section class="card hm-health hm-link" data-go="now">
       <div class="hm-health-head">
         <span class="hm-health-title">${ICON.heart}<span>${t('hl_title')}</span></span>
         <span class="hm-health-meta">${t('hl_src')}</span>
@@ -86,7 +78,7 @@ function healthCardHtml() {
 
   const updMatch = h.updated ? String(h.updated).match(/T(\d{2}:\d{2})/) : null;
   const upd = updMatch ? updMatch[1] : '';
-  return `<section class="card hm-health hm-link" data-go="tweets">
+  return `<section class="card hm-health hm-link" data-go="now">
     <div class="hm-health-head">
       <span class="hm-health-title">${ICON.heart}<span>${t('hl_title')}</span></span>
       <span class="hm-health-meta">${t('hl_src')}${upd ? ` · ${esc(upd)}` : ''}</span>
@@ -114,21 +106,21 @@ function homeNowCardHtml() {
   const d = dlState.data;
   const v = d && d.ok ? d.view : null;
   if (dlState.loading && !v) {
-    return `<section class="card hm-card hm-link" data-go="tweets">
+    return `<section class="card hm-card hm-link" data-go="now">
       <div class="hm-card-head">
         <span class="hm-card-title">${ICON.devices}<span>${t('dl_now')}</span></span>
-        <a class="hm-more" href="#tweets">${t('hm_more')}</a>
+        <a class="hm-more" href="#now">${t('hm_more')}</a>
       </div>
       <div class="mu-skel" style="height:68px"></div>
     </section>`;
   }
   const activeApps = (d && d.ok && Array.isArray(d.apps)) ? d.apps.slice(0, 3) : [];
-  return `<section class="card hm-card hm-link" data-go="tweets">
+  return `<section class="card hm-card hm-link" data-go="now">
     <div class="hm-card-head">
       <span class="hm-card-title">${ICON.devices}<span>${t('dl_now')}</span></span>
       <div class="hm-head-right">
         ${v ? `<span class="dl-pill${v.stale ? ' is-idle' : ''}">${v.stale ? t('dl_offline') : t('dl_online')}</span>` : ''}
-        <a class="hm-more" href="#tweets">${t('hm_more')}</a>
+        <a class="hm-more" href="#now">${t('hm_more')}</a>
       </div>
     </div>
     ${!v ? `<div class="empty">${ICON.empty}<span>${esc(dlState.error || t('dl_empty'))}</span></div>` : `
@@ -277,7 +269,7 @@ function homeRecAnimeCardHtml() {
     </div>
     ${!items.length ? `<div class="empty">${ICON.empty}<span>${t('hm_recommend_empty')}</span></div>` : `
       <div class="hm-vi-grid">
-        ${items.map(viCardHtml).join('')}
+        ${items.map(it => viCardHtml(it, true)).join('')}
       </div>`}
   </section>`;
 }
