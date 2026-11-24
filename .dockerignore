@@ -1,0 +1,16 @@
+.git
+.github
+.env
+.env.*
+data/
+daylog/
+bin/
+agent/
+android/
+tests/
+docs/
+scripts/
+*.tmp
+build.log
+admintest.out
+.android-check/

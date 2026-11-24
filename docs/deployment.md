@@ -4,7 +4,7 @@
 
 | 项目 | 说明 |
 |---|---|
-| 镜像 | `hongtang-live:1`（`deploy/build-image.sh` 构建，同时打 `hongtang-live:<日期>-<提交>`） |
+| 镜像 | 默认 `ghcr.io/hongtangmiao/hongtang-live:latest`（多架构 `linux/amd64` / `linux/arm64`，亦支持 Docker Hub）；本地构建可用 `docker build` 或 `deploy/build-image.sh`（打 `hongtang-live:1`） |
 | 起停 | `cd deploy && docker compose up -d` / `down` |
 | 端口 | 容器内监听 `8787`，默认映射宿主机 `8090` |
 | 配置 | `data/config.json`（权限 `600`）：首次启动自动生成，之后全部在 `/admin` 修改 |
@@ -16,9 +16,13 @@
 
 ## 首次初始化流程
 
-1. 构建镜像并启动：
+1. 拉取预构建镜像并启动（推荐）：
    ```sh
-   ./test.sh && ./deploy/build-image.sh && (cd deploy && docker compose up -d)
+   cd deploy && docker compose pull && docker compose up -d
+   ```
+   如需本地构建并启动（低内存 NAS 推荐）：
+   ```sh
+   ./test.sh && ./deploy/build-image.sh && (cd deploy && HONGTANG_IMAGE=hongtang-live:1 docker compose up -d)
    ```
 2. 查看一次性设置码：
    ```sh
@@ -35,16 +39,21 @@
 
 ## 更新与回滚
 
-更新：
+使用预构建镜像更新：
 ```sh
-./test.sh && ./deploy/build-image.sh && (cd deploy && docker compose up -d)
+cd deploy && docker compose pull && docker compose up -d
 ```
 
-回滚到上一个镜像版本：
+本地构建更新：
+```sh
+./test.sh && ./deploy/build-image.sh && (cd deploy && HONGTANG_IMAGE=hongtang-live:1 docker compose up -d)
+```
+
+回滚到上一个本地镜像版本：
 ```sh
 docker images hongtang-live
 docker tag hongtang-live:<上一个日期-提交> hongtang-live:1
-cd deploy && docker compose up -d
+cd deploy && HONGTANG_IMAGE=hongtang-live:1 docker compose up -d
 ```
 
 桌面托盘程序：`agent/build.sh` → `agent/dist/hl-agent.exe`（Windows）、`hl-agent-linux-amd64` / `-arm64`。

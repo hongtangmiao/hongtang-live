@@ -4,7 +4,9 @@
 name: hongtang-live
 services:
   hongtang-live:
-    image: hongtang-live:1
+    # 默认拉取 GHCR 预构建镜像（支持 linux/amd64 与 linux/arm64）；
+    # 如需改用 Docker Hub 或本地 build-image.sh 构建的镜像，可通过 HONGTANG_IMAGE 覆盖（例如 hongtang-live:1）
+    image: ${HONGTANG_IMAGE:-ghcr.io/hongtangmiao/hongtang-live:latest}
     container_name: hongtang-live
     restart: unless-stopped
     ports:

@@ -32,18 +32,21 @@
 
 > **安全提醒**：公网部署务必通过 **HTTPS 反向代理**（如 Nginx / Caddy / Cloudflare Tunnel）暴露，切勿直接公网 HTTP 暴露，否则 `/admin` 登录密码与设备 Bearer Token 会以明文传输。
 
-1. **运行测试并构建镜像**（在 Docker `golang:alpine` 中单线程执行，无需宿主机安装 Go）：
+1. **拉取预构建镜像并启动**（支持 `linux/amd64` 与 `linux/arm64`，由 GitHub Actions 自动构建）：
    ```sh
-   ./test.sh
-   ./deploy/build-image.sh
+   cd deploy && docker compose pull && docker compose up -d
+   ```
+   如需使用 Docker Hub 镜像或本地自行构建：
+   ```sh
+   # 直接使用根目录多阶段 Dockerfile 构建
+   docker build -t hongtang-live:1 .
+   # 或在低内存 NAS 上单线程测试并构建
+   ./test.sh && ./deploy/build-image.sh
+   # 使用本地镜像启动
+   HONGTANG_IMAGE=hongtang-live:1 docker compose -f deploy/compose.yml up -d
    ```
 
-2. **启动容器**：
-   ```sh
-   cd deploy && docker compose up -d
-   ```
-
-3. **获取一次性设置码并初始化**：
+2. **获取一次性设置码并初始化**：
    ```sh
    docker logs hongtang-live | grep 设置码
    ```
