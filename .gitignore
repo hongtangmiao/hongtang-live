@@ -1,0 +1,11 @@
+
+admintest.out
+bin/
+build.log
+data/
+.env
+*.tmp
+# 测试输出
+# 编译产物 / 运行时
+.android-check/
+tests/e2e/screenshots/

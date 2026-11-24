@@ -1,0 +1,27 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace = 'xyz.hongtang.live'
+    compileSdk = 36                 // 工具链里装的是 android-36
+    buildToolsVersion = '36.1.0'
+
+    defaultConfig {
+        applicationId = 'xyz.hongtang.live'
+        minSdk = 21
+        // 25：家里那台 Android 7.1.1 的固定设备也能装；鸿蒙 4.2 上照样能装，
+        // 后台限制、通知权限、蓝牙新权限这些都按老规矩来，不用一样样适配
+        targetSdk = 25
+        versionCode = 1
+        versionName = '1.0'
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
+}

@@ -1,0 +1,38 @@
+#!/bin/sh
+# 提交前检查文件大小：超过 5000 token（字节数 ÷ 4 = 20000 字节）就拒绝提交。
+# agent 每次要读整个文件，文件太大它就读不全、改东忘西。
+# 启用（每个 clone 执行一次）：git config core.hooksPath scripts/hooks
+#
+# 跳过：lockfile、压缩过 / 自动生成的代码、二进制资源（见下面的 case）。
+# 已经超标的老文件记在 scripts/hooks/size-baseline.txt（"字节数 路径"）：
+#   只要不比记录的更大就放行；拆小以后把那一行删掉即可。
+
+LIMIT=20000
+BASELINE="$(git rev-parse --show-toplevel)/scripts/hooks/size-baseline.txt"
+fail=0
+
+for f in $(git diff --cached --name-only --diff-filter=ACMR); do
+  case "$f" in
+    go.sum|*/go.sum|*.lock|*-lock.json|*.min.js|*.min.css|web/stats.js) continue ;;
+    dist/*|*/dist/*|build/*|*/build/*|bin/*) continue ;;
+    *.png|*.jpg|*.jpeg|*.gif|*.webp|*.ico|*.woff|*.woff2|*.ttf|*.otf|*.jar|*.exe|*.zip|*.gz) continue ;;
+  esac
+  size=$(git cat-file -s ":$f" 2>/dev/null) || continue
+  [ "$size" -le "$LIMIT" ] && continue
+  base=$(awk -v p="$f" '$2 == p { print $1 }' "$BASELINE" 2>/dev/null)
+  if [ -n "$base" ] && [ "$size" -le "$base" ]; then continue; fi
+  tok=$((size / 4))
+  if [ -n "$base" ]; then
+    echo "✗ $f：$size 字节（约 $tok token），比原来的 $base 字节又大了。" >&2
+  else
+    echo "✗ $f：$size 字节（约 $tok token），超过 $LIMIT 字节（5000 token）上限。" >&2
+  fi
+  fail=1
+done
+
+if [ "$fail" -ne 0 ]; then
+  echo "" >&2
+  echo "请按功能把上面的文件拆成几个小文件，再提交。" >&2
+  exit 1
+fi
+exit 0

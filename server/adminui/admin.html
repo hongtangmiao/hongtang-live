@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="dark">
+<title>设置</title>
+<style>
+@font-face { font-family: "Fusion Pixel 12"; src: url("/fonts/fusion-pixel-12.woff2") format("woff2"); font-display: swap; }
+:root {
+  --bg: #0c1533; --win: #14204a; --win2: #1b2a5c; --line: #f4f4f0; --gold: #ffd23f;
+  --dim: #b9c2e0; --mute: #7c86b0; --track: #2a3870; --red: #ff7a6b; --green: #8ce99a;
+}
+* { box-sizing: border-box; border-radius: 0; }
+html, body { margin: 0; background: var(--bg); color: var(--line); }
+body { font: 13px/1.75 "Fusion Pixel 12", "Microsoft YaHei UI", "PingFang SC", sans-serif; -webkit-font-smoothing: none; letter-spacing: .02em; padding-bottom: 96px; }
+::selection { background: var(--gold); color: var(--bg); }
+a { color: var(--gold); }
+.top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 14px; padding: 12px 20px; background: var(--bg); border-bottom: 3px solid var(--line); }
+.top b { font-size: 16px; font-weight: 400; }
+.top b::before { content: "▶ "; color: var(--gold); }
+.top .sp { flex: 1; }
+.top a { color: var(--dim); text-decoration: none; }
+.top a:hover { color: var(--gold); }
+main { max-width: 880px; margin: 0 auto; padding: 20px 16px; }
+.win { background: var(--win); border: 3px solid var(--line); outline: 3px solid var(--bg); padding: 18px 20px; margin: 0 0 22px; }
+.win h2 { margin: 0 0 4px; font-size: 14px; font-weight: 400; color: var(--gold); letter-spacing: .08em; }
+.win h2::before { content: "■ "; }
+.win > .hint { margin: 0 0 14px; }
+.hint, .muted { color: var(--mute); font-size: 12px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; }
+.grid > * { min-width: 0; }
+.full { grid-column: 1 / -1; }
+label { display: block; color: var(--dim); font-size: 12px; margin-bottom: 3px; }
+input[type=text], input[type=password], input[type=number], input[type=email], textarea, select {
+  width: 100%; font: inherit; color: var(--line); background: var(--bg); border: 2px solid var(--line); padding: 6px 8px; outline: 0;
+}
+input:focus, textarea:focus { border-color: var(--gold); }
+textarea { min-height: 110px; resize: vertical; font-size: 11px; line-height: 1.5; }
+input[readonly] { color: var(--mute); border-color: var(--track); }
+.chk { display: inline-flex; align-items: center; gap: 6px; color: var(--dim); font-size: 12px; margin-top: 4px; cursor: pointer; }
+.chk input { accent-color: var(--gold); }
+button { font: inherit; color: var(--line); background: var(--win); border: 3px solid var(--line); padding: 5px 14px; cursor: pointer; }
+button:hover { border-color: var(--gold); color: var(--gold); }
+button.primary { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+button.primary:hover { color: var(--bg); filter: brightness(1.08); }
+button.danger:hover { border-color: var(--red); color: var(--red); }
+button.small { padding: 1px 8px; border-width: 2px; font-size: 12px; }
+button:disabled { opacity: .5; cursor: default; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.status { border: 2px solid var(--track); background: var(--win2); padding: 8px 12px; margin: 0 0 14px; font-size: 12px; color: var(--dim); }
+.status b { color: var(--line); font-weight: 400; }
+.ok { color: var(--green); }
+.bad { color: var(--red); }
+.gold { color: var(--gold); }
+.list { display: flex; flex-direction: column; gap: 8px; }
+.item { display: grid; gap: 6px 10px; align-items: end; border: 2px dotted var(--track); padding: 8px 10px; }
+.item.link { grid-template-columns: 1fr 1fr 1.6fr auto auto; }
+.item.disk { grid-template-columns: 1fr 2fr auto; }
+.avatar { display: flex; gap: 14px; align-items: center; }
+.avatar img { width: 72px; height: 72px; object-fit: cover; border: 3px solid var(--line); background: transparent; }
+.once { border: 2px solid var(--gold); color: var(--gold); padding: 8px 10px; word-break: break-all; margin-top: 8px; }
+.savebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--bg); border-top: 3px solid var(--line); padding: 10px 16px; }
+.savebar .in { max-width: 880px; margin: 0 auto; display: flex; gap: 12px; align-items: center; }
+.savebar .msg { flex: 1; color: var(--mute); font-size: 12px; }
+.center { max-width: 420px; margin: 8vh auto 0; }
+#toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); background: var(--win); border: 3px solid var(--line); padding: 6px 14px; z-index: 9; display: none; max-width: 90vw; }
+#toast.show { display: block; }
+#toast.err { border-color: var(--red); color: var(--red); }
+@media (max-width: 640px) {
+  .grid, .item.link, .item.disk { grid-template-columns: 1fr; }
+  .win { padding: 14px; }
+}
+</style>
+</head>
+<body>
+<header class="top"><b id="head">设置</b><span class="sp"></span><a href="/" id="home">← 回到首页</a><button id="logout" class="small" hidden>退出登录</button></header>
+<main id="app"><p class="muted">加载中…</p></main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="/admin/js/00-core.js"></script>
+<script src="/admin/js/01-settings.js"></script>
+<script src="/admin/js/02-daylog.js"></script>
+<script src="/admin/js/03-devices.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+// 工具链里的 Gradle 是 9.5.1：AGP 9.3 是最低要求 Gradle 9.5.0 的那一版（AGP 7.x 和 Gradle 9 不兼容）
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:9.3.3'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}

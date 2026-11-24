@@ -1,0 +1,240 @@
+/* =========================================================
+   pixel.css — JRPG 窗口风（覆盖 css/*.css，后加载）
+   字体：Fusion Pixel 12px（OFL，fonts/OFL-fusion-pixel.txt）
+   配色：夜蓝 + 白框 + 金色光标，只有这几种颜色
+   ========================================================= */
+@font-face {
+  font-family: "Fusion Pixel 12";
+  src: url("fonts/fusion-pixel-12.woff2") format("woff2");
+  font-display: swap;
+}
+
+html[data-theme] {
+  --px-bg: #0c1533;
+  --px-win: #14204a;
+  --px-win-2: #1b2a5c;
+  --px-line: #f4f4f0;          /* 正文色 */
+  --px-frame: #9ca8d2;         /* 窗口边框：比正文暗一档，别让白框抢视线 */
+  --px-gold: #ffd23f;
+  --px-dim: #b9c2e0;
+  --px-mute: #7c86b0;
+  --px-track: #2a3870;
+  --px-red: #ff7a6b;
+  --px-green: #8ce99a;
+
+  --font: "Fusion Pixel 12", "Microsoft YaHei UI", "PingFang SC", "Hiragino Sans", sans-serif;
+  --mono: "Fusion Pixel 12", ui-monospace, Consolas, monospace;
+  --base: var(--px-bg);
+  --card-bg: var(--px-win);
+  --card-solid: var(--px-win);
+  --layer: var(--px-win-2);
+  --nav-selected: transparent;
+  --nav-hover: rgba(255, 210, 63, .08);
+  --border: var(--px-track);          /* 窗口内部的分隔线用暗色，白框只给窗口本身 */
+  --border-strong: var(--px-mute);
+  --txt1: var(--px-line);
+  --txt2: var(--px-dim);
+  --txt3: var(--px-mute);
+  --accent: var(--px-gold);
+  --accent-fg: var(--px-bg);
+  --link: var(--px-gold);
+  --shadow: none;
+  --radius: 6px;
+  --chart-fill: rgba(255, 210, 63, .22);
+  --chart-line: var(--px-gold);
+  --chart-line-2: #8fd3ff;
+  --grid: rgba(244, 244, 240, .08);
+  --pink-fill: rgba(255, 210, 63, .22);
+  --pink-line: var(--px-gold);
+  --violet-fill: rgba(143, 211, 255, .25);
+  --violet-line: #8fd3ff;
+  --danger: var(--px-red);
+  --chart-bg: rgba(0, 0, 0, .18);
+  --track: var(--px-track);
+  --hair: 2px;
+  color-scheme: dark;
+}
+
+/* ---------- 全局：方角、无阴影、无渐变、像素字 ---------- */
+html[data-theme] *,
+html[data-theme] *::before,
+html[data-theme] *::after { border-radius: 0 !important; box-shadow: none !important; text-shadow: none !important; }
+
+body {
+  font-size: 13px;
+  line-height: 1.75;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  text-rendering: optimizeSpeed;
+  letter-spacing: .02em;
+}
+b, strong, h1, h2, h3, h4, [class*="title"], [class*="name"] { font-weight: 400 !important; }
+::selection, html[data-theme="dark"] ::selection { background: var(--px-gold); color: var(--px-bg); }
+::-webkit-scrollbar-thumb { background: var(--px-track); border: 0; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--px-gold); }
+
+/* ---------- 窗口（所有卡片） ---------- */
+.card, .modal, .mu-guest-card {
+  background: var(--px-win);
+  border: 2px solid var(--px-frame) !important;
+}
+.card .card, .card .hm-stat { border: 2px solid var(--px-track) !important; background: var(--px-win-2) !important; }
+.hm-stat { background: var(--px-win-2) !important; border: 2px solid var(--px-track) !important; }
+
+/* 窗口标题：金色，前面一个小方块 */
+.hm-card-title, .hm-health-title, .table-title, .mx-sec-title, .dl-card h2, .card h2 {
+  color: var(--px-gold) !important;
+  font-size: 13px !important;
+  letter-spacing: .08em;
+}
+.hm-card-title::before, .hm-health-title::before, .dl-card-title::before, .mx-sec-t::before { content: "■ "; color: var(--px-gold); }
+.hm-card-title svg, .hm-health-title svg, .hm-card-title i, .hm-health-title i,
+.dl-card-title > svg, .dl-card-title > i, .mx-sec-t > i { display: none !important; }
+.dl-card-title, .mx-sec-t { color: var(--px-gold) !important; font-size: 13px !important; letter-spacing: .08em; }
+.hm-more { color: var(--px-dim) !important; }
+.hm-link:hover .hm-more { color: var(--px-gold) !important; }
+.hm-link:hover, html[data-theme="dark"] .hm-link:hover { background: var(--px-win) !important; border-color: var(--px-gold) !important; }
+
+/* ---------- 侧栏：指令菜单 ---------- */
+.sidebar { background: var(--px-bg); }
+.brand-avatar, .profile-avatar { border: 2px solid var(--px-frame); background: var(--px-win); }
+/* 自己的头像是透明 PNG，账户页不垫底色（css/01-pages.css 里那块浅蓝 #dfe8f2 是旧主题留下的） */
+.acct-avatar.is-user, .acct-card-avatar:has(.self-avatar) { background: transparent !important; }
+.acct-avatar.is-user { border: 0 !important; }
+.brand.active, .brand:hover { background: transparent; }
+.brand.active::before { content: none; }
+.brand-name { color: var(--px-line); }
+.brand-sub { color: var(--px-mute); }
+.nav-ico { display: none; }
+.nav-item { gap: 0; padding-left: 28px; font-size: 13px; height: 34px; color: var(--px-dim); }
+.nav-item:hover { color: var(--px-line); background: transparent; }
+.nav-item.active { color: var(--px-line); background: transparent; }
+.nav-item.active::before {
+  content: "▶"; width: auto; height: auto; left: 10px;
+  background: none; color: var(--px-gold); font-size: 12px; line-height: 1;
+}
+#themeBtn { display: none; }
+.lang-toggle { border: 2px solid var(--px-frame); background: transparent; }
+.lang-toggle span.on { background: var(--px-gold); color: var(--px-bg); }
+
+/* 手机底栏：纯文字 + 光标 */
+.bottom-nav { background: var(--px-bg); border-top: 2px solid var(--px-frame) !important; }
+.bottom-nav-item { color: var(--px-mute) !important; }
+.bottom-nav-item .nav-ico, .bottom-nav-item .nav-icon { display: none !important; }
+.bottom-nav-item.active { color: var(--px-line) !important; background: transparent !important; }
+.bottom-nav-item::after, .bottom-nav-item.active::after { display: none !important; }
+.bottom-nav-item.active::before { content: "▶ "; color: var(--px-gold); }
+
+/* ---------- 顶栏 ---------- */
+.topbar { background: var(--px-bg); }
+.topbar-title { font-size: 24px; font-weight: 400; color: var(--px-line); }
+.topbar-sub { display: none !important; }
+
+/* ---------- 状态点 / 胶囊 → 闪烁方块 + 文字 ---------- */
+.dl-pill, .vi-src-pill, .pill, .mx-chip, .dl-cat-tag, .tl-badge {
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--px-gold) !important;
+  padding: 0 !important;
+}
+.dl-pill.is-idle { color: var(--px-mute) !important; }
+.dl-dot, .vi-dot, .dl-app-dot {
+  width: 7px !important; height: 7px !important;
+  background: var(--px-gold) !important;
+  border: 0 !important;
+}
+.dl-dot.is-off, .dl-pill.is-idle .dl-dot, .vi-dot:not(.on) { background: var(--px-mute) !important; animation: none !important; }
+.mx-chip.on, .pill.on, .pill[aria-pressed="true"] { color: var(--px-bg) !important; background: var(--px-gold) !important; padding: 0 6px !important; }
+.mx-chip, .pill { color: var(--px-dim) !important; }
+
+/* ---------- 进度条：白框 + 金色填充 ---------- */
+.hm-bar-trk, .dl-bar, [class*="-trk"] {
+  height: 10px !important;
+  background: var(--px-track) !important;
+  border: 2px solid var(--px-frame) !important;
+  overflow: hidden;
+}
+.hm-bar-trk i, [class*="-trk"] i { background: var(--px-gold) !important; height: 100% !important; }
+
+/* ---------- 首页：现在在干嘛 ---------- */
+.dl-face { font-size: 22px; color: var(--px-line); background: transparent !important; border: 0 !important; }
+.hm-card .dl-face { font-size: 15px; }
+.hm-card .dl-now-title { font-size: 15px !important; }
+.dl-now-title { font-size: 18px !important; color: var(--px-line); line-height: 1.5; }
+.dl-now-title::before { content: "▶ "; color: var(--px-gold); }
+.dl-now-sub { color: var(--px-dim); }
+.hm-app-pills { display: block !important; }
+.hm-app-pill {
+  display: flex !important; align-items: baseline; gap: 8px;
+  background: transparent !important; border: 0 !important;
+  padding: 3px 0 !important; width: 100%;
+}
+.hm-app-pill i { display: none !important; }
+.hm-app-pill b { color: var(--px-line); font-size: 13px; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-app-pill small { margin-left: auto; color: var(--px-gold); font-size: 13px; flex: none; order: 2; }
+.hm-app-pill::after { content: ""; order: 1; flex: 1; border-bottom: 2px dotted var(--px-track); transform: translateY(-4px); min-width: 12px; }
+
+/* ---------- 首页：音乐 ---------- */
+.hm-mx-cover, .mx-cover, .th { border: 2px solid var(--px-frame) !important; image-rendering: pixelated; }
+.hm-mx-title, .mx-h1 { font-size: 18px !important; color: var(--px-line); }
+.hm-mx-sub, .mx-sub { color: var(--px-dim); }
+
+/* ---------- 首页：健康 / 数字 ---------- */
+.hm-stat-k { color: var(--px-dim) !important; }
+.hm-stat-v { color: var(--px-line) !important; font-size: 18px !important; }
+.hm-stat-sub { color: var(--px-mute) !important; }
+/* 过期数据不占大字号 */
+.hm-stat-v.is-sm { font-size: 13px !important; color: var(--px-mute) !important; }
+.hm-health-meta { color: var(--px-mute) !important; }
+
+/* ---------- 统计块（大数字） ---------- */
+.mx-tile, .mx-tile.blue, html[data-theme="dark"] .mx-tile.blue {
+  background: var(--px-win-2) !important;
+  border: 2px solid var(--px-frame) !important;
+  color: var(--px-line) !important;
+}
+.mx-tile b { font-size: 24px !important; color: var(--px-gold) !important; }
+.mx-tile small, .mx-tile .mi { color: var(--px-dim) !important; }
+.mx-hero { background: transparent !important; border: 0 !important; }
+
+/* ---------- 列表行：虚线分隔 ---------- */
+.mx-row, .dl-app, .table-row { border-bottom: 2px dotted var(--px-track) !important; }
+.mx-row .n { color: var(--px-gold) !important; }
+.mx-row:hover, .dl-app:hover { background: rgba(255, 210, 63, .06) !important; }
+
+/* ---------- 番剧海报 ---------- */
+.vi-card { border: 2px solid var(--px-frame) !important; background: var(--px-win) !important; }
+/* 封面是卡里单独的一格：卡片留白 + 自己一圈暗边，上面不压任何东西 */
+.vi-poster { border: 2px solid var(--px-track) !important; }
+/* 来源标签：实色小方块，BGM 粉 / JF 紫（调色板里的两种），一眼分得开 */
+.vi-src-tag { padding: 0 4px !important; font-size: 12px; line-height: 1.4; color: var(--px-bg) !important; font-weight: 400 !important; }
+.vi-src-tag.bgm { background: #ff9ec4 !important; }
+.vi-src-tag.jf  { background: #c0b6ff !important; }
+/* 评分：平时显示大众分，悬停换成自己的分；只报自己的分时整块是金色 */
+.vi-rate { background: rgba(12, 21, 51, .88) !important; border: 2px solid var(--px-frame) !important; padding: 0 5px !important;
+  font-size: 12px; line-height: 1.5; color: var(--px-line) !important; font-weight: 400 !important; white-space: nowrap;
+  transition: border-color .18s ease; }
+.vi-card:hover .vi-rate.both { border-color: var(--px-gold) !important; }
+.vi-rate .vi-r.mine { color: var(--px-gold); }
+.vi-rate.mine { color: var(--px-gold) !important; border-color: var(--px-gold) !important; }
+.vi-rate.dim { color: var(--px-line) !important; }
+
+/* ---------- 骨架屏 / toast ---------- */
+.mu-skel, [class*="skel"] { background: var(--px-win-2) !important; animation: none !important; }
+.toast, html[data-theme="dark"] .toast { background: var(--px-win) !important; color: var(--px-line) !important; border: 2px solid var(--px-frame); }
+
+/* ---------- 统计页（本家 stats.css 的浅色固定色） ---------- */
+#panel-stats, html[data-theme="dark"] #panel-stats {
+  --primary: var(--px-gold);
+  --primary-dim: rgba(255, 210, 63, .16);
+  --green: var(--px-green); --green-dim: rgba(140, 233, 154, .14);
+  --amber: var(--px-gold); --amber-dim: rgba(255, 210, 63, .14);
+  --red: var(--px-red); --red-dim: rgba(255, 122, 107, .14);
+}
+
+/* ---------- 闪烁光标（尊重减少动态效果设置） ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .dl-pill:not(.is-idle) .dl-dot, .vi-dot.on { animation: px-blink 1s steps(1) infinite; }
+  @keyframes px-blink { 50% { opacity: 0; } }
+  .view.in { animation: none; }
+}

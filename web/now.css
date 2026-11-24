@@ -1,0 +1,109 @@
+/* =========================================================
+   now.css — 「いま / 此刻」页（原 daylog 首页），沿用 pixel.css 的夜蓝 + 白框 + 金色
+   ========================================================= */
+.nw-wrap { display: flex; flex-direction: column; gap: 14px; max-width: 760px; margin: 0 auto; }
+.nw-wrap > div:empty { display: none; }
+
+/* ---------- 主卡：表情 + 此刻在干嘛 ---------- */
+.nw-hero { padding: 26px 22px 18px; text-align: center; }
+.nw-face { font-size: 26px; line-height: 1.3; color: var(--txt1); margin-bottom: 8px; }
+.nw-title { font-size: clamp(20px, 4.6vw, 30px); line-height: 1.45; margin: 0; color: var(--txt1); word-break: break-word; }
+.nw-title::before { content: "▶ "; color: var(--accent); }
+.nw-title.is-off { color: var(--txt2); }
+.nw-title.is-off::before { color: var(--txt3); }
+.nw-meta { margin: 6px 0 0; color: var(--txt2); min-height: 1.75em; }
+.nw-kpis { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 18px; border-top: 2px dotted var(--border); padding-top: 12px; }
+.nw-kpis div { display: flex; flex-direction: column; gap: 2px; }
+.nw-kpis small { color: var(--txt3); font-size: 12px; }
+.nw-kpis b { color: var(--accent); font-size: 18px; }
+
+/* ---------- 媒体卡：正在听 / 直播间 ---------- */
+.nw-media { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.nw-media[data-count="2"] { grid-template-columns: 1fr 1fr; }
+.nw-mcard { display: flex; align-items: center; gap: 12px; padding: 12px; min-width: 0; position: relative; }
+.nw-mcover { flex: none; width: 56px; height: 56px; display: grid; place-items: center; background: var(--layer); border: 2px solid var(--txt1); overflow: hidden; font-size: 22px; color: var(--accent); }
+.nw-mcover img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+.nw-mbody { min-width: 0; flex: 1; }
+.nw-mkicker { color: var(--accent); font-size: 12px; }
+.nw-mkicker::before { content: "♪ "; }
+.nw-mcard[data-kind="live"] .nw-mkicker::before { content: "● "; color: var(--danger); }
+.nw-mtitle { color: var(--txt1); font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nw-msub { color: var(--txt2); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nw-mlink { flex: none; color: var(--accent); font-size: 12px; text-decoration: none; border: 2px solid var(--accent); padding: 0 6px; }
+.nw-mlink:hover { background: var(--accent); color: var(--accent-fg); }
+
+/* ---------- 健康 ---------- */
+.nw-health { padding: 14px 16px; }
+.nw-health .hm-health-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
+.nw-htile { padding: 10px 12px; }
+.nw-htile .hm-stat-k { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; }
+.nw-htile .hm-stat-v i { font-style: normal; font-size: 12px; color: var(--txt3); margin-left: 3px; }
+.nw-htile.is-empty .hm-stat-v { font-size: 13px !important; color: var(--txt3) !important; }
+.nw-hbar { height: 8px; margin: 6px 0 2px; background: var(--track); border: 2px solid var(--txt1); overflow: hidden; }
+.nw-hbar i { display: block; height: 100%; background: var(--accent); }
+
+/* ---------- 日期条 ---------- */
+.nw-daybar { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.nw-daylabel { color: var(--txt2); }
+.nw-daylabel b { color: var(--txt1); }
+.nw-nav { width: 30px; height: 30px; display: grid; place-items: center; font: inherit; font-size: 18px; line-height: 1;
+  color: var(--txt1); background: var(--card-bg); border: 2px solid var(--txt1); cursor: pointer; padding: 0; }
+.nw-nav:hover { color: var(--accent); border-color: var(--accent); }
+.nw-nav.is-off { color: var(--txt3); border-color: var(--border); cursor: default; }
+.nw-today { font: inherit; font-size: 12px; color: var(--accent); background: transparent; border: 2px solid var(--accent); padding: 2px 8px; cursor: pointer; }
+.nw-today:hover { background: var(--accent); color: var(--accent-fg); }
+
+/* ---------- 应用列表 ---------- */
+.nw-apps { padding: 8px 14px; }
+.nw-apps .dl-app-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 2px dotted var(--border); min-width: 0; }
+.nw-apps .dl-app-row:last-child { border-bottom: 0; }
+.nw-dot { flex: none; width: 8px; height: 8px; }
+.nw-apps .dl-app-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--txt1); }
+.nw-apps .dl-app-row.is-cur .dl-app-name { color: var(--accent); }
+.nw-apps .dl-app-cat { flex: none; color: var(--txt3); font-size: 12px; }
+.nw-apps .dl-app-dur { flex: none; color: var(--accent); min-width: 64px; text-align: right; }
+.nw-apps .dl-app-cur { flex: none; font-size: 12px; color: var(--accent-fg); background: var(--accent); padding: 0 4px; }
+
+/* ---------- 设备 + 分类 ---------- */
+.nw-metarow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; color: var(--txt2); font-size: 12px; justify-content: center; }
+.nw-dev i { display: inline-block; width: 7px; height: 7px; margin-right: 5px; background: var(--txt3); vertical-align: 1px; }
+.nw-dev.is-on { color: var(--txt1); }
+.nw-dev.is-on i { background: var(--px-green, #8ce99a); }
+.nw-chip i { display: inline-block; width: 7px; height: 7px; margin-right: 4px; vertical-align: 1px; }
+.nw-chip b { color: var(--accent); }
+.nw-sep { color: var(--txt3); }
+
+/* ---------- 倒计时 ---------- */
+.nw-foot { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--txt3); font-size: 12px; padding-bottom: 6px; }
+.nw-ring { width: 12px; height: 12px; border: 2px solid var(--txt3); position: relative; overflow: hidden; }
+.nw-ring::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--p, 1) * 100%); background: var(--accent); transition: height 1s steps(4); }
+
+/* ---------- AI 日报（管理员） ---------- */
+.nw-report { padding: 14px 16px; }
+.nw-rhead { color: var(--txt1); font-size: 15px; margin: 10px 0 8px; }
+.nw-rhead::before { content: "▶ "; color: var(--accent); }
+.nw-rkpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; margin: 8px 0 10px; }
+.nw-rkpis .dl-kpi { display: flex; flex-direction: column; background: var(--layer); border: 2px solid var(--border); padding: 6px 8px; }
+.nw-rkpis .dl-kpi b { color: var(--accent); font-size: 15px; }
+.nw-rkpis .dl-kpi small { color: var(--txt3); font-size: 12px; }
+.nw-report .nw-metarow { justify-content: flex-start; margin-bottom: 8px; }
+.nw-rnarr p { margin: 0 0 10px; color: var(--txt1); }
+.nw-rsec h4 { margin: 12px 0 4px; color: var(--accent); font-size: 13px; }
+.nw-rsec h4::before { content: "■ "; }
+.nw-rsec ul { margin: 0; padding-left: 1.2em; }
+.nw-rsec li { margin: 2px 0; color: var(--txt1); }
+.nw-rsec code { font-family: var(--mono); color: var(--accent); }
+.nw-rsec p { margin: 0 0 4px; color: var(--txt1); }
+.nw-rq { margin: 12px 0 6px; padding: 6px 12px; border-left: 4px solid var(--accent); color: var(--txt1); }
+.nw-rmuted { color: var(--txt3); font-size: 12px; margin: 6px 0 0; }
+.nw-replist { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 2px dotted var(--border); }
+.nw-replist small { color: var(--txt3); margin-right: 4px; }
+.nw-repchip { font: inherit; font-size: 12px; color: var(--txt2); background: transparent; border: 2px solid var(--border); padding: 0 6px; cursor: pointer; }
+.nw-repchip:hover { color: var(--accent); border-color: var(--accent); }
+.nw-repchip.on { color: var(--accent-fg); background: var(--accent); border-color: var(--accent); }
+
+@media (max-width: 560px) {
+  .nw-media[data-count="2"] { grid-template-columns: 1fr; }
+  .nw-hero { padding: 20px 14px 14px; }
+  .nw-apps .dl-app-cat { display: none; }
+}

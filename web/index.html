@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light" class="theme-fluent">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>{{HL_FULL_TITLE}}</title>
+<meta name="description" content="{{HL_DESC}}">
+<meta name="theme-color" content="#0c1533">
+<link rel="icon" type="image/x-icon" href="img/favicon.ico">
+<link rel="apple-touch-icon" href="img/avatar.png">
+<link rel="preload" href="fonts/fusion-pixel-12.woff2" as="font" type="font/woff2" crossorigin>
+<script>
+/* 旧浏览器没有 dvh：把可见高度写进 --app-h（地址栏收起 / 旋转屏幕时更新） */
+(function(){var r=document.documentElement;function f(){r.style.setProperty('--app-h',window.innerHeight+'px')}f();window.addEventListener('resize',f);window.addEventListener('orientationchange',f)})();
+</script>
+<link rel="stylesheet" href="css/00-base.css?v=hl2">
+<link rel="stylesheet" href="css/01-pages.css?v=hl2">
+<link rel="stylesheet" href="css/02-music.css?v=hl2">
+<link rel="stylesheet" href="css/03-icons.css?v=hl2">
+<link rel="stylesheet" href="css/04-stats.css?v=hl2">
+<link rel="stylesheet" href="css/05-videos.css?v=hl2">
+<link rel="stylesheet" href="css/06-home-cards.css?v=hl2">
+<link rel="stylesheet" href="pixel.css?v=hl1">
+<link rel="stylesheet" href="now.css?v=hl3">
+<script>
+/* Segoe Fluent Icons があれば Tabler の代わりに Windows のグリフで描く（本家と同じ判定） */
+(function(){var r=document.documentElement,K='segoeIcons';try{if(localStorage.getItem(K)==='1')r.classList.add('has-segoe-icons')}catch(e){}if(!window.FontFace)return;var probe=function(n){try{return new FontFace('segoe-probe',"local('"+n+"')").load().then(function(){return true},function(){return false})}catch(e){return Promise.resolve(false)}};Promise.all([probe('Segoe Fluent Icons'),probe('Segoe MDL2 Assets')]).then(function(a){var ok=a[0]||a[1];r.classList.toggle('has-segoe-icons',ok);try{localStorage.setItem(K,ok?'1':'0')}catch(e){}})})();
+</script>
+</head>
+<body>
+<nav class="sidebar" aria-label="メインナビゲーション">
+  <button class="brand" type="button" data-route="account" title="アカウント">
+    <span class="brand-avatar" aria-hidden="true">
+      <img class="self-avatar" src="img/avatar.png" alt="">
+    </span>
+    <span class="brand-text"><span class="brand-name">{{HL_NAME}}</span><span class="brand-sub">{{HL_DOMAIN}}</span></span>
+  </button>
+
+  <a class="nav-item" data-tab="home" href="#home"><img class="nav-ico" src="icons/home.png" alt=""><span data-i18n="nav_home">ホーム</span></a>
+  <a class="nav-item" data-tab="now" href="#now"><img class="nav-ico" src="icons/now.png" alt=""><span data-i18n="nav_now">いま</span></a>
+  <a class="nav-item" data-tab="music" href="#music"><img class="nav-ico" src="icons/music.png" alt=""><span data-i18n="nav_music">音楽</span></a>
+  <a class="nav-item" data-tab="videos" href="#videos"><img class="nav-ico" src="icons/video.png" alt=""><span data-i18n="nav_videos">アニメ</span></a>
+  <a class="nav-item" data-tab="illust" href="#illust"><img class="nav-ico" src="icons/illust.png" alt=""><span data-i18n="nav_illust">イラスト</span></a>
+  <a class="nav-item" data-tab="tweets" href="#tweets"><img class="nav-ico" src="icons/tweets.png" alt=""><span data-i18n="nav_tweets">つぶやき</span></a>
+
+  <div class="side-foot">
+    <span class="copyright">© {{HL_NAME}}</span>
+    <span class="side-tools">
+      <button class="icon-btn" id="themeBtn" title="テーマ" aria-label="テーマ">
+        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M16 12.5A7 7 0 0 1 7.5 4a7 7 0 1 0 8.5 8.5Z"/></svg>
+      </button>
+      <button class="lang-toggle" id="langBtn" aria-label="言語 / 语言">
+        <span data-lang="ja">日</span><span data-lang="zh">中</span>
+      </button>
+    </span>
+  </div>
+</nav>
+
+<main class="main">
+  <header class="topbar">
+    <button class="mobile-brand" type="button" data-route="account" aria-label="アカウント">
+      <span class="brand-avatar" aria-hidden="true">
+        <img class="self-avatar" src="img/avatar.png" alt="">
+      </span>
+      <span class="brand-name">{{HL_NAME}}</span>
+    </button>
+    <button class="lang-toggle top-lang" type="button" aria-label="言語 / 语言">
+      <span data-lang="ja">日</span><span data-lang="zh">中</span>
+    </button>
+    <div class="topbar-title" id="topbarTitle">ホーム</div>
+    <p class="topbar-sub" id="topbarSub"></p>
+  </header>
+  <div id="view" class="view"></div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- 統計パネル（本家と同じ静的 DOM。SPA のビューに付け外しして使い回す） -->
+<div id="stats-hold" hidden>
+  <section class="panel" id="panel-stats" aria-label="サーバー統計">
+    <div class="stats-wrap">
+      <div class="stats-header">
+        <div class="header-left">
+          <div>
+            <div class="hostname" id="hostname">—</div>
+            <div class="osinfo" id="osinfo">—</div>
+          </div>
+        </div>
+        <div class="header-right">
+          <span class="ts" id="ts">—</span>
+          <div class="stats-device">
+            <button type="button" class="btn" id="pf-btn" aria-haspopup="true" aria-expanded="false" aria-controls="pf-menu"><i class="ti ti-devices" aria-hidden="true"></i> <span id="pf-current">—</span> <i class="ti ti-chevron-down pf-caret" aria-hidden="true"></i></button>
+            <div class="pf-menu" id="pf-menu" role="menu" aria-label="デバイスを選択" hidden></div>
+          </div>
+          <button class="btn" type="button" id="stats-refresh"><i class="ti ti-refresh" aria-hidden="true"></i> <span data-i18n="st_refresh">更新</span></button>
+        </div>
+      </div>
+      <div id="stats-main"><div class="loading" role="status" aria-label="読み込み中"><svg class="win-spinner" aria-hidden="true"><circle><animateTransform attributeName="transform" type="rotate" values="-90;810" keyTimes="0;1" dur="2s" repeatCount="indefinite"></animateTransform><animate attributeName="stroke-dashoffset" values="0%;0%;-157.080%" calcMode="spline" keySplines="0.61, 1, 0.88, 1; 0.12, 0, 0.39, 1" keyTimes="0;0.5;1" dur="2s" repeatCount="indefinite"></animate><animate attributeName="stroke-dasharray" values="0% 314.159%;157.080% 157.080%;0% 314.159%" calcMode="spline" keySplines="0.61, 1, 0.88, 1; 0.12, 0, 0.39, 1" keyTimes="0;0.5;1" dur="2s" repeatCount="indefinite"></animate></circle></svg></div></div>
+    </div>
+  </section>
+</div>
+
+<!--HL_SITE-->
+<script src="stats.js?v=hl4" defer></script>
+<!-- 原 app.js 拆成的 12 段，必须按这个顺序、同步加载（不要加 defer/async） -->
+<script src="js/00-core.js?v=hl6"></script>
+<script src="js/01-i18n-zh.js?v=hl6"></script>
+<script src="js/02-base.js?v=hl6"></script>
+<script src="js/03-home.js?v=hl6"></script>
+<script src="js/04-tweets.js?v=hl6"></script>
+<script src="js/05-music-view.js?v=hl6"></script>
+<script src="js/06-music-data.js?v=hl6"></script>
+<script src="js/07-videos.js?v=hl6"></script>
+<script src="js/08-netease-login.js?v=hl6"></script>
+<script src="js/09-now.js?v=hl6"></script>
+<script src="js/10-router-stats.js?v=hl6"></script>
+<script src="js/11-boot.js?v=hl6"></script>
+</body>
+</html>
