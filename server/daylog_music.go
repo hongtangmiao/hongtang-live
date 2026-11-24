@@ -139,28 +139,39 @@ func currentMusic() any {
 	if err != nil {
 		return nil
 	}
-	defer rows.Close()
+	var picked *struct {
+		title, artist, album, cover, url, last string
+		sid                                    int64
+	}
 	for rows.Next() {
 		var title, artist, album, cover, u, last sql.NullString
 		var sid sql.NullInt64
 		if rows.Scan(&title, &artist, &album, &cover, &u, &sid, &last) != nil || title.String == "" || isNoiseMusic(title.String, artist.String) {
 			continue
 		}
-		var ago any
-		if ms, ok := msOf(last.String); ok {
-			ago = maxF(0, jsRound((nowMs()-ms)/60000))
-		}
-		cv := httpsURL(cover.String)
-		if cv == "" {
-			if e := enrichMusic(M{"title": title.String, "artist": artist.String, "album": album.String}); truthy(e["cover"]) {
-				cv = httpsURL(toStr(e["cover"]))
-				saveMusicCover(title.String, artist.String, e)
-			}
-		}
-		return M{"title": title.String, "sub": artist.String, "album": album.String, "cover": cv, "url": u.String,
-			"song_id": sid.Int64, "last_seen": last.String, "ago": ago, "playing": false}
+		picked = &struct {
+			title, artist, album, cover, url, last string
+			sid                                    int64
+		}{title.String, artist.String, album.String, cover.String, u.String, last.String, sid.Int64}
+		break
 	}
-	return nil
+	rows.Close()
+	if picked == nil {
+		return nil
+	}
+	var ago any
+	if ms, ok := msOf(picked.last); ok {
+		ago = maxF(0, jsRound((nowMs()-ms)/60000))
+	}
+	cv := httpsURL(picked.cover)
+	if cv == "" {
+		if e := enrichMusic(M{"title": picked.title, "artist": picked.artist, "album": picked.album}); truthy(e["cover"]) {
+			cv = httpsURL(toStr(e["cover"]))
+			go saveMusicCover(picked.title, picked.artist, e)
+		}
+	}
+	return M{"title": picked.title, "sub": picked.artist, "album": picked.album, "cover": cv, "url": picked.url,
+		"song_id": picked.sid, "last_seen": picked.last, "ago": ago, "playing": false}
 }
 
 type musicRow struct {
