@@ -23,6 +23,8 @@
 <link rel="stylesheet" href="css/06-home-cards.css?v=hl2">
 <link rel="stylesheet" href="pixel.css?v=hl1">
 <link rel="stylesheet" href="now.css?v=hl3">
+<link rel="stylesheet" href="css/07-ui-ac.css?v=hl1">
+<link rel="stylesheet" href="css/08-ui-macos.css?v=hl1">
 <script>
 /* Segoe Fluent Icons があれば Tabler の代わりに Windows のグリフで描く（本家と同じ判定） */
 (function(){var r=document.documentElement,K='segoeIcons';try{if(localStorage.getItem(K)==='1')r.classList.add('has-segoe-icons')}catch(e){}if(!window.FontFace)return;var probe=function(n){try{return new FontFace('segoe-probe',"local('"+n+"')").load().then(function(){return true},function(){return false})}catch(e){return Promise.resolve(false)}};Promise.all([probe('Segoe Fluent Icons'),probe('Segoe MDL2 Assets')]).then(function(a){var ok=a[0]||a[1];r.classList.toggle('has-segoe-icons',ok);try{localStorage.setItem(K,ok?'1':'0')}catch(e){}})})();
@@ -114,5 +116,6 @@
 <script src="js/09-now.js?v=hl6"></script>
 <script src="js/10-router-stats.js?v=hl6"></script>
 <script src="js/11-boot.js?v=hl6"></script>
+<script src="js/12-ui-switch.js?v=hl1"></script>
 </body>
 </html>
