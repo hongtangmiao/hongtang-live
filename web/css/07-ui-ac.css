@@ -3,59 +3,67 @@
    只在 html[data-ui="ac"] 时生效，不影响像素经典模式
    ========================================================= */
 
-/* ---------- 临时 3-UI 切换浮条（三种模式共用） ---------- */
+/* ---------- 临时 3-UI 切换浮条（不遮挡侧栏底栏、不遮挡卡片） ---------- */
 #hlUiBar {
   position: fixed;
-  left: 16px;
-  bottom: 16px;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 9990;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 5px;
-  background: rgba(18, 20, 26, 0.86);
+  padding: 4px;
+  background: rgba(18, 20, 26, 0.88);
   backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 12px !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28) !important;
   font: 600 12px/1 -apple-system, "PingFang SC", sans-serif;
+}
+html[data-ui="x2"] #hlUiBar {
+  top: auto;
+  left: 16px;
+  bottom: 16px;
+  transform: none;
 }
 #hlUiBar button {
   border: 0;
   background: transparent;
   color: #aeb5c2;
-  padding: 7px 11px;
-  border-radius: 8px !important;
+  padding: 6px 11px;
+  border-radius: 7px !important;
   font: inherit;
+  font-size: 12px !important;
   cursor: pointer;
   transition: background .18s, color .18s;
   white-space: nowrap;
 }
 #hlUiBar button:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
 #hlUiBar button.on { background: #f3f4f6; color: #111318; }
-#hlUiBar .hl-ui-sep { width: 1px; height: 16px; background: rgba(255, 255, 255, 0.14); margin: 0 2px; }
-#hlUiBar .hl-ui-sub { color: #d8dee9; border: 1px solid rgba(255, 255, 255, 0.16); }
+#hlUiBar .hl-ui-sep { width: 1px; height: 15px; background: rgba(255, 255, 255, 0.14); margin: 0 2px; }
+#hlUiBar .hl-ui-sub { color: #d8dee9; border: 1px solid rgba(255, 255, 255, 0.18); }
 @media (max-width: 760px) {
-  #hlUiBar { left: 50%; transform: translateX(-50%); bottom: 68px; padding: 4px; }
-  html[data-ui="x2"] #hlUiBar { bottom: 84px; }
+  #hlUiBar { top: auto; bottom: 64px; left: 50%; transform: translateX(-50%); }
+  html[data-ui="x2"] #hlUiBar { left: 50%; transform: translateX(-50%); bottom: 82px; }
 }
 
 /* ---------- AC 融合版变量（暖纸日间 / 深石墨夜间） ---------- */
 html[data-theme][data-ui="ac"] {
   --ac-bg: #f4f0e7;
-  --ac-card: rgba(252, 250, 245, 0.9);
+  --ac-card: rgba(252, 250, 245, 0.92);
   --ac-card-2: #eee8db;
   --ac-ink: #221f1b;
-  --ac-muted: #756d61;
+  --ac-muted: #665e53;
   --ac-line: #dfd7c6;
-  --ac-line-hi: #c8bda8;
+  --ac-line-hi: #c4b8a2;
   --ac-accent: #c5482e;
-  --ac-green: #38664d;
+  --ac-green: #2f6b47;
   --ac-sheen: rgba(255, 255, 255, 0.72);
-  --ac-rail: rgba(252, 250, 245, 0.86);
+  --ac-rail: rgba(252, 250, 245, 0.9);
   --ac-rail-pill: #221f1b;
   --ac-rail-on: #fcfaf5;
-  --ac-shadow: 0 10px 28px rgba(34, 31, 27, 0.06);
+  --ac-shadow: 0 8px 24px rgba(34, 31, 27, 0.06);
 
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
   --mono: ui-monospace, "JetBrains Mono", Consolas, monospace;
@@ -82,30 +90,36 @@ html[data-theme][data-ui="ac"] {
   --px-mute: var(--ac-muted);
   --px-track: var(--ac-line);
   --px-green: var(--ac-green);
-  --px-red: #d14343;
+  --px-red: #c93b3b;
   color-scheme: light;
 }
 
 html[data-theme][data-ui="ac"][data-ac-tone="graphite"] {
   --ac-bg: #0b0c0f;
-  --ac-card: rgba(25, 27, 32, 0.78);
+  --ac-card: rgba(25, 27, 32, 0.8);
   --ac-card-2: rgba(255, 255, 255, 0.055);
   --ac-ink: #f3f4f6;
-  --ac-muted: #939aa6;
+  --ac-muted: #98a0ad;
   --ac-line: rgba(255, 255, 255, 0.1);
   --ac-line-hi: rgba(255, 255, 255, 0.22);
   --ac-accent: #f3f4f6;
   --ac-green: #30d158;
   --ac-sheen: rgba(255, 255, 255, 0.075);
-  --ac-rail: rgba(22, 24, 29, 0.82);
-  --ac-rail-pill: rgba(255, 255, 255, 0.15);
+  --ac-rail: rgba(22, 24, 29, 0.86);
+  --ac-rail-pill: rgba(255, 255, 255, 0.16);
   --ac-rail-on: #ffffff;
   --ac-shadow: 0 14px 36px rgba(0, 0, 0, 0.36);
   --accent-fg: #0b0c0f;
   color-scheme: dark;
 }
 
+/* 消除内嵌悬空滚动条：让整个页面自然滚动 */
+html[data-theme][data-ui="ac"],
 html[data-theme][data-ui="ac"] body {
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
   background: var(--ac-bg) !important;
   color: var(--ac-ink) !important;
   font-family: var(--font) !important;
@@ -126,7 +140,7 @@ html[data-theme][data-ui="ac"] .sidebar {
   top: 50% !important;
   bottom: auto !important;
   transform: translateY(-50%);
-  width: 60px !important;
+  width: 58px !important;
   height: auto !important;
   padding: 8px !important;
   gap: 6px !important;
@@ -143,19 +157,31 @@ html[data-theme][data-ui="ac"] .sidebar {
 }
 html[data-theme][data-ui="ac"] .sidebar .brand {
   padding: 0 !important;
+  margin: 0 0 2px 0 !important;
   width: 42px !important;
   height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
   justify-content: center !important;
   border: 1px solid var(--ac-line) !important;
   border-radius: 10px !important;
-  margin-bottom: 4px !important;
+  overflow: hidden !important;
 }
 html[data-theme][data-ui="ac"] .sidebar .brand-text,
-html[data-theme][data-ui="ac"] .sidebar .copyright { display: none !important; }
-html[data-theme][data-ui="ac"] .sidebar .brand-avatar,
+html[data-theme][data-ui="ac"] .sidebar .side-foot { display: none !important; }
+html[data-theme][data-ui="ac"] .sidebar .brand-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
 html[data-theme][data-ui="ac"] .sidebar .brand-avatar img {
-  width: 34px !important;
-  height: 34px !important;
+  width: 36px !important;
+  height: 36px !important;
+  object-fit: cover !important;
   border-radius: 8px !important;
 }
 html[data-theme][data-ui="ac"] .sidebar .nav-item {
@@ -164,40 +190,21 @@ html[data-theme][data-ui="ac"] .sidebar .nav-item {
   width: 42px !important;
   height: 42px !important;
   padding: 0 !important;
-  justify-content: center !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center !important;
   border: 0 !important;
   background: transparent !important;
   border-radius: 10px !important;
   color: var(--ac-muted) !important;
 }
-html[data-theme][data-ui="ac"] .sidebar .nav-item::before { display: none !important; }
-html[data-theme][data-ui="ac"] .sidebar .nav-item .nav-ico {
-  display: none !important;
-}
-html[data-theme][data-ui="ac"] .sidebar .nav-item::after {
-  font-size: 17px;
-  line-height: 1;
-}
+html[data-theme][data-ui="ac"] .sidebar .nav-item::before,
+html[data-theme][data-ui="ac"] .sidebar .nav-item .nav-ico { display: none !important; }
+html[data-theme][data-ui="ac"] .sidebar .nav-item::after { font-size: 17px; line-height: 1; }
 html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="home"]::after { content: "⌂"; }
 html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="now"]::after { content: "◉"; }
 html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="music"]::after { content: "♪"; }
 html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="videos"]::after { content: "✦"; }
-html[data-theme][data-ui="ac"] .hm-card-title::before,
-html[data-theme][data-ui="ac"] .hm-health-title::before,
-html[data-theme][data-ui="ac"] .dl-card-title::before,
-html[data-theme][data-ui="ac"] .mx-sec-t::before { content: none !important; }
-html[data-theme][data-ui="ac"] .hm-card-title,
-html[data-theme][data-ui="ac"] .hm-health-title,
-html[data-theme][data-ui="ac"] .dl-card-title,
-html[data-theme][data-ui="ac"] .mx-sec-t {
-  color: var(--ac-ink) !important;
-  font-weight: 700 !important;
-  letter-spacing: 0 !important;
-}
-html[data-theme][data-ui="ac"] .hm-stat-v,
-html[data-theme][data-ui="ac"] .dl-now-title,
-html[data-theme][data-ui="ac"] .hm-mx-title,
-html[data-theme][data-ui="ac"] .vi-title { font-weight: 700 !important; }
 html[data-theme][data-ui="ac"] .sidebar .nav-item span {
   position: absolute !important;
   right: 54px !important;
@@ -212,15 +219,10 @@ html[data-theme][data-ui="ac"] .sidebar .nav-item span {
   white-space: nowrap !important;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .16s, transform .22s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity .14s, transform .2s cubic-bezier(0.22, 1, 0.36, 1);
 }
-html[data-theme][data-ui="ac"] .sidebar .nav-item:hover span {
-  opacity: 1;
-  transform: translate(0, -50%);
-}
-html[data-theme][data-ui="ac"] .sidebar .nav-item.active {
-  color: var(--ac-rail-on) !important;
-}
+html[data-theme][data-ui="ac"] .sidebar .nav-item:hover span { opacity: 1; transform: translate(0, -50%); }
+html[data-theme][data-ui="ac"] .sidebar .nav-item.active { color: var(--ac-rail-on) !important; }
 html[data-theme][data-ui="ac"] .ac-rail-pill {
   position: absolute;
   left: 8px;
@@ -234,38 +236,24 @@ html[data-theme][data-ui="ac"] .ac-rail-pill {
   pointer-events: none;
   z-index: 0;
 }
-html[data-theme][data-ui="ac"] .sidebar .side-foot {
-  margin-top: 4px !important;
-  padding-top: 6px !important;
-  border-top: 1px solid var(--ac-line) !important;
-  width: 100%;
-  justify-content: center !important;
-}
-html[data-theme][data-ui="ac"] .sidebar .side-tools {
-  flex-direction: column !important;
-  gap: 6px !important;
-  align-items: center !important;
-}
-html[data-theme][data-ui="ac"] .sidebar .icon-btn,
-html[data-theme][data-ui="ac"] .sidebar .lang-toggle {
-  border: 1px solid var(--ac-line) !important;
-  background: var(--ac-card-2) !important;
-  color: var(--ac-ink) !important;
-  border-radius: 8px !important;
-  padding: 4px 6px !important;
-}
 
-/* ---------- 主内容区留出右侧导航间距 ---------- */
+/* ---------- 主内容区：无内嵌滚动条 ---------- */
 html[data-theme][data-ui="ac"] .main {
-  margin-left: 0 !important;
-  max-width: 1180px;
   margin: 0 auto !important;
-  padding: 10px 84px 72px 20px !important;
+  max-width: 1180px !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding: 12px 86px 56px 24px !important;
+}
+html[data-theme][data-ui="ac"] .view {
+  height: auto !important;
+  overflow: visible !important;
+  padding-right: 0 !important;
 }
 html[data-theme][data-ui="ac"] .topbar {
   background: transparent !important;
   border: 0 !important;
-  padding: 14px 4px 12px !important;
+  padding: 10px 4px 14px !important;
 }
 html[data-theme][data-ui="ac"] .topbar-title {
   font-size: 22px !important;
@@ -273,8 +261,19 @@ html[data-theme][data-ui="ac"] .topbar-title {
   letter-spacing: -0.02em !important;
   color: var(--ac-ink) !important;
 }
+html[data-theme][data-ui="ac"] .lang-toggle {
+  border: 1px solid var(--ac-line) !important;
+  background: var(--ac-card) !important;
+  border-radius: 8px !important;
+  padding: 2px !important;
+}
+html[data-theme][data-ui="ac"] .lang-toggle span {
+  border-radius: 6px !important;
+  padding: 3px 7px !important;
+  font-size: 12px !important;
+}
 
-/* ---------- A2 全圆角矩形卡片 + C2 鼠标跟随镜面反光 ---------- */
+/* ---------- A2 全圆角矩形卡片 + C2 鼠标镜面反光 ---------- */
 html[data-theme][data-ui="ac"] .card,
 html[data-theme][data-ui="ac"] .mx-col,
 html[data-theme][data-ui="ac"] .stats-wrap .panel {
@@ -299,6 +298,24 @@ html[data-theme][data-ui="ac"] .card::after {
 html[data-theme][data-ui="ac"] .card:hover::after { opacity: 1; }
 html[data-theme][data-ui="ac"] .card:hover { border-color: var(--ac-line-hi) !important; }
 
+html[data-theme][data-ui="ac"] .hm-card-title::before,
+html[data-theme][data-ui="ac"] .hm-health-title::before,
+html[data-theme][data-ui="ac"] .dl-card-title::before,
+html[data-theme][data-ui="ac"] .mx-sec-t::before { content: none !important; }
+html[data-theme][data-ui="ac"] .hm-card-title,
+html[data-theme][data-ui="ac"] .hm-health-title,
+html[data-theme][data-ui="ac"] .dl-card-title,
+html[data-theme][data-ui="ac"] .mx-sec-t {
+  color: var(--ac-ink) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+html[data-theme][data-ui="ac"] .hm-stat-v,
+html[data-theme][data-ui="ac"] .dl-now-title,
+html[data-theme][data-ui="ac"] .hm-mx-title,
+html[data-theme][data-ui="ac"] .vi-title { font-weight: 700 !important; }
+
 html[data-theme][data-ui="ac"] .hm-stat,
 html[data-theme][data-ui="ac"] .hm-sys-host,
 html[data-theme][data-ui="ac"] .hm-app-pill,
@@ -311,19 +328,46 @@ html[data-theme][data-ui="ac"] .vi-card {
   border: 1px solid var(--ac-line) !important;
   border-radius: 10px !important;
 }
+/* 修复 #now 列表右侧贴边 & 补齐内边距 */
+html[data-theme][data-ui="ac"] .dl-app-row { padding: 10px 14px !important; }
+
+/* 修复暖纸/石墨模式下 评分徽标 & BGM/JF 标签对比度 + 统一 >=12px */
+html[data-theme][data-ui="ac"] .vi-rate {
+  background: var(--ac-card) !important;
+  color: var(--ac-ink) !important;
+  border: 1px solid var(--ac-line-hi) !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 1px 7px !important;
+}
+html[data-theme][data-ui="ac"] .vi-rate .vi-r.all { color: var(--ac-ink) !important; }
+html[data-theme][data-ui="ac"] .vi-rate .vi-r.mine { color: var(--ac-accent) !important; }
+html[data-theme][data-ui="ac"] .vi-src-tag {
+  background: var(--ac-card) !important;
+  color: var(--ac-ink) !important;
+  border: 1px solid var(--ac-line-hi) !important;
+  border-radius: 5px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 1px 6px !important;
+}
+html[data-theme][data-ui="ac"] .vi-ep,
+html[data-theme][data-ui="ac"] .vi-orig,
+html[data-theme][data-ui="ac"] .hm-stat-k,
+html[data-theme][data-ui="ac"] .hm-stat-sub,
+html[data-theme][data-ui="ac"] .hm-bar-lbl { font-size: 12px !important; }
+
 html[data-theme][data-ui="ac"] .vi-poster,
 html[data-theme][data-ui="ac"] .vi-poster img,
 html[data-theme][data-ui="ac"] .hm-mx-cover,
 html[data-theme][data-ui="ac"] .profile-avatar img,
 html[data-theme][data-ui="ac"] .mx-cover,
 html[data-theme][data-ui="ac"] .dl-pill,
-html[data-theme][data-ui="ac"] .vi-src-tag,
-html[data-theme][data-ui="ac"] .vi-rate,
 html[data-theme][data-ui="ac"] .pill,
 html[data-theme][data-ui="ac"] .mx-chip,
-html[data-theme][data-ui="ac"] .btn {
-  border-radius: 8px !important;
-}
+html[data-theme][data-ui="ac"] .btn { border-radius: 8px !important; }
+
 html[data-theme][data-ui="ac"] .vi-card:hover {
   transform: translateY(-3px);
   border-color: var(--ac-line-hi) !important;

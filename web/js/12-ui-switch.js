@@ -44,17 +44,51 @@
     card.style.setProperty('--my', (e.clientY - rect.top) + 'px');
   }, { passive: true });
 
-  /* ---------- X2 macOS 桌面工作台（实时读取站点真实数据） ---------- */
+  /* ---------- X2 macOS 桌面工作台（实时读取站点真实数据，零重叠自动排布） ---------- */
   let x2Z = 20;
+  let x2UserMoved = false;
   const x2Wins = [
-    { id: 'now', icon: '◉', title: '此刻状态', x: 28, y: 48, w: 390 },
-    { id: 'health', icon: '♥', title: '身体健康', x: 438, y: 48, w: 300 },
-    { id: 'music', icon: '♪', title: '音乐', x: 758, y: 48, w: 320 },
-    { id: 'hosts', icon: '▤', title: '活动监视器', x: 28, y: 344, w: 390 },
-    { id: 'anime', icon: '✦', title: '追番书架', x: 438, y: 244, w: 640 },
+    { id: 'now', icon: '◉', title: '此刻状态', x: 24, y: 44, w: 376 },
+    { id: 'health', icon: '♥', title: '身体健康', x: 416, y: 44, w: 420 },
+    { id: 'music', icon: '♪', title: '音乐', x: 852, y: 44, w: 400 },
+    { id: 'hosts', icon: '▤', title: '活动监视器', x: 24, y: 374, w: 376 },
+    { id: 'anime', icon: '✦', title: '追番书架', x: 416, y: 268, w: 836 },
   ];
   const x2State = {};
   x2Wins.forEach(w => { x2State[w.id] = { open: true, max: false }; });
+
+  function layoutX2Default() {
+    if (window.innerWidth <= 860) return;
+    const vw = window.innerWidth;
+    const pad = 20, gap = 16;
+    const maxW = Math.min(1240, vw - pad * 2);
+    const ox = Math.max(pad, Math.round((vw - maxW) / 2));
+    const leftW = Math.round(maxW * 0.31);
+    const rightW = maxW - leftW - gap;
+    const halfR = Math.floor((rightW - gap) / 2);
+
+    const setBox = (id, x, y, w) => {
+      const el = document.getElementById('x2w-' + id);
+      if (!el || el.classList.contains('is-max')) return;
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.style.width = w + 'px';
+    };
+    setBox('now', ox, 44, leftW);
+    setBox('health', ox + leftW + gap, 44, halfR);
+    setBox('music', ox + leftW + gap + halfR + gap, 44, rightW - halfR - gap);
+
+    const wNow = document.getElementById('x2w-now');
+    const wHealth = document.getElementById('x2w-health');
+    const wMusic = document.getElementById('x2w-music');
+    const leftY = wNow ? (44 + wNow.offsetHeight + gap) : 368;
+    const rightY = Math.max(
+      wHealth ? (44 + wHealth.offsetHeight + gap) : 250,
+      wMusic ? (44 + wMusic.offsetHeight + gap) : 250
+    );
+    setBox('hosts', ox, leftY, leftW);
+    setBox('anime', ox + leftW + gap, rightY, rightW);
+  }
 
   function ensureX2Dom() {
     let rootEl = document.getElementById('x2Root');
@@ -104,6 +138,7 @@
       bar.addEventListener('pointerdown', e => {
         if (e.target.closest('.x2-lights') || window.innerWidth <= 860 || win.classList.contains('is-max')) return;
         win.classList.add('dragging');
+        x2UserMoved = true;
         const sx = e.clientX - win.offsetLeft;
         const sy = e.clientY - win.offsetTop;
         const mv = ev => {
@@ -162,15 +197,15 @@
   }
 
   function resetX2() {
+    x2UserMoved = false;
     x2Wins.forEach((w, i) => {
       x2State[w.id] = { open: true, max: false };
       const win = document.getElementById('x2w-' + w.id);
       if (!win) return;
       win.classList.remove('is-hidden', 'is-max');
-      win.style.left = w.x + 'px';
-      win.style.top = w.y + 'px';
       win.style.zIndex = i + 1;
     });
+    layoutX2Default();
     syncX2Dots();
   }
 
@@ -212,8 +247,10 @@
         bHealth.innerHTML = '<div style="color:var(--os-muted)">暂无健康数据</div>';
       } else {
         const sleepTxt = (typeof fmtSleepMin === 'function' && h.sleep_min != null) ? fmtSleepMin(h.sleep_min) : '—';
+        const hrTxt = h.hr_live != null ? `${h.hr_live} bpm` : (h.hr_last_text || '—');
+        const hrSm = h.hr_live == null && String(hrTxt).length > 8 ? ' class="is-sm"' : '';
         bHealth.innerHTML = `<div class="x2-sgrid">
-          <div class="x2-stat"><small>心率</small><b>${h.hr_live != null ? safe(h.hr_live) + ' bpm' : safe(h.hr_last_text || '—')}</b></div>
+          <div class="x2-stat"><small>心率</small><b${hrSm}>${safe(hrTxt)}</b></div>
           <div class="x2-stat"><small>睡眠${h.sleep_score != null ? ' (' + h.sleep_score + '分)' : ''}</small><b>${safe(sleepTxt)}</b></div>
           <div class="x2-stat"><small>压力</small><b>${h.stress != null ? safe(h.stress) : '—'}</b></div>
           <div class="x2-stat"><small>血氧</small><b>${h.spo2 != null ? safe(h.spo2) + '%' : '—'}</b></div>
@@ -234,7 +271,7 @@
           <div style="min-width:0">
             <div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${safe(m.title)}</div>
             <div style="color:var(--os-muted);font-size:12px">${safe(m.sub || '—')}</div>
-            <div style="color:var(--os-green);font-size:12px;margin-top:3px">${m.state === 'playing' ? '● 正在播放' : '已暂停'}</div>
+            <div style="color:${m.state === 'playing' ? 'var(--os-green)' : 'var(--os-muted)'};font-size:12px;margin-top:3px">${m.state === 'playing' ? '● 正在播放' : '已暂停'}</div>
           </div>
         </div>`;
       }
@@ -269,6 +306,7 @@
           </a>`;
         }).join('')}</div>`;
     }
+    if (!x2UserMoved) requestAnimationFrame(layoutX2Default);
   }
 
   /* ---------- 切换器 UI 浮条 ---------- */
@@ -343,7 +381,10 @@
       return res;
     };
   }
-  window.addEventListener('resize', syncAcPill);
+  window.addEventListener('resize', () => {
+    syncAcPill();
+    if (ui === 'x2' && !x2UserMoved) layoutX2Default();
+  });
   window.addEventListener('hashchange', () => { if (ui === 'ac') setTimeout(syncAcPill, 30); });
   setInterval(() => { if (ui === 'x2') paintX2(); }, 5000);
 
