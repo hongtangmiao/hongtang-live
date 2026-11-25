@@ -224,7 +224,7 @@
     // 3. 音乐窗
     const bMusic = document.getElementById('x2b-music');
     if (bMusic) {
-      const m = (typeof hmState !== 'undefined' && hmState.musicNow) || (typeof mxState !== 'undefined' && mxState.now);
+      const m = (typeof hmState !== 'undefined' && hmState && hmState.musicNow) || (typeof mxState !== 'undefined' && mxState && mxState.now);
       if (!m || !m.title) {
         bMusic.innerHTML = '<div style="color:var(--os-muted)">暂无播放记录</div>';
       } else {
