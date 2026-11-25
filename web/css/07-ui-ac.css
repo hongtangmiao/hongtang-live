@@ -172,10 +172,32 @@ html[data-theme][data-ui="ac"] .sidebar .nav-item {
 }
 html[data-theme][data-ui="ac"] .sidebar .nav-item::before { display: none !important; }
 html[data-theme][data-ui="ac"] .sidebar .nav-item .nav-ico {
-  width: 20px !important;
-  height: 20px !important;
-  image-rendering: auto !important;
+  display: none !important;
 }
+html[data-theme][data-ui="ac"] .sidebar .nav-item::after {
+  font-size: 17px;
+  line-height: 1;
+}
+html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="home"]::after { content: "⌂"; }
+html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="now"]::after { content: "◉"; }
+html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="music"]::after { content: "♪"; }
+html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="videos"]::after { content: "✦"; }
+html[data-theme][data-ui="ac"] .hm-card-title::before,
+html[data-theme][data-ui="ac"] .hm-health-title::before,
+html[data-theme][data-ui="ac"] .dl-card-title::before,
+html[data-theme][data-ui="ac"] .mx-sec-t::before { content: none !important; }
+html[data-theme][data-ui="ac"] .hm-card-title,
+html[data-theme][data-ui="ac"] .hm-health-title,
+html[data-theme][data-ui="ac"] .dl-card-title,
+html[data-theme][data-ui="ac"] .mx-sec-t {
+  color: var(--ac-ink) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+html[data-theme][data-ui="ac"] .hm-stat-v,
+html[data-theme][data-ui="ac"] .dl-now-title,
+html[data-theme][data-ui="ac"] .hm-mx-title,
+html[data-theme][data-ui="ac"] .vi-title { font-weight: 700 !important; }
 html[data-theme][data-ui="ac"] .sidebar .nav-item span {
   position: absolute !important;
   right: 54px !important;
@@ -307,12 +329,15 @@ html[data-theme][data-ui="ac"] .vi-card:hover {
   border-color: var(--ac-line-hi) !important;
 }
 html[data-theme][data-ui="ac"] .hm-bar-trk,
+html[data-theme][data-ui="ac"] .nw-hbar {
+  height: 6px !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  background: var(--ac-line) !important;
+}
 html[data-theme][data-ui="ac"] .hm-bar-trk i,
-html[data-theme][data-ui="ac"] .nw-hbar,
 html[data-theme][data-ui="ac"] .nw-hbar i {
   border-radius: 4px !important;
-}
-html[data-theme][data-ui="ac"] .hm-bar-trk i {
   background: var(--ac-ink) !important;
 }
 
