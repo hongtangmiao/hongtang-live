@@ -121,11 +121,83 @@ html[data-theme][data-ui="x2"] .x2-win.is-hidden {
   pointer-events: none;
 }
 html[data-theme][data-ui="x2"] .x2-win.is-max {
-  left: 16px !important;
-  top: 42px !important;
-  width: calc(100vw - 32px) !important;
-  z-index: 800 !important;
+  left: 0 !important;
+  top: 30px !important;
+  width: 100vw !important;
+  height: calc(100vh - 30px) !important;
+  border-radius: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  z-index: 880 !important;
+  display: flex;
+  flex-direction: column;
 }
+html[data-theme][data-ui="x2"] .x2-win.is-max .x2-body {
+  flex: 1;
+  max-height: none !important;
+  padding: 20px 28px 40px;
+  overflow-y: auto;
+  user-select: text;
+}
+html[data-theme][data-ui="x2"] .x2-detail {
+  max-width: 1180px;
+  margin: 0 auto;
+  --base: transparent;
+  --card-bg: var(--os-in);
+  --card-solid: var(--os-win);
+  --layer: var(--os-in);
+  --border: var(--os-stroke);
+  --border-strong: var(--os-stroke);
+  --txt1: var(--os-ink);
+  --txt2: var(--os-muted);
+  --txt3: var(--os-muted);
+  --accent: var(--os-ink);
+  --accent-fg: var(--os-bar);
+  --px-bg: transparent;
+  --px-win: var(--os-in);
+  --px-win-2: var(--os-in);
+  --px-line: var(--os-ink);
+  --px-frame: var(--os-stroke);
+  --px-gold: var(--os-ink);
+  --px-dim: var(--os-muted);
+  --px-mute: var(--os-muted);
+  --px-track: var(--os-stroke);
+}
+html[data-theme][data-ui="x2"] .x2-detail .mx-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+html[data-theme][data-ui="x2"] .x2-detail .card,
+html[data-theme][data-ui="x2"] .x2-detail .mx-col,
+html[data-theme][data-ui="x2"] .x2-detail .vi-card,
+html[data-theme][data-ui="x2"] .x2-detail .hm-stat,
+html[data-theme][data-ui="x2"] .x2-detail .dl-app-row,
+html[data-theme][data-ui="x2"] .x2-detail .mx-hero,
+html[data-theme][data-ui="x2"] .x2-detail .mx-tile {
+  background: var(--os-in) !important;
+  border: 1px solid var(--os-stroke) !important;
+  border-radius: 12px !important;
+}
+html[data-theme][data-ui="x2"] .x2-detail .mx-col { padding: 14px !important; }
+html[data-theme][data-ui="x2"] .x2-detail .vi-poster,
+html[data-theme][data-ui="x2"] .x2-detail .vi-poster img { border-radius: 7px !important; }
+html[data-theme][data-ui="x2"] .x2-detail .vi-rate,
+html[data-theme][data-ui="x2"] .x2-detail .vi-src-tag {
+  background: var(--os-win) !important;
+  color: var(--os-ink) !important;
+  border: 1px solid var(--os-stroke) !important;
+  border-radius: 6px !important;
+  padding: 1px 7px !important;
+  font-size: 12px !important;
+}
+html[data-theme][data-ui="x2"] .x2-detail .hm-card-title::before,
+html[data-theme][data-ui="x2"] .x2-detail .dl-card-title::before,
+html[data-theme][data-ui="x2"] .x2-detail .mx-sec-t::before { content: none !important; }
+html[data-theme][data-ui="x2"] #x2Root.has-max .x2-dock-wrap { opacity: 0; pointer-events: none; transform: translate(-50%, 24px); transition: all .25s var(--os-spring); }
+html[data-theme][data-ui="x2"] .x2-ditem .ti { font-size: 21px; }
+html[data-theme][data-ui="x2"] .x2-mb-app .ti,
+html[data-theme][data-ui="x2"] .x2-mb-btn .ti { font-size: 14px; vertical-align: -1px; margin-right: 3px; }
 html[data-theme][data-ui="x2"] .x2-win.dragging {
   transition: none;
   box-shadow: 0 32px 72px rgba(0, 0, 0, 0.5) !important;

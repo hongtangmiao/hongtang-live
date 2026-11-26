@@ -87,7 +87,7 @@ html[data-theme][data-ui="ac"] {
   --ac-line-hi: #c4b8a2;
   --ac-accent: #c5482e;
   --ac-green: #2f6b47;
-  --ac-sheen: rgba(255, 255, 255, 0.72);
+  --ac-sheen: rgba(34, 31, 27, 0.032);
   --ac-rail: rgba(252, 250, 245, 0.9);
   --ac-rail-pill: #221f1b;
   --ac-rail-on: #fcfaf5;
@@ -132,7 +132,7 @@ html[data-theme][data-ui="ac"][data-ac-tone="graphite"] {
   --ac-line-hi: rgba(255, 255, 255, 0.22);
   --ac-accent: #f3f4f6;
   --ac-green: #30d158;
-  --ac-sheen: rgba(255, 255, 255, 0.075);
+  --ac-sheen: rgba(255, 255, 255, 0.055);
   --ac-rail: rgba(22, 24, 29, 0.88);
   --ac-rail-pill: rgba(255, 255, 255, 0.16);
   --ac-rail-on: #ffffff;
@@ -212,11 +212,17 @@ html[data-theme][data-ui="ac"] .sidebar .nav-item {
 }
 html[data-theme][data-ui="ac"] .sidebar .nav-item::before,
 html[data-theme][data-ui="ac"] .sidebar .nav-item .nav-ico { display: none !important; }
-html[data-theme][data-ui="ac"] .sidebar .nav-item::after { font-size: 17px; line-height: 1; }
-html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="home"]::after { content: "⌂"; }
-html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="now"]::after { content: "◉"; }
-html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="music"]::after { content: "♪"; }
-html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="videos"]::after { content: "✦"; }
+html[data-theme][data-ui="ac"] .sidebar .nav-item::after {
+  font-family: "tabler-icons" !important;
+  font-size: 19px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+}
+html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="home"]::after { content: "\eac1"; }
+html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="now"]::after { content: "\ea70"; }
+html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="music"]::after { content: "\eafc"; }
+html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="videos"]::after { content: "\ea8d"; }
 html[data-theme][data-ui="ac"] .sidebar .nav-item span {
   position: absolute !important; right: 54px !important; top: 50% !important;
   transform: translate(6px, -50%);
@@ -245,8 +251,36 @@ html[data-theme][data-ui="ac"] .main {
 html[data-theme][data-ui="ac"] .view { height: auto !important; overflow: visible !important; padding-right: 0 !important; }
 html[data-theme][data-ui="ac"] .topbar { background: transparent !important; border: 0 !important; padding: 10px 4px 16px !important; }
 html[data-theme][data-ui="ac"] .topbar-title { font-size: 22px !important; font-weight: 800 !important; letter-spacing: -0.02em !important; color: var(--ac-ink) !important; }
-html[data-theme][data-ui="ac"] .lang-toggle { border: 1px solid var(--ac-line) !important; background: var(--ac-card) !important; border-radius: 8px !important; padding: 2px !important; }
-html[data-theme][data-ui="ac"] .lang-toggle span { border-radius: 6px !important; padding: 3px 7px !important; font-size: 12px !important; }
+html[data-theme][data-ui="ac"] .lang-toggle {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  padding: 3px !important;
+  border: 1px solid var(--ac-line) !important;
+  background: var(--ac-card-2) !important;
+  border-radius: 9px !important;
+  height: auto !important;
+}
+html[data-theme][data-ui="ac"] .lang-toggle span {
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  color: var(--ac-muted) !important;
+  background: transparent !important;
+  transition: background .18s, color .18s;
+}
+html[data-theme][data-ui="ac"] .lang-toggle span.on {
+  background: var(--ac-ink) !important;
+  color: var(--ac-bg) !important;
+}
+/* 音乐页改为宽松 2 列，不再 4 列挤成一团 */
+html[data-theme][data-ui="ac"] .mx-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+html[data-theme][data-ui="ac"] .mx-col { padding: 16px !important; }
 
 /* 行 1：紧凑横向个人卡 + 健康卡（彻底消灭健康卡顶部大片留白） */
 html[data-theme][data-ui="ac"] .home-grid {
@@ -309,8 +343,9 @@ html[data-theme][data-ui="ac"] .stats-wrap .panel {
   box-shadow: var(--ac-shadow) !important;
   transition: border-color .22s ease, transform .26s cubic-bezier(0.22, 1, 0.36, 1);
 }
+html[data-theme][data-ui="ac"] .card > * { position: relative; z-index: 1; }
 html[data-theme][data-ui="ac"] .card::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
   background: radial-gradient(360px circle at var(--mx, -220px) var(--my, -220px), var(--ac-sheen), transparent 60%);
   opacity: 0; transition: opacity .24s ease;
 }
@@ -380,6 +415,7 @@ html[data-theme][data-ui="ac"] .nw-hbar i { border-radius: 4px !important; backg
   html[data-theme][data-ui="ac"] .sidebar { display: none !important; }
   html[data-theme][data-ui="ac"] .main { padding: 8px 14px 120px !important; }
   html[data-theme][data-ui="ac"] .home-grid,
+  html[data-theme][data-ui="ac"] .mx-grid,
   html[data-theme][data-ui="ac"] #hmNowBox,
   html[data-theme][data-ui="ac"] #hmMusicBox { grid-template-columns: 1fr !important; grid-column: span 12 !important; }
   html[data-theme][data-ui="ac"] .hm-vi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
