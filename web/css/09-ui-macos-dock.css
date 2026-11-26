@@ -1,0 +1,86 @@
+/* 09-ui-macos-dock.css: X2 macOS Dock, minimized window thumbnail tray & calendar popover */
+html[data-theme][data-ui="x2"] .x2-dock-wrap {
+  position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 950;
+}
+html[data-theme][data-ui="x2"] .x2-dock {
+  display: flex; align-items: flex-end; gap: 10px; padding: 8px 12px;
+  background: var(--os-dock);
+  backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--os-stroke);
+  border-radius: 20px !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35) !important;
+}
+html[data-theme][data-ui="x2"] .x2-ditem {
+  position: relative; width: 46px; height: 46px;
+  border-radius: 12px !important; border: 1px solid var(--os-stroke);
+  background: var(--os-win); color: var(--os-ink); font-size: 19px;
+  cursor: pointer; display: grid; place-items: center;
+  transition: transform .22s var(--os-bounce); transform-origin: bottom center;
+}
+html[data-theme][data-ui="x2"] .x2-ditem .ti { font-size: 21px; }
+html[data-theme][data-ui="x2"] .x2-ditem:hover { transform: translateY(-8px) scale(1.22); }
+html[data-theme][data-ui="x2"] .x2-ditem span {
+  position: absolute; top: -32px; left: 50%; transform: translateX(-50%);
+  background: rgba(20, 22, 27, 0.92); color: #fff; font-size: 12px;
+  padding: 2px 8px; border-radius: 6px !important; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .15s;
+}
+html[data-theme][data-ui="x2"] .x2-ditem:hover span { opacity: 1; }
+html[data-theme][data-ui="x2"] .x2-ditem::after {
+  content: ""; position: absolute; bottom: -6px; width: 4px; height: 4px;
+  border-radius: 50% !important; background: var(--os-ink); opacity: 0; transition: opacity .2s, background .2s;
+}
+html[data-theme][data-ui="x2"] .x2-ditem.open::after { opacity: 0.85; }
+html[data-theme][data-ui="x2"] .x2-ditem.minimized::after { opacity: 0.9; background: #febc2e; }
+html[data-theme][data-ui="x2"] .x2-dsep { width: 1px; height: 34px; background: var(--os-stroke); align-self: center; }
+
+html[data-theme][data-ui="x2"] .x2-dock-tray { display: inline-flex; align-items: flex-end; gap: 8px; }
+html[data-theme][data-ui="x2"] .x2-dock-tray:empty { display: none; }
+html[data-theme][data-ui="x2"] .x2-thumb {
+  position: relative; width: 62px; height: 44px; padding: 0;
+  border: 1px solid var(--os-stroke); border-radius: 7px !important;
+  background: var(--os-win); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28) !important;
+  cursor: pointer; overflow: visible; display: flex; flex-direction: column;
+  transition: transform .22s var(--os-bounce); transform-origin: bottom center;
+  animation: x2ThumbIn .2s ease-out both;
+}
+@keyframes x2ThumbIn { from { opacity: 0; } to { opacity: 1; } }
+html[data-theme][data-ui="x2"] .x2-thumb:hover { transform: translateY(-8px) scale(1.22); }
+html[data-theme][data-ui="x2"] .x2-thumb-bar {
+  height: 9px; background: var(--os-title); border-bottom: 1px solid var(--os-stroke);
+  border-radius: 6px 6px 0 0 !important; display: flex; align-items: center; gap: 2px; padding: 0 4px;
+}
+html[data-theme][data-ui="x2"] .x2-thumb-bar i { width: 3px; height: 3px; border-radius: 50% !important; display: block; }
+html[data-theme][data-ui="x2"] .x2-thumb-body { flex: 1; padding: 4px 5px; display: flex; flex-direction: column; gap: 3px; justify-content: center; }
+html[data-theme][data-ui="x2"] .x2-thumb-body s { display: block; height: 3px; border-radius: 2px !important; background: var(--os-stroke); text-decoration: none; }
+html[data-theme][data-ui="x2"] .x2-thumb-badge {
+  position: absolute; right: -5px; bottom: -4px; width: 20px; height: 20px;
+  border-radius: 6px !important; background: var(--os-ink); color: var(--os-bar);
+  border: 1px solid var(--os-stroke); display: grid; place-items: center;
+  font-size: 12px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+html[data-theme][data-ui="x2"] .x2-thumb-tip {
+  position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+  background: rgba(20, 22, 27, 0.92); color: #fff; font-size: 12px;
+  padding: 2px 8px; border-radius: 6px !important; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .15s;
+}
+html[data-theme][data-ui="x2"] .x2-thumb:hover .x2-thumb-tip { opacity: 1; }
+
+html[data-theme][data-ui="x2"] .x2-cal-pop {
+  position: fixed; top: 38px; right: 12px; width: 276px; z-index: 960;
+  background: var(--os-win); backdrop-filter: blur(24px);
+  border: 1px solid var(--os-stroke); border-radius: 14px !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4) !important; padding: 14px;
+  display: none;
+}
+html[data-theme][data-ui="x2"] .x2-cal-pop.open { display: block; animation: x2FadeIn .16s ease-out; }
+html[data-theme][data-ui="x2"] .x2-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; font-size: 12px; margin: 8px 0 10px; }
+html[data-theme][data-ui="x2"] .x2-cal-grid span { padding: 4px 0; border-radius: 6px !important; color: var(--os-ink); }
+html[data-theme][data-ui="x2"] .x2-cal-grid span.hd { color: var(--os-muted); font-weight: 600; }
+html[data-theme][data-ui="x2"] .x2-cal-grid span.today { background: var(--os-ink); color: var(--os-bar); font-weight: 700; }
+html[data-theme][data-ui="x2"] .x2-cal-go {
+  width: 100%; border: 1px solid var(--os-stroke); background: var(--os-in); color: var(--os-ink);
+  padding: 7px 10px; border-radius: 8px !important; font: 600 12px inherit; cursor: pointer;
+}
+html[data-theme][data-ui="x2"] .x2-cal-go:hover { background: var(--os-stroke); }

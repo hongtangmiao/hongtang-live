@@ -219,17 +219,17 @@
     rootEl.innerHTML = `
       <header class="x2-menubar">
         <div class="x2-mb-l">
-          <span class="x2-mb-app"><i class="ti ti-brand-apple"></i>${safe(siteName)} OS</span>
-          <button class="x2-mb-btn" id="x2ResetTop" type="button"></button>
+          <span class="x2-mb-app">${safe(siteName)} OS</span>
         </div>
         <div class="x2-mb-r">
           <span id="x2MbStatus"><i class="x2-dot"></i></span>
           <span id="x2MbHr"></span>
           <button class="x2-mb-btn" id="x2LangBtn" type="button"><i class="ti ti-language"></i><span id="x2LangTxt"></span></button>
           <button class="x2-mb-btn" id="x2ToneTop" type="button"></button>
-          <span id="x2MbClock"></span>
+          <button class="x2-mb-btn" id="x2MbClock" type="button" style="font-variant-numeric:tabular-nums"></button>
         </div>
       </header>
+      <div class="x2-cal-pop" id="x2CalPop"></div>
       <div class="x2-desk" id="x2Desk"></div>
       <div class="x2-dock-wrap"><nav class="x2-dock" id="x2Dock"></nav></div>`;
     document.body.appendChild(rootEl);
@@ -342,14 +342,29 @@
       syncDots();
     });
 
-    rootEl.querySelector('#x2ResetTop').addEventListener('click', resetAll);
     rootEl.querySelector('#x2ToneTop').addEventListener('click', () => { if (window.HL_UI) window.HL_UI.toggleX2Tone(); });
+    rootEl.querySelector('#x2MbClock').addEventListener('click', e => {
+      e.stopPropagation();
+      const pop = document.getElementById('x2CalPop');
+      if (!pop) return;
+      const opening = !pop.classList.contains('open');
+      if (opening) renderCalPop();
+      pop.classList.toggle('open', opening);
+    });
+    document.addEventListener('click', e => {
+      const pop = document.getElementById('x2CalPop');
+      if (pop && pop.classList.contains('open') && !e.target.closest('#x2CalPop, #x2MbClock')) {
+        pop.classList.remove('open');
+      }
+    });
     rootEl.querySelector('#x2LangBtn').addEventListener('click', () => {
       const btn = document.querySelector('.lang-toggle');
       if (btn) btn.click();
       setTimeout(() => {
         if (x2MaxId) mountDetail(x2MaxId);
         paint();
+        const pop = document.getElementById('x2CalPop');
+        if (pop && pop.classList.contains('open')) renderCalPop();
       }, 30);
     });
     return rootEl;
@@ -382,16 +397,42 @@
     syncDots();
   }
 
+  function renderCalPop() {
+    const pop = document.getElementById('x2CalPop');
+    if (!pop) return;
+    const zh = isZh();
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth(), today = now.getDate();
+    const firstDay = new Date(y, m, 1).getDay();
+    const days = new Date(y, m + 1, 0).getDate();
+    const wds = zh ? ['日','一','二','三','四','五','六'] : ['日','月','火','水','木','金','土'];
+    const cells = wds.map(w => `<span class="hd">${w}</span>`);
+    for (let i = 0; i < firstDay; i++) cells.push('<span></span>');
+    for (let d = 1; d <= days; d++) cells.push(`<span class="${d === today ? 'today' : ''}">${d}</span>`);
+    pop.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:baseline;font-weight:700;font-size:13px">
+        <span>${y} 年 ${m + 1} 月</span>
+        <span style="font-size:12px;color:var(--os-muted);font-weight:400">${zh ? '今日' : '今日'} ${m + 1}/${today}</span>
+      </div>
+      <div class="x2-cal-grid">${cells.join('')}</div>
+      <button class="x2-cal-go" type="button" id="x2CalGo">${zh ? '打开今日时间线与日报 →' : '今日のアクティビティ・日報を見る →'}</button>`;
+    pop.querySelector('#x2CalGo').addEventListener('click', () => {
+      pop.classList.remove('open');
+      if (x2MaxId !== 'now') toggleFullscreen('now');
+    });
+  }
+
   function paint() {
     if (!window.HL_UI || window.HL_UI.getMode() !== 'x2') return;
     ensureDom();
     const zh = isZh();
     const tone = window.HL_UI.getX2Tone();
-    const nowTime = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const now = new Date();
+    const wd = (zh ? ['周日','周一','周二','周三','周四','周五','周六'] : ['日','月','火','水','木','金','土'])[now.getDay()];
+    const tm = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const dt = zh ? `${now.getMonth() + 1}月${now.getDate()}日 ${wd} ${tm}` : `${now.getMonth() + 1}月${now.getDate()}日(${wd}) ${tm}`;
     const ck = document.getElementById('x2MbClock');
-    if (ck) ck.textContent = nowTime;
-    const rs = document.getElementById('x2ResetTop');
-    if (rs) rs.textContent = zh ? '还原布局' : 'レイアウト初期化';
+    if (ck) ck.textContent = dt;
     const lt = document.getElementById('x2LangTxt');
     if (lt) lt.textContent = zh ? '中 / 日' : '日 / 中';
     const tb = document.getElementById('x2ToneTop');
