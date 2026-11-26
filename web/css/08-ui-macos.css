@@ -18,6 +18,9 @@
   color: var(--px-bg, #0c1533);
   border-color: var(--px-gold, #ffd23f);
 }
+@media (max-width: 860px) {
+  .hl-os-egg { display: none !important; }
+}
 
 #x2Root { display: none; }
 
