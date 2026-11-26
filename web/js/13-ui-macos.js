@@ -19,16 +19,31 @@
   const x2State = {};
   x2Wins.forEach(w => { x2State[w.id] = { open: true, minimized: false, max: false }; });
 
-  /* 计算窗口飞缩到对应 Dock 图标中心的纯 GPU transform 偏移 */
+  /* 计算窗口飞缩到 Dock 对应缩略图（或图标）的纯 GPU transform 偏移 */
   function setDockVector(id, win) {
-    const icon = document.querySelector(`#x2Dock .x2-ditem[data-id="${id}"]`);
-    if (!icon || !win) return;
+    const target = document.querySelector(`#x2DockTray .x2-thumb[data-id="${id}"]`)
+      || document.querySelector(`#x2Dock .x2-ditem[data-id="${id}"]`);
+    if (!target || !win) return;
     const wr = win.getBoundingClientRect();
-    const ir = icon.getBoundingClientRect();
+    const ir = target.getBoundingClientRect();
     const dx = Math.round((ir.left + ir.width / 2) - (wr.left + wr.width / 2));
     const dy = Math.round((ir.top + ir.height / 2) - (wr.top + wr.height / 2));
     win.style.setProperty('--min-x', dx + 'px');
     win.style.setProperty('--min-y', dy + 'px');
+  }
+
+  /* 渲染 Dock 右侧最小化窗口缩略图托盘 */
+  function syncDockTray() {
+    const tray = document.getElementById('x2DockTray');
+    if (!tray) return;
+    const mins = x2Wins.filter(w => x2State[w.id].minimized);
+    tray.innerHTML = mins.map(w => `
+      <button class="x2-thumb" type="button" data-thumb="${w.id}" data-id="${w.id}" title="${safe(winTitle(w))}">
+        <span class="x2-thumb-tip">${safe(winTitle(w))}</span>
+        <span class="x2-thumb-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span>
+        <span class="x2-thumb-body"><s style="width:72%"></s><s style="width:92%"></s><s style="width:55%"></s></span>
+        <span class="x2-thumb-badge"><i class="ti ${w.ti}"></i></span>
+      </button>`).join('');
   }
 
   const winTitle = w => (isZh() ? w.zh : w.ja);
@@ -120,6 +135,27 @@
     });
   }
 
+  /* 纯 GPU FLIP 动画（只动画 transform，零重排；动画结束后再挂载重 DOM 详情，彻底消除掉帧） */
+  function flipWindow(win, mutate, onDone) {
+    const first = win.getBoundingClientRect();
+    mutate();
+    const last = win.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    const sx = last.width ? first.width / last.width : 1;
+    const sy = last.height ? first.height / last.height : 1;
+    win.style.transition = 'none';
+    win.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+    win.classList.add('is-flipping');
+    void win.offsetWidth;
+    win.style.transition = '';
+    win.style.transform = '';
+    setTimeout(() => {
+      win.classList.remove('is-flipping');
+      if (onDone) onDone();
+    }, 330);
+  }
+
   function toggleFullscreen(id) {
     const rootEl = document.getElementById('x2Root');
     const win = document.getElementById('x2w-' + id);
@@ -127,7 +163,7 @@
 
     const entering = !x2State[id].max;
     x2Wins.forEach(w => {
-      if (x2State[w.id].max) {
+      if (w.id !== id && x2State[w.id].max) {
         x2State[w.id].max = false;
         const el = document.getElementById('x2w-' + w.id);
         if (el) el.classList.remove('is-max');
@@ -136,29 +172,34 @@
     returnStatsToHold();
 
     if (entering) {
-      win.style.height = win.offsetHeight + 'px';
-      void win.offsetWidth;
+      x2Animating = true;
       x2MaxId = id;
       x2State[id].open = true;
       x2State[id].minimized = false;
       x2State[id].max = true;
-      win.classList.remove('is-closed', 'is-minimized');
-      win.classList.add('is-max');
       win.style.zIndex = ++x2Z;
       if (rootEl) rootEl.classList.add('has-max');
-      mountDetail(id);
+      syncDockTray();
+      flipWindow(win, () => {
+        win.classList.remove('is-closed', 'is-minimized');
+        win.classList.add('is-max');
+      }, () => {
+        x2Animating = false;
+        if (x2MaxId === id) mountDetail(id);
+      });
     } else {
-      // 退出放大动画期间锁住 layoutDefault，防止把下方窗口按动画中高度推到底部
       x2Animating = true;
       x2MaxId = null;
+      x2State[id].max = false;
       if (rootEl) rootEl.classList.remove('has-max');
-      win.classList.remove('is-max');
+      // 先切回轻量总结内容再跑 FLIP 缩小，零重 DOM 卡顿
       paint();
-      setTimeout(() => {
+      flipWindow(win, () => {
+        win.classList.remove('is-max');
+      }, () => {
         x2Animating = false;
-        if (!x2State[id].max) win.style.height = '';
         if (!x2UserMoved && !x2MaxId) layoutDefault();
-      }, 400);
+      });
     }
     updateTitlebarLabels();
     syncDots();
@@ -205,7 +246,7 @@
 
     rootEl.querySelector('#x2Dock').innerHTML = x2Wins.map(w =>
       `<button class="x2-ditem open" type="button" data-id="${w.id}"><i class="ti ${w.ti}"></i><span>${winTitle(w)}</span></button>`
-    ).join('') + `<div class="x2-dsep"></div><button class="x2-ditem" type="button" id="x2DockReset"><i class="ti ti-refresh"></i><span>还原窗口</span></button>`;
+    ).join('') + `<div class="x2-dsep"></div><div class="x2-dock-tray" id="x2DockTray"></div><button class="x2-ditem" type="button" id="x2DockReset"><i class="ti ti-refresh"></i><span>还原窗口</span></button>`;
 
     desk.querySelectorAll('.x2-win').forEach(win => {
       win.addEventListener('pointerdown', () => { if (!win.classList.contains('is-max')) win.style.zIndex = ++x2Z; });
@@ -250,9 +291,10 @@
         syncDots();
       } else if (act === 'min') {
         if (x2State[id].max) toggleFullscreen(id);
-        setDockVector(id, win);
         x2State[id].open = true;
         x2State[id].minimized = true;
+        syncDockTray();
+        setDockVector(id, win);
         win.classList.remove('is-closed');
         win.classList.add('is-minimized');
         syncDots();
@@ -262,6 +304,17 @@
     });
 
     rootEl.querySelector('#x2Dock').addEventListener('click', e => {
+      const thumb = e.target.closest('.x2-thumb[data-id]');
+      if (thumb) {
+        const id = thumb.dataset.id;
+        const win = document.getElementById('x2w-' + id);
+        x2State[id].minimized = false;
+        win.classList.remove('is-minimized');
+        win.style.zIndex = ++x2Z;
+        syncDockTray();
+        syncDots();
+        return;
+      }
       const it = e.target.closest('.x2-ditem');
       if (!it) return;
       if (it.id === 'x2DockReset') { resetAll(); return; }
@@ -272,9 +325,9 @@
         return;
       }
       if (x2State[id].minimized) {
-        // 从 Dock 对应图标位置丝滑弹回原位
         x2State[id].minimized = false;
         win.classList.remove('is-minimized');
+        syncDockTray();
       } else if (!x2State[id].open) {
         x2State[id].open = true;
         win.classList.remove('is-closed');
@@ -319,6 +372,7 @@
       win.style.zIndex = i + 1;
     });
     layoutDefault();
+    syncDockTray();
     syncDots();
   }
 
