@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"math"
 	"sort"
 	"strings"
 	"sync"
@@ -217,26 +216,14 @@ func musicOf(maxAge float64) M {
 		return nil
 	}
 	var m M
-	if json.Unmarshal([]byte(music), &m) != nil {
+	if json.Unmarshal([]byte(music), &m) != nil || m == nil {
 		return nil
 	}
-	cover := httpsURL(toStr(m["cover"]))
 	title, artist := toStr(m["title"]), toStr(m["artist"])
-	if cover == "" && title != "" {
-		var histCover sql.NullString
-		if db.QueryRow("SELECT cover FROM music WHERE title=? AND artist=? AND cover != '' ORDER BY last_ts DESC LIMIT 1", title, artist).Scan(&histCover) == nil {
-			cover = httpsURL(histCover.String)
-		}
+	if isNoiseMusic(title, artist) {
+		return nil
 	}
-	if cover == "" && title != "" {
-		if e := enrichMusic(m); truthy(e["cover"]) {
-			cover = httpsURL(toStr(e["cover"]))
-			if !truthy(m["url"]) && truthy(e["url"]) {
-				m["url"] = e["url"]
-			}
-		}
-	}
-	m["cover"] = cover
+	m["cover"] = fillMusicCover(db, title, artist, m)
 	return m
 }
 
@@ -588,19 +575,6 @@ func knownDays() []string {
 	}
 	sort.Strings(out)
 	return out
-}
-
-// pyFmtMin：截断到分钟，不四舍五入
-func pyFmtMin(sec float64) string {
-	s := int64(math.Max(0, sec))
-	if s < 60 {
-		return itoa(s) + "s"
-	}
-	m := s / 60
-	if m < 60 {
-		return itoa(m) + "m"
-	}
-	return itoa(m/60) + "h" + pad2(m%60) + "m"
 }
 
 func logErr(what string, err error) {

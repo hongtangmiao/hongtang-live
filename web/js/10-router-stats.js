@@ -1,6 +1,5 @@
 'use strict';
 // 路由，统计面板的中文化与初始化
-// 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 /* ---------------- router ---------------- */
 const PANELS = {
   home:      { key: 'nav_home',      sub: null,          render: pageHome },

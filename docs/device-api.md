@@ -1,4 +1,4 @@
-# 设备接口（第 3 阶段）
+# 设备接口
 
 托盘程序（Windows / Linux）和安卓 App 都用这一套。所有请求和返回都是 JSON（UTF-8）。
 
@@ -66,7 +66,7 @@ POST /api/v1/aw           Content-Encoding: gzip（建议）
 200 {"ok": true, "day": "2026-11-21", "report_exists": false}
 ```
 
-格式同原来的 `windows/export_day.ps1`。服务器每天定时把前一天的交给 DeepSeek 写日报；当天的先存着，第二天再处理。同一天重复上传会覆盖，在日报生成之前都没问题。
+由电脑端托盘程序 `hl-agent` 每日定时导出上传。服务器每天定时把前一天的交给 DeepSeek 写日报；当天的先存着，第二天再处理。同一天重复上传会覆盖，在日报生成之前都没问题。
 
 ## 5. 解除配对
 

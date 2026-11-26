@@ -8,12 +8,12 @@ function pageStats() {
 async function loadDaylog(force = false) {
   if (dlState.loading) return;
   if (!force && dlState.data && (Date.now() - (dlState.at || 0)) < 15000) {
-    paintHomeHealth();
+    paintHomeCards();
     return;
   }
   dlState.loading = true;
   dlState.error = null;
-  paintHomeHealth();
+  paintHomeCards();
   try {
     const r = await fetch('api/daylog/feed', { credentials: 'same-origin', cache: 'no-store' });
     const d = await r.json();
@@ -24,7 +24,7 @@ async function loadDaylog(force = false) {
     dlState.error = e.message || String(e);
   } finally {
     dlState.loading = false;
-    paintHomeHealth();
+    paintHomeCards();
   }
 }
 

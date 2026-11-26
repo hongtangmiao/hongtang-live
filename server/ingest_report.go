@@ -123,10 +123,38 @@ func sameSongName(name, title string) bool {
 	return bigramDice(n, t) >= 0.5
 }
 
-// 浏览器上报的来源（Chrome / MSEdge / Firefox …）
-var browserSourceRE = regexp.MustCompile(`(?i)chrome|msedge|edge|firefox|brave|opera|vivaldi|chromium|safari`)
-
-func looksLikeBrowser(source string) bool { return browserSourceRE.MatchString(source) }
+// 浏览器上报的来源：统一走主配置 privacy.browser_apps，兼容安卓包名（com.android.chrome）、
+// Windows SMTC AUMID（Microsoft.MicrosoftEdge_...）和 Linux 进程名（google-chrome）
+func looksLikeBrowser(source string) bool {
+	s := strings.TrimSpace(source)
+	if s == "" {
+		return false
+	}
+	cfg := dlCfg()
+	if cfg == nil {
+		cfg = dlDefaults()
+	}
+	if isBrowser(cfg, s) {
+		return true
+	}
+	low := strings.ToLower(s)
+	for _, p := range dList(cfg, "privacy", "browser_apps") {
+		lp := strings.ToLower(strings.TrimSpace(p))
+		if lp == "" {
+			continue
+		}
+		if len(lp) <= 3 {
+			if reSearch(pyRe(`(?:^|[^a-z])`+regexp.QuoteMeta(lp)+`(?:[^a-z]|$)`, true), low) {
+				return true
+			}
+			continue
+		}
+		if strings.Contains(low, lp) {
+			return true
+		}
+	}
+	return false
+}
 
 func httpsURL(u string) string {
 	if strings.HasPrefix(u, "http://") {
@@ -457,7 +485,7 @@ func handleNow(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		sec := c["sec"].(int64)
-		cats = append(cats, M{"name": c["name"], "sec": sec, "dur": pyFmtMin(float64(sec)), "color": pyCatColor(toStr(c["name"]))})
+		cats = append(cats, M{"name": c["name"], "sec": sec, "dur": fmtMin(float64(sec)), "color": catColor(toStr(c["name"]))})
 	}
 	prev, next := "", ""
 	if admin {
@@ -467,17 +495,17 @@ func handleNow(w http.ResponseWriter, r *http.Request) {
 		"ok": true, "day": target, "today": today, "is_today": isToday, "admin": admin,
 		"prev": prev, "next": next, "owner": dOwner(),
 		"apps":  appsPayload(appTotals(target), isToday && !stale),
-		"total": pyFmtMin(float64(totals.Total)), "total_sec": totals.Total, "app_count": totals.Apps,
+		"total": fmtMin(float64(totals.Total)), "total_sec": totals.Total, "app_count": totals.Apps,
 		"last_clock": hhmm(totals.Last), "cats": cats, "devices": devicesView(4), "viewers": viewers(300),
 		"poll": pollSeconds(), "media": []M{}, "health": nil,
 	}
 	if isToday {
 		out["view"] = view
-		out["face"] = pyFaceFor(view)
+		out["face"] = faceForView(view)
 		out["stale"] = stale
-		out["media"] = buildMediaPy()
+		out["media"] = buildMedia()
 		if healthPublic() {
-			if h := healthViewPy(); len(h) > 0 {
+			if h := healthView(); len(h) > 0 {
 				out["health"] = h
 			}
 		}

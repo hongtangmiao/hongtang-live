@@ -164,26 +164,6 @@ html[data-theme="dark"] .mx-tile.blue {
 }
 .mx-bar i { display: block; height: 100%; border-radius: 2px; background: var(--accent); }
 
-/* 卡啦 OK 行：日期 + 方式 + 曲名 + 分数 */
-.mx-row.k .when {
-  flex: none; width: 60px;
-  font-size: 12px; color: var(--txt3); line-height: 1.35;
-  font-variant-numeric: tabular-nums;
-}
-.mx-row.k .sc {
-  flex: none; font-size: 13px; font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.mx-methods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.mx-m {
-  padding: 8px 9px;
-  background: var(--card-bg);
-  border: var(--hair) solid var(--border);
-  border-radius: 8px;
-}
-.mx-m .nm { font-size: 12px; font-weight: 600; }
-.mx-m .ct { margin-top: 3px; font-size: 12px; color: var(--txt3); line-height: 1.35; }
-
 /* 歌单行内展开 */
 .mx-row.pl { cursor: pointer; }
 .mx-row.pl:hover .t { color: var(--accent); }

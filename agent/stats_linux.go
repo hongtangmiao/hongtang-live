@@ -27,7 +27,6 @@ type linStats struct {
 	host    string
 	osName  string
 	smi     string
-	gpuName string
 	static  bool
 	l1, l2, l3, cores, sockets int
 	baseGHz float64

@@ -97,6 +97,26 @@ func backfillMusicCovers(items []musicRow) {
 	}()
 }
 
+// fillMusicCover：优先用自带封面，缺了查历史 music 表，再走 enrichMusic 补拉
+func fillMusicCover(db *sql.DB, title, artist string, m M) string {
+	cover := httpsURL(toStr(m["cover"]))
+	if cover == "" && title != "" {
+		var histCover sql.NullString
+		if db.QueryRow("SELECT cover FROM music WHERE title=? AND artist=? AND cover != '' ORDER BY last_ts DESC LIMIT 1", title, artist).Scan(&histCover) == nil {
+			cover = httpsURL(histCover.String)
+		}
+	}
+	if cover == "" && title != "" {
+		if e := enrichMusic(m); truthy(e["cover"]) {
+			cover = httpsURL(toStr(e["cover"]))
+			if !truthy(m["url"]) && truthy(e["url"]) {
+				m["url"] = e["url"]
+			}
+		}
+	}
+	return cover
+}
+
 // currentMusic：优先 devices.music；清空或过期就用最近一条有效播放记录（标成没在放）
 func currentMusic() any {
 	db := daylogDB()
@@ -119,18 +139,7 @@ func currentMusic() any {
 				sid = m["song_id"]
 			}
 			title, artist := toStr(m["title"]), toStr(m["artist"])
-			cover := httpsURL(toStr(m["cover"]))
-			if cover == "" {
-				var histCover sql.NullString
-				if db.QueryRow("SELECT cover FROM music WHERE title=? AND artist=? AND cover != '' ORDER BY last_ts DESC LIMIT 1", title, artist).Scan(&histCover) == nil {
-					cover = httpsURL(histCover.String)
-				}
-			}
-			if cover == "" {
-				if e := enrichMusic(m); truthy(e["cover"]) {
-					cover = httpsURL(toStr(e["cover"]))
-				}
-			}
+			cover := fillMusicCover(db, title, artist, m)
 			return M{"title": title, "sub": artist, "album": toStr(m["album"]), "cover": cover,
 				"url": toStr(m["url"]), "song_id": sid, "last_seen": ref, "ago": ago, "playing": playing}
 		}

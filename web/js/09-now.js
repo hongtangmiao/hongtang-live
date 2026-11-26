@@ -1,6 +1,5 @@
 'use strict';
 // 「いま / 此刻」页
-// 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 /* ---------------- いま / 此刻（原 daylog 首页：此刻在干嘛 + 今天用过的应用；管理员可翻历史、看 AI 日报） ---------------- */
 const nwState = { data: null, day: '', loading: false, error: '', timer: null, left: 0, reports: null, rep: {}, repErr: {} };
 const NW_HR_EMPTY = '无数据，疑似是似了喵~';   // 状态文案：日语模式下也保持中文
@@ -12,6 +11,10 @@ const tf = (k, vars) => {
 };
 const nwColor = c => (/^#[0-9a-fA-F]{6}$/.test(c || '') ? c : '#94a3b8');
 const nwUrl = u => (/^https?:\/\//i.test(u || '') ? u : '');
+function nwWeekdaysSunFirst() {
+  const m = t('nw_wd').split(',');
+  return [m[6], ...m.slice(0, 6)];
+}
 function nwWeekday(day) {
   const d = new Date(day + 'T12:00:00');
   const i = (d.getDay() + 6) % 7;

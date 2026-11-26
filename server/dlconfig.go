@@ -26,7 +26,7 @@ const dlDefaultsJSON = `{
      "authenticator", "验证器", "身份证", "密码"],
    "hide_title_apps": ["wechat", "微信", "qq", "tim", "feishu", "飞书", "dingtalk", "钉钉", "outlook", "thunderbird", "foxmail", "mail",
      "telegram", "discord"],
-   "browser_apps": ["chrome", "msedge", "edge", "firefox", "brave", "arc", "vivaldi", "opera", "chromium", "librewolf", "zen", "floorp"]},
+   "browser_apps": ["chrome", "msedge", "edge", "firefox", "brave", "arc", "vivaldi", "opera", "chromium", "librewolf", "zen", "floorp", "safari"]},
  "live": {"enabled": true, "public_show_title": false, "stale_sec": 180, "poll_sec": 10, "segment_gap_sec": 120, "token": "", "max_rows": 60},
  "telegram": {"enabled": false, "bot_token": "", "chat_id": "", "send_daily": true, "send_weekly": false},
  "plugins": {"telegram": true, "ocr": true},

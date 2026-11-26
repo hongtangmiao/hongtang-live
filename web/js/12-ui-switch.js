@@ -7,9 +7,9 @@
   const isMobile = () => window.innerWidth <= 860;
 
   const params = new URLSearchParams(location.search);
-  let prefUi = params.get('ui') || localStorage.getItem(K_UI) || 'x2';
+  let prefUi = params.get('ui') || store.get(K_UI) || 'x2';
   if (prefUi !== 'classic' && prefUi !== 'x2') prefUi = 'x2';
-  let x2Tone = localStorage.getItem(K_X2) || 'dark';
+  let x2Tone = store.get(K_X2) || 'dark';
   let activeUi = isMobile() ? 'classic' : prefUi;
 
   function setMode(next) {
@@ -17,13 +17,13 @@
     if (isMobile() && next === 'x2') return;
     if (activeUi === 'x2' && next !== 'x2' && window.HL_X2) window.HL_X2.exitFullscreen();
     prefUi = next;
-    localStorage.setItem(K_UI, prefUi);
+    store.set(K_UI, prefUi);
     applyUi();
   }
 
   function setX2Tone(tone) {
     x2Tone = tone === 'light' ? 'light' : 'dark';
-    localStorage.setItem(K_X2, x2Tone);
+    store.set(K_X2, x2Tone);
     applyUi();
   }
 
@@ -65,6 +65,7 @@
   }
 
   window.HL_UI = {
+    isMobile,
     getMode: () => activeUi,
     setMode,
     getX2Tone: () => x2Tone,

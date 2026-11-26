@@ -1,6 +1,5 @@
 'use strict';
 // 音乐页：取数据、正在听轮询、歌单展开、事件绑定
-// 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 /* 正在听：读 daylog 的 devices.music */
 async function fetchNow() {
   if (!NET.proxy) return null;
@@ -203,7 +202,7 @@ function bindRankChips(scope) {
   $$('[data-mx-rank]', scope || document).forEach(b => b.addEventListener('click', () => {
     if (!mxState) return;
     mxState.mxRankWin = b.dataset.mxRank;
-    mxPaint('rank');
+    mxPaint();
   }));
 }
 

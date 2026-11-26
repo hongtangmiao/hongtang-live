@@ -1,6 +1,5 @@
 'use strict';
-/* daylog 设置：日报、隐私规则、健康（单独保存）（由 admin.js 按原顺序拆出，admin.html 按 00→03 顺序加载） */
-/* ---------------- daylog（日报、隐私规则、健康）：单独保存 ---------------- */
+/* daylog 设置：日报、隐私规则、健康（单独保存） */
 const lines = a => (a || []).join('\n');
 const unlines = s => String(s || '').split('\n').map(x => x.trim()).filter(Boolean);
 

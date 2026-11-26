@@ -117,7 +117,7 @@ func mprisApp(n string) string {
 }
 
 // 和服务端 server/dlconfig.go 的 privacy.browser_apps 保持同一份名单，改一边要改另一边
-var browserApps = []string{"chrome", "msedge", "edge", "firefox", "brave", "arc", "vivaldi", "opera", "chromium", "librewolf", "zen", "floorp"}
+var browserApps = []string{"chrome", "msedge", "edge", "firefox", "brave", "arc", "vivaldi", "opera", "chromium", "librewolf", "zen", "floorp", "safari"}
 
 func isBrowser(app string) bool {
 	a := strings.ToLower(strings.TrimSuffix(strings.ToLower(app), ".exe"))
@@ -162,9 +162,7 @@ type Agent struct {
 	status  Status
 	changed chan struct{} // 状态变了，托盘刷新
 	kick    chan struct{} // 配对 / 改设置后马上报一次
-	lastAct M
-	statsN  int
-	statsT  time.Time // 上次发完整的系统资源
+	statsT  time.Time     // 上次发完整的系统资源
 	now     func() time.Time
 }
 

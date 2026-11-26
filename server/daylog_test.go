@@ -132,6 +132,11 @@ func TestMusic(t *testing.T) {
 	if got := musicOf(240); got == nil || got["title"] != "A" {
 		t.Errorf("music_of 能读到: %v", got)
 	}
+	nullStr := "null"
+	_ = touchDevice("pc", "", now, "chrome", "在用 Chrome", &nullStr)
+	if got := musicOf(240); got != nil {
+		t.Errorf("JSON null 不应 panic 且返回 nil: %v", got)
+	}
 	empty := ""
 	_ = touchDevice("pc", "", now, "chrome", "在用 Chrome", &empty)
 	if got := musicOf(240); got != nil {
@@ -147,27 +152,33 @@ func TestSameSongName(t *testing.T) {
 	// 实测的原始数据：X 视频标题里含「瞬间」，盲搜配到了歌名就叫「瞬间」的歌
 	eq(t, "长标题里凑巧含歌名", sameSongName("瞬间", "要不怎么说你能赚钱呢，客户咳嗽一声就能瞬间明白对方需求。"), false)
 	eq(t, "空名字", sameSongName("", "x"), false)
-	eq(t, "浏览器来源", looksLikeBrowser("chrome") && looksLikeBrowser("MSEdge.exe") && !looksLikeBrowser("cloudmusic.exe"), true)
+	for _, src := range []string{"chrome", "MSEdge.exe", "com.android.chrome", "org.mozilla.firefox", "com.brave.browser",
+		"Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge", "google-chrome", "Safari"} {
+		eq(t, "浏览器来源 "+src, looksLikeBrowser(src), true)
+	}
+	for _, src := range []string{"cloudmusic.exe", "spotify", "searchmusic", "citizen"} {
+		eq(t, "非浏览器来源 "+src, looksLikeBrowser(src), false)
+	}
 }
 
 func TestMedia(t *testing.T) {
 	setupDL(t, true)
 	now := time.Now().In(loc)
 	_ = upsertLive("live:live.bilibili.com", "某直播间", "https://live.bilibili.com/1", isoSec(now))
-	if items := buildMediaPy(); len(items) == 0 || items[0]["state"] != "focus" {
+	if items := buildMedia(); len(items) == 0 || items[0]["state"] != "focus" {
 		t.Errorf("刚看过直播 -> focus: %v", items)
 	}
 	db := daylogDB()
 	_, _ = db.Exec("UPDATE media SET last_focus=?, last_seen=? WHERE key=?", isoSec(now.Add(-200*time.Second)), isoSec(now), "live:live.bilibili.com")
-	if items := buildMediaPy(); len(items) != 0 {
+	if items := buildMedia(); len(items) != 0 {
 		t.Errorf("超过 120 秒不再出直播卡: %v", items)
 	}
 	_ = upsertLive("live:live.bilibili.com", "某直播间", "https://live.bilibili.com/1", isoSec(time.Now().In(loc)))
 	m := `{"title":"A","artist":"B","cover":"","url":""}`
 	_ = touchDevice("pc", "", isoSec(now), "chrome", "在用 Chrome", &m)
-	eq(t, "直播 + 音乐 = 双卡", len(buildMediaPy()), 2)
+	eq(t, "直播 + 音乐 = 双卡", len(buildMedia()), 2)
 	_, _ = db.Exec("DELETE FROM media WHERE key=?", "live:live.bilibili.com")
-	items := buildMediaPy()
+	items := buildMedia()
 	if len(items) != 1 || items[0]["kind"] != "music" {
 		t.Errorf("直播结束只剩音乐: %v", items)
 	}
@@ -181,7 +192,7 @@ func TestHealthCloud(t *testing.T) {
 	for m, v := range map[string]float64{"sleep_duration": 402, "sleep_score": 81, "sleep_avg_hrv": 43, "resting_heart_rate": 57} {
 		_ = addHealth(m, now, v, "")
 	}
-	v := healthViewPy()
+	v := healthView()
 	eq(t, "睡眠分钟", v["sleep_min"], 402.0)
 	eq(t, "评分", v["sleep_score"], 81.0)
 	for _, k := range []string{"hrv", "rhr"} {
@@ -197,12 +208,12 @@ func TestHealthCloud(t *testing.T) {
 		}
 	}
 	_ = addHealth("sleep_duration", now, 500, "")
-	eq(t, "同 metric 同 ts 幂等", healthViewPy()["sleep_min"], 500.0)
+	eq(t, "同 metric 同 ts 幂等", healthView()["sleep_min"], 500.0)
 	var n int
 	_ = daylogDB().QueryRow("SELECT COUNT(*) FROM health_metrics WHERE metric='sleep_avg_hrv'").Scan(&n)
 	eq(t, "HRV 仍留在库里", n, 1)
 	setupDL(t, false)
-	eq(t, "无数据返回空", len(healthViewPy()), 0)
+	eq(t, "无数据返回空", len(healthView()), 0)
 }
 
 func TestICUMapping(t *testing.T) {
@@ -235,9 +246,9 @@ func TestFmtAgoMeow(t *testing.T) {
 	eq(t, "1540 分钟", fmtAgo(1540*60), "1天1小时40分钟")
 	eq(t, "整小时", fmtAgo(3600), "1小时")
 	eq(t, "几十秒", fmtAgo(30), "刚刚")
-	eq(t, "喵~ 自动补", pyMeow("在用 Chrome"), "在用 Chrome喵~")
-	eq(t, "已有喵~ 不重复", pyMeow("正在听歌喵~"), "正在听歌喵~")
-	eq(t, "fmt_min 截断", pyFmtMin(119.9), "1m")
+	eq(t, "喵~ 自动补", meow("在用 Chrome"), "在用 Chrome喵~")
+	eq(t, "已有喵~ 不重复", meow("正在听歌喵~"), "正在听歌喵~")
+	eq(t, "fmt_min 截断", fmtMin(119.9), "1m")
 }
 
 func TestUWPTitle(t *testing.T) {

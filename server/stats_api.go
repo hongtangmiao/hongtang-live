@@ -173,7 +173,7 @@ func sectionData(host, sec string) any {
 		return m
 	case "gpu":
 		if !isPC {
-			return nil // サーバー側は GPU 無し
+			return nil // 服务器无 GPU
 		}
 		raw := asM(snap["gpu"])
 		if raw == nil {

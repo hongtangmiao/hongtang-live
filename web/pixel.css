@@ -1,7 +1,7 @@
 /* =========================================================
-   pixel.css — JRPG 窗口风（覆盖 css/*.css，后加载）
+   pixel.css — JRPG 窗口风（覆盖 css/00..06，经典模式生效；桌面默认 X2 macOS 由 08/09 覆盖）
    字体：Fusion Pixel 12px（OFL，fonts/OFL-fusion-pixel.txt）
-   配色：夜蓝 + 白框 + 金色光标，只有这几种颜色
+   配色：夜蓝 + 蓝灰框（--px-frame）+ 金色光标
    ========================================================= */
 @font-face {
   font-family: "Fusion Pixel 12";
@@ -120,7 +120,7 @@ b, strong, h1, h2, h3, h4, [class*="title"], [class*="name"] { font-weight: 400 
 /* 手机底栏：纯文字 + 光标 */
 .bottom-nav { background: var(--px-bg); border-top: 2px solid var(--px-frame) !important; }
 .bottom-nav-item { color: var(--px-mute) !important; }
-.bottom-nav-item .nav-ico, .bottom-nav-item .nav-icon { display: none !important; }
+.bottom-nav-item .nav-ico { display: none !important; }
 .bottom-nav-item.active { color: var(--px-line) !important; background: transparent !important; }
 .bottom-nav-item::after, .bottom-nav-item.active::after { display: none !important; }
 .bottom-nav-item.active::before { content: "▶ "; color: var(--px-gold); }

@@ -129,52 +129,45 @@ func currentView() M {
 			sec = maxI64(0, int64(end.Sub(start).Seconds()))
 		}
 	}
-	if age > staleSec {
+	// 设备报了空闲（last_app 为空且比最后一段活动新）也算离开电脑
+	markedIdle := false
+	if db := daylogDB(); db != nil && okE {
+		var devSeen, devApp sql.NullString
+		var err error
+		if cur.Host != "" {
+			err = db.QueryRow("SELECT last_seen, last_app FROM devices WHERE host = ?", cur.Host).Scan(&devSeen, &devApp)
+		} else {
+			err = db.QueryRow("SELECT last_seen, last_app FROM devices ORDER BY last_seen DESC LIMIT 1").Scan(&devSeen, &devApp)
+		}
+		if err == nil && devApp.String == "" {
+			if ds, ok := pyAware(devSeen.String); ok && ds.After(end) {
+				markedIdle = true
+			}
+		}
+	}
+	if age > staleSec || markedIdle {
 		ago := fmtAgo(age)
 		d := "最后活动 " + ago + "前"
 		if ago == "刚刚" {
 			d = "最后活动 刚刚"
 		}
-		return M{"now": pyMeow(owner + " 不在电脑前"), "stale": true, "dur_text": d, "cat": cur.Cat, "label": pyMeow(or(cur.LabelPlain, cur.Label))}
+		return M{"now": meow(owner + " 不在电脑前"), "stale": true, "dur_text": d, "cat": cur.Cat, "label": meow(or(cur.LabelPlain, cur.Label))}
 	}
-	return M{"now": pyMeow(cur.Label), "stale": false, "dur_text": "已经 " + pyFmtMin(float64(sec)), "cat": cur.Cat, "label": pyMeow(cur.Label)}
+	return M{"now": meow(cur.Label), "stale": false, "dur_text": "已经 " + fmtMin(float64(sec)), "cat": cur.Cat, "label": meow(cur.Label)}
 }
 
-func pyFaceFor(view M) string {
-	if !truthy(view["label"]) {
-		return "ฅ(\u3000・ω・)"
-	}
-	if stale, _ := view["stale"].(bool); stale {
-		return "ฅ(´-ω- )"
-	}
-	return "ฅ^•ﻌ•^ฅ"
-}
-
-// displayApps：只有在线且是当前应用才带窗口标题，其余只用不含标题的名字（P0-6）
+// appsPayload：只有在线且是当前应用才带窗口标题，其余只用不含标题的名字
 func appsPayload(apps []*appTotal, detailed bool) []M {
 	out := []M{}
 	for _, a := range apps {
-		label := pyMeow(or(a.LabelPlain, a.Label))
+		label := meow(or(a.LabelPlain, a.Label))
 		if detailed && a.Cur {
-			label = pyMeow(a.Label)
+			label = meow(a.Label)
 		}
-		out = append(out, M{"label": label, "cat": a.Cat, "color": pyCatColor(a.Cat), "total": pyFmtMin(float64(a.Total)),
+		out = append(out, M{"label": label, "cat": a.Cat, "color": catColor(a.Cat), "total": fmtMin(float64(a.Total)),
 			"clock": a.Clock, "cur": a.Cur})
 	}
 	return out
-}
-
-// pyCatColor：pages.cat_color（按 Unicode 码点求和）
-func pyCatColor(name string) string {
-	if c, ok := catColors[name]; ok {
-		return c
-	}
-	s := or(name, "?")
-	sum := 0
-	for _, r := range s {
-		sum += int(r)
-	}
-	return fallbackColors[sum%len(fallbackColors)]
 }
 
 /* ---------------- 媒体卡片 ---------------- */
@@ -205,7 +198,7 @@ func liveKey(raw string) (string, string) {
 	return "", ""
 }
 
-func buildMediaPy() []M {
+func buildMedia() []M {
 	cfg := dlCfg()
 	items := []M{}
 	if dBoolDef(cfg, true, "live", "enabled") {
@@ -240,8 +233,8 @@ var healthFields = map[string]string{
 	"heart_rate_live": "hr_live", "heart_rate": "hr_live",
 }
 
-// healthViewPy：server.health_view —— rhr / hrv 是私密字段，任何接口都不下发
-func healthViewPy() M {
+// healthView：rhr / hrv 是私密字段，任何接口都不下发
+func healthView() M {
 	raw := healthLatest(30)
 	if len(raw) == 0 {
 		return M{}
@@ -312,7 +305,6 @@ func healthViewPy() M {
 	return out
 }
 
-// icuToMetrics：Intervals.icu 一条 wellness → {metric: value}（只取 > 0 的）
 var icuFields = []struct {
 	field, metric string
 	scale         float64
@@ -323,6 +315,7 @@ var icuFields = []struct {
 	{"respiration", "respiration", 1},
 }
 
+// icuToMetrics：Intervals.icu 一条 wellness → {metric: value}（只取 > 0 的）
 func icuToMetrics(rec M) map[string]float64 {
 	out := map[string]float64{}
 	for _, f := range icuFields {
@@ -443,13 +436,13 @@ func handleCurrent(w http.ResponseWriter, r *http.Request) {
 	view := currentView()
 	day := pickDay(r)
 	stale, _ := view["stale"].(bool)
-	out := M{"ok": true, "face": pyFaceFor(view), "apps": appsPayload(appTotals(day), !stale), "viewers": viewers(300),
-		"media": buildMediaPy(), "health": nil, "today": pyFmtMin(float64(dayTotals(day).Total))}
+	out := M{"ok": true, "face": faceForView(view), "apps": appsPayload(appTotals(day), !stale), "viewers": viewers(300),
+		"media": buildMedia(), "health": nil, "today": fmtMin(float64(dayTotals(day).Total))}
 	for k, v := range view {
 		out[k] = v
 	}
 	if healthPublic() {
-		out["health"] = healthViewPy()
+		out["health"] = healthView()
 	}
 	writeJSON(w, 200, out)
 }
@@ -469,25 +462,25 @@ func handleDay(w http.ResponseWriter, r *http.Request) {
 		if i >= 6 {
 			break
 		}
-		cats = append(cats, M{"name": c["name"], "dur": pyFmtMin(float64(c["sec"].(int64)))})
+		cats = append(cats, M{"name": c["name"], "dur": fmtMin(float64(c["sec"].(int64)))})
 	}
 	media := []M{}
 	if isToday {
-		media = buildMediaPy()
+		media = buildMedia()
 	}
 	out := M{"ok": true, "day": target, "is_today": isToday, "apps": appsPayload(appTotals(target), isToday && !stale),
-		"total": pyFmtMin(float64(totals.Total)), "cats": cats, "prev": prev, "next": next, "viewers": viewers(300), "media": media}
+		"total": fmtMin(float64(totals.Total)), "cats": cats, "prev": prev, "next": next, "viewers": viewers(300), "media": media}
 	if isToday {
 		meta := toStr(view["dur_text"])
 		if truthy(view["cat"]) {
 			meta += " · " + toStr(view["cat"])
 		}
-		out["title"], out["meta"], out["face"], out["stale"], out["day_label"] = view["now"], pyStrip(meta), pyFaceFor(view), stale, "今天"
+		out["title"], out["meta"], out["face"], out["stale"], out["day_label"] = view["now"], pyStrip(meta), faceForView(view), stale, "今天"
 	} else {
 		d, _ := time.Parse("2006-01-02", target)
 		wd := []string{"一", "二", "三", "四", "五", "六", "日"}[(int(d.Weekday())+6)%7]
 		out["title"] = strconv.Itoa(int(d.Month())) + " 月 " + strconv.Itoa(d.Day()) + " 日"
-		out["meta"] = "周" + wd + " · 一共在电脑前 " + pyFmtMin(float64(totals.Total))
+		out["meta"] = "周" + wd + " · 一共在电脑前 " + fmtMin(float64(totals.Total))
 		out["face"], out["stale"], out["day_label"] = "ฅ(・ω・ )", true, "当天"
 	}
 	writeJSON(w, 200, out)

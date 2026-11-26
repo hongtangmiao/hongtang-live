@@ -4,7 +4,7 @@
 
 ## 主要功能
 
-- **个人状态页 & 像素风格前端（`web/`）**：原生 HTML / CSS / JS（无构建工具），像素 JRPG 窗口主题（`Fusion Pixel 12` 点阵字），支持中/日双语切换、首页概览、动态、音乐、番剧墙、设备统计与账户页。
+- **个人状态页 & 双 UI 前端（`web/`）**：原生 HTML / CSS / JS（无构建工具），桌面端默认 X2 macOS 工作台（支持自由切换回像素经典），移动端锁定像素 JRPG 窗口主题（`Fusion Pixel 12` 点阵字），支持中/日双语切换、首页概览、「此刻」、音乐、番剧墙、设备统计与账户页。
 - **「此刻」实时状态与健康数据**：展示当前活跃设备、正在使用的应用（经服务端隐私规则脱敏与分类）、正在听的音乐、设备电量以及 Intervals.icu 同步的健康指标。
 - **数字生活日报 / 周报**：接收电脑端每日导出的 ActivityWatch 数据，按隐私规则清洗聚合后调用 DeepSeek 生成 Markdown 日报/周报并自动入库、推送至 Telegram。
 - **影音与媒体集成**：支持网易云音乐（自建 API 代理同步）、Bangumi + Jellyfin 番剧墙。
@@ -23,8 +23,6 @@
 | `tests/` | Playwright 端到端测试（`tests/e2e/`）与后台接口测试（`tests/admintest.py`） |
 | `docs/` | 部署说明（[docs/deployment.md](docs/deployment.md)）与设备接口文档（[docs/device-api.md](docs/device-api.md)） |
 | `.env.example` | 可选的首次启动环境变量模板 |
-| `DESIGN.md` | 界面视觉规范（配色、字号档位、组件约束） |
-| `AGENTS.md` | 项目约定、常用命令与质量门禁说明 |
 
 ## 快速开始（Docker）
 

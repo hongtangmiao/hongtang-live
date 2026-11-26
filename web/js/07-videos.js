@@ -1,6 +1,5 @@
 'use strict';
 // 番剧页（bgm.tv + Jellyfin 海报墙）
-// 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 /* ---------------- videos（bgm.tv + Jellyfin 番剧海报墙） ---------------- */
 let viState = {
   data: null,
@@ -33,6 +32,16 @@ function viBindFallbackTimers(scope) {
   });
 }
 
+// 观看集数以 BGM 为准，没有的保底才用 JF 的
+function viEpText(it) {
+  if (it.status === 'watching') {
+    if (it.epTotal > 0) return `${it.epWatched || 0}/${it.epTotal}${t('vi_ep')}`;
+    if (it.epWatched > 0) return `${it.epWatched}${t('vi_ep')}`;
+    return it.jfNextEp || '';
+  }
+  return it.epTotal > 0 ? `${it.epTotal}${t('vi_ep')}` : '';
+}
+
 function viCardHtml(it, preferMine = false) {
   const srcs = Array.isArray(it.sources) ? it.sources : [];
   const badges = [
@@ -57,15 +66,7 @@ function viCardHtml(it, preferMine = false) {
     rating = `<span class="vi-rate dim" title="${esc(scoreLabel + ' ' + scoreTxt)}">★ ${scoreTxt}</span>`;
   }
 
-  // 观看集数以 BGM 为准，没有的保底才用 JF 的
-  let epText = '';
-  if (it.status === 'watching') {
-    if (it.epTotal > 0) epText = `${it.epWatched || 0}/${it.epTotal}${t('vi_ep')}`;
-    else if (it.epWatched > 0) epText = `${it.epWatched}${t('vi_ep')}`;
-    else if (it.jfNextEp) epText = it.jfNextEp;
-  } else if (it.epTotal > 0) {
-    epText = `${it.epTotal}${t('vi_ep')}`;
-  }
+  const epText = viEpText(it);
 
   const cover = it.cover || it.fallbackCover || '';
   const fallback = (it.cover && it.fallbackCover && it.cover !== it.fallbackCover) ? it.fallbackCover : '';

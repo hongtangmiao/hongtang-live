@@ -4,7 +4,6 @@
    ========================================================= */
 'use strict';
 // 基础：$ / $$、SITE、语言判断、日语文案（I18N.ja）
-// 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -23,13 +22,14 @@ const qLang = q.get('lang');
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* 存不了就只在本页生效 */ } },
+  remove(k) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } },
 };
 let lang = LANGS.indexOf(qLang) >= 0 ? qLang : (store.get('amk-lang') || 'ja');
 
 const I18N = {
   ja: {
-    nav_home: 'ホーム', nav_tweets: 'つぶやき', nav_music: '音楽',
-    nav_illust: 'イラスト', nav_videos: 'アニメ',
+    nav_home: 'ホーム', nav_music: '音楽',
+    nav_videos: 'アニメ',
     nav_account: 'アカウント', nav_stats: 'サーバー統計',
 
     /* いま */
@@ -49,10 +49,7 @@ const I18N = {
     rp_quality: 'データ品質', rp_tg: 'Telegram 送信済み', rp_min: '{n} 分', rp_plays: '{n} 回',
     rp_no_ai: 'AI 分析はまだありません（統計のみ）',
 
-    /* home */
-    profile: 'プロフィール', height: '身長', weight: '体重', foot: '足のサイズ',
-
-    /* home health & daylog tweets */
+    /* home & health */
     hl_title: 'ヘルスケア', hl_src: 'Huawei Health', hl_sleep: '睡眠時間', hl_score: '睡眠スコア',
     hl_hr: '心拍数', hl_stress: 'ストレス', hl_spo2: '血中酸素',
     hm_more: 'すべて見る', hm_watching: '視聴中のアニメ', hm_watching_empty: '視聴中の作品はありません',
@@ -60,24 +57,19 @@ const I18N = {
     hm_sys: 'システムリソース', hm_sys_offline: 'デバイスオフライン', hm_cpu: 'CPU', hm_mem: 'メモリ', hm_gpu: 'GPU',
     hl_empty: 'ヘルスデータがありません',
     dl_now: 'いまの活動', dl_online: 'オンライン', dl_offline: '離席中',
-    dl_today: '今日のアクティビティ', dl_total_dur: '累計時間', dl_app_cnt: '使用アプリ数',
-    dl_live: '視聴中の配信', dl_apps: 'アプリ使用時間',
-    dl_empty: '今日のアクティビティ記録はまだありません', dl_err: 'daylog の読み込みに失敗しました',
-    /* tweets */
-    tw_sub: 'daylog のリアルタイム状態・アプリ使用時間・AI レポート・配信視聴のまとめ。',
-    filter: 'フィルター', updated: '最終更新', all: 'すべて',
+    dl_total_dur: '累計時間',
+    dl_empty: '今日のアクティビティ記録はまだありません',
 
     /* music */
     mu_sub: 'いま再生中・今日の曲 (daylog)、再生ランキング、プレイリスト、お気に入りのまとめ。',
     pill_playing: '再生中', pill_paused: '一時停止',
     mx_playing: 'いま再生中', mx_last: '最後に聴いた曲', mx_src_ne: '网易云 で 見る',
-    mx_total_plays: '総再生回数',
     mx_top_artists: 'よく聴いているアーティスト',
     mx_times: '回',
     mx_open_ne: '网易云 で開く', mx_playlists: 'プレイリスト', mx_pl_total: '曲数の合計',
     mx_mine: 'マイプレイリスト', mx_list: '一覧', mx_library: 'ライブラリ',
     mx_first_fav: 'いちばん人気', mx_likes_total: '曲の合計', mx_artists: 'アーティスト',
-    mx_tracks: '曲一覧', mx_charts_count: 'ランキング',
+    mx_tracks: '曲一覧',
     mx_src_daylog: 'daylog で 見る', mx_today: '今日の曲', mx_today_songs: '曲（今日）', mx_today_plays: '再生（今日）',
     mx_rank: 'よく聴く曲', mx_rank_songs: '曲数', mx_rank_plays: '再生回数',
     mx_days: '日', mx_all_time: '全期間', mx_play_short: '再生', mx_owner_view: 'シェア中',
@@ -85,16 +77,14 @@ const I18N = {
     ne_login: 'ログイン', ne_logout: 'ログアウト', ne_close: '閉じる', ne_group: '連携サービス',
     ne_account: '网易云音楽', ne_account_sub: '最近再生・プレイリスト・お気に入りを同期',
     ne_playlists: 'プレイリスト', ne_liked: 'お気に入り', ne_songs: '曲',
-    ne_recommend: 'おすすめプレイリスト', ne_charts: '公式ランキング', ne_signed: 'ログイン中',
+    ne_signed: 'ログイン中',
     ne_empty: 'データがありません', ne_error: '読み込みに失敗しました',
     ne_qr: 'QR コード', ne_phone: '電話番号', ne_phone_ph: '電話番号', ne_pass_ph: 'パスワード',
     ne_qr_hint: 'NetEase Cloud Music アプリでスキャンしてください', ne_qr_wait: 'スキャン待ち…',
     ne_qr_scanned: 'スマホで確認してください', ne_qr_expired: 'QR コードの有効期限が切れました',
     ne_login_ok: 'ログインしました', ne_logout_ok: 'ログアウトしました',
     ne_login_fail: 'ログインに失敗しました', ne_qr_fail: 'QR コードを取得できませんでした（サーバーが混雑しています）', ne_retry: '再試行', ne_bound_hint: 'すでに連携済みです。再連携は ?bind_key= 付きの URL からどうぞ。', ne_cookie_warn: 'サーバーがログイン情報を受け付けませんでした',
-    k_song: '課題曲',
-    /* illust / videos */
-    il_sub: '描いたイラストを載せるページです。',
+    /* videos */
     vi_sub: 'bgm.tv と Jellyfin の視聴記録・アニメウォール。',
     vi_watching: '視聴中',
     vi_recommend: 'おすすめ',
@@ -111,16 +101,12 @@ const I18N = {
 
     /* account */
     guest: 'ゲスト', not_logged: '未ログイン',
-    login: 'ログイン',
     ac_info: '{name} の情報', mail: 'メール',
     ac_server: 'サーバー情報',
     ac_stats: 'サーバー統計', ac_stats_sub: 'CPU・メモリ・ディスク・GPU の稼働状況',
 
-
     /* stats */
     crumb_server: 'サーバー情報',
     st_refresh: '更新',
-
-
   },
 };

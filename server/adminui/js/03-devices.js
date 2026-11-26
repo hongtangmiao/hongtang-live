@@ -1,6 +1,5 @@
 'use strict';
-/* 设备：配对 / 停用 / 权限；加载设置、启动（由 admin.js 按原顺序拆出，admin.html 按 00→03 顺序加载） */
-/* ---------------- 设备：配对 / 停用 / 权限 ---------------- */
+/* 设备：配对 / 停用 / 权限；加载设置、启动 */
 const SCOPE_LABEL = { activity: '在用什么', music: '正在听', health: '健康数据', battery: '电量', stats: '系统资源', aw: '每日 ActivityWatch' };
 const SVGNS = 'http://www.w3.org/2000/svg';
 

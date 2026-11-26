@@ -85,7 +85,7 @@ check("首页注入了站点信息", "window.HL_SITE=" in html and "{{HL_" not i
 st, _, b = call(anon, "/api/site"); d = js(b).get("site", {})
 check("/api/site", d.get("name") == "TestSite" and d.get("links"), d)
 
-xss = dict(profile); xss = json.loads(json.dumps(profile)); xss["config"]["profile"]["name"] = '</script><script>alert(1)</script>'
+xss = json.loads(json.dumps(profile)); xss["config"]["profile"]["name"] = '</script><script>alert(1)</script>'
 call(op, "/api/admin/config", xss)
 st, _, b = call(anon, "/"); html = b.decode()
 check("名字里的 </script> 被转义", "<script>alert(1)" not in html, "")
@@ -123,3 +123,5 @@ print(f"通过 {ok} / {len(results)}")
 for name, c, detail in results:
     if not c:
         print(f"✗ {name}  {str(detail)[:200]}")
+if ok < len(results):
+    sys.exit(1)

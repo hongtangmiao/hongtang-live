@@ -25,7 +25,7 @@ import (
 )
 
 /*
- * 系统资源（替代原来的 C# 采集器，输出格式和它一样，见服务器 stats.go 的 pcReport）。
+ * 系统资源（替代原 C# 采集器，输出格式和它一样，见服务器 stats.go 的 pcReportTo）。
  *   动态数据：性能计数器（PDH）+ 几个 Win32 API，4 秒一次
  *   静态数据：CPU / 内存条 / 显卡驱动 / 系统版本 / 补丁，用一次 PowerShell（CIM）查，6 小时刷新
  *   显卡：DXGI 拿显存上限和 LUID（和计数器对上号），NVIDIA 的温度走 nvml.dll

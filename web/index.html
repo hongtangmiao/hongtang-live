@@ -103,7 +103,7 @@
 
 <!--HL_SITE-->
 <script src="stats.js?v=hl4" defer></script>
-<!-- 原 app.js 拆成的 12 段，必须按这个顺序、同步加载（不要加 defer/async） -->
+<!-- 前端脚本：必须按此顺序同步加载（14-ui-macos-views.js 需先于 13-ui-macos.js，不要加 defer/async） -->
 <script src="js/00-core.js?v=hl6"></script>
 <script src="js/01-i18n-zh.js?v=hl6"></script>
 <script src="js/02-base.js?v=hl6"></script>

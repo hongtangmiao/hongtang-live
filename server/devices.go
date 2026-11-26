@@ -160,18 +160,6 @@ func startDevicesSaver() {
 	}()
 }
 
-func resetDevicesForTest() {
-	devMu.Lock()
-	devLoaded, devList, devDirty = false, nil, false
-	pairCodes = map[string]*pairCode{}
-	devMu.Unlock()
-	pairFailMu.Lock()
-	pairFails = 0
-	pairFailMu.Unlock()
-	devAuthFails.reset()
-	pairLimiter.reset()
-}
-
 /* ---------------- 小工具 ---------------- */
 
 const codeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789" // 去掉 I O 0 1
@@ -285,12 +273,6 @@ func (l *limiter) blocked(key string, n int, win time.Duration) bool {
 		}
 	}
 	return cnt >= n
-}
-
-func (l *limiter) reset() {
-	l.mu.Lock()
-	l.m = nil
-	l.mu.Unlock()
 }
 
 var (

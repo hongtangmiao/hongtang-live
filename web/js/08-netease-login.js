@@ -1,6 +1,5 @@
 'use strict';
 // 网易云登录
-// 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 /* ---------------- 网易云：登录 ---------------- */
 let nePoll = null;
 const stopNePoll = () => { if (nePoll) { clearInterval(nePoll); nePoll = null; } };

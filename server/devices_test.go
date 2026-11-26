@@ -12,6 +12,24 @@ import (
 	"time"
 )
 
+func (l *limiter) reset() {
+	l.mu.Lock()
+	l.m = nil
+	l.mu.Unlock()
+}
+
+func resetDevicesForTest() {
+	devMu.Lock()
+	devLoaded, devList, devDirty = false, nil, false
+	pairCodes = map[string]*pairCode{}
+	devMu.Unlock()
+	pairFailMu.Lock()
+	pairFails = 0
+	pairFailMu.Unlock()
+	devAuthFails.reset()
+	pairLimiter.reset()
+}
+
 func setupDevices(t *testing.T) string {
 	root := setupRoot(t) // daylog 可写、DaylogRoot = 临时目录、dataDir = 临时目录
 	resetDevicesForTest()
@@ -307,7 +325,7 @@ func TestStatsSlots(t *testing.T) {
 	c.Stats.ServerID, c.Stats.PCName = "10.0.0.1", "老 PC"
 	setConfig(c)
 	// 旧采集器写 pc
-	pcReport(M{"host": "old", "cpu": M{"usagePercent": 1.0}, "network": M{"publicIpv4": "1.2.3.4", "adapters": []any{}}})
+	pcReportTo("pc", M{"host": "old", "cpu": M{"usagePercent": 1.0}, "network": M{"publicIpv4": "1.2.3.4", "adapters": []any{}}})
 	if n := asM(sectionData("pc", "network")); n == nil || n["publicIpv4"] != nil {
 		t.Errorf("公网 IP 要去掉: %v", n)
 	}

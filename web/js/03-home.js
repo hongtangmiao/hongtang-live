@@ -1,6 +1,5 @@
 'use strict';
 // 首页面板：健康 / 此刻 / 音乐 / 系统 / 番剧卡片
-// 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 /* ---------------- panels ---------------- */
 const dlState = { loading: false, data: null, error: null };
 
@@ -137,8 +136,12 @@ function homeNowCardHtml() {
   </section>`;
 }
 
+function currentMusicNow() {
+  return hmState.musicNow || (typeof mxState !== 'undefined' && mxState && mxState.now) || null;
+}
+
 function homeMusicCardHtml() {
-  const n = hmState.musicNow || (mxState && mxState.now);
+  const n = currentMusicNow();
   if (hmState.musicLoading && !n) {
     return `<section class="card hm-card hm-link" data-go="music">
       <div class="hm-card-head">
@@ -293,10 +296,6 @@ function paintHomeCards() {
     rb.innerHTML = homeRecAnimeCardHtml();
     viBindFallbackTimers(rb);
   }
-}
-
-function paintHomeHealth() {
-  paintHomeCards();
 }
 
 async function loadHomeMusic(force = false) {

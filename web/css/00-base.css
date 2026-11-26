@@ -177,12 +177,10 @@ html[data-theme="dark"] ::selection { background: rgba(76, 194, 255, .3); }
   transform: translateY(-50%);
   background: var(--accent);
 }
-.nav-icon { display: grid; place-items: center; width: 20px; height: 20px; flex: none; color: var(--txt1); }
 .nav-ico {
   width: 20px; height: 20px; flex: none; display: block;
   object-fit: contain;
 }
-.nav-icon svg { display: block; width: 20px; height: 20px; }
 
 .side-foot {
   margin-top: auto;
@@ -292,20 +290,3 @@ html[data-theme="dark"] ::selection { background: rgba(76, 194, 255, .3); }
 .profile-avatar { width: 96px; height: 96px; border-radius: 50%; overflow: hidden; margin-bottom: 18px; }
 .profile-avatar svg { display: block; width: 100%; height: 100%; }
 .profile-name { font-size: 24px; font-weight: 700; letter-spacing: -.5px; }
-.profile-handle { font-size: 13px; color: var(--txt3); margin-top: 4px; }
-.profile-bio { font-size: 13px; color: var(--txt2); line-height: 1.9; margin-top: 16px; }
-
-.table-card { padding: 12px 24px 8px; display: flex; flex-direction: column; justify-content: center; }
-.table-title { font-weight: 700; margin: 4px 0 0; font-size: 13px; }
-.table-rows { margin: 0; }
-.table-row {
-  display: grid;
-  grid-template-columns: minmax(5.5em, 28%) minmax(0, 1fr);
-  gap: 12px;
-  padding: 12px 0;
-}
-.table-row + .table-row { border-top: var(--hair) solid var(--border); }
-.table-row dt { margin: 0; font-size: 13px; font-weight: 700; color: var(--txt3); }
-.table-row dd { margin: 0; font-size: 13px; line-height: 1.7; }
-
-/* 相互リンク */

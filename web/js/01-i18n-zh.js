@@ -1,9 +1,8 @@
 'use strict';
 // 中文文案（I18N.zh）
-// 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 I18N.zh = {
-    nav_home: '首页', nav_tweets: '动态', nav_music: '音乐',
-    nav_illust: '插画', nav_videos: '番剧',
+    nav_home: '首页', nav_music: '音乐',
+    nav_videos: '番剧',
     nav_account: '账户', nav_stats: '服务器统计',
 
     nav_now: '此刻', nw_sub: '此刻在干嘛 · 今天用过的应用',
@@ -22,8 +21,6 @@ I18N.zh = {
     rp_quality: '数据质量', rp_tg: '已推送 Telegram', rp_min: '{n} 分钟', rp_plays: '{n} 次',
     rp_no_ai: '还没有 AI 分析（只有统计）',
 
-    profile: '资料', height: '身高', weight: '体重', foot: '鞋码',
-
     hl_title: '身体健康', hl_src: '华为运动健康', hl_sleep: '睡眠时长', hl_score: '睡眠评分',
     hl_hr: '心率状态', hl_stress: '压力指数', hl_spo2: '血氧饱和度',
     hm_more: '查看全部', hm_watching: '正在追番', hm_watching_empty: '暂无正在看的番剧',
@@ -31,22 +28,18 @@ I18N.zh = {
     hm_sys: '资源占用', hm_sys_offline: '设备不在线', hm_cpu: 'CPU', hm_mem: '内存', hm_gpu: 'GPU',
     hl_empty: '暂无健康数据',
     dl_now: '实时状态', dl_online: '在线', dl_offline: '离开电脑',
-    dl_today: '今日活动概览', dl_total_dur: '今日累计', dl_app_cnt: '活跃应用',
-    dl_live: '正在看直播', dl_apps: '今日应用时长',
-    dl_empty: '今天还没有活动记录', dl_err: 'daylog 数据加载失败',
-    tw_sub: '汇总显示 daylog 的实时动态、应用时长、AI 日报与直播记录。',
-    filter: '筛选', updated: '最后更新', all: '全部',
+    dl_total_dur: '今日累计',
+    dl_empty: '今天还没有活动记录',
 
     mu_sub: '正在听与今日记录 (daylog)、常听排行、歌单、喜欢的歌。',
     pill_playing: '播放中', pill_paused: '已暂停',
     mx_playing: '正在听', mx_last: '最后听的曲目', mx_src_ne: '在网易云查看',
-    mx_total_plays: '总播放次数',
     mx_top_artists: '常听的歌手',
     mx_times: '次',
     mx_open_ne: '在网易云打开', mx_playlists: '歌单', mx_pl_total: '曲目合计',
     mx_mine: '我的歌单', mx_list: '列表', mx_library: '曲库',
     mx_first_fav: '第一首', mx_likes_total: '曲目合计', mx_artists: '歌手',
-    mx_tracks: '曲目列表', mx_charts_count: '榜单',
+    mx_tracks: '曲目列表',
     mx_src_daylog: '在 daylog 查看', mx_today: '今天听的', mx_today_songs: '首（今天）', mx_today_plays: '次（今天）',
     mx_rank: '常听的歌', mx_rank_songs: '曲目数', mx_rank_plays: '播放次数',
     mx_days: '天', mx_all_time: '所有时间', mx_play_short: '次', mx_owner_view: '共享中',
@@ -54,15 +47,13 @@ I18N.zh = {
     ne_login: '登录', ne_logout: '退出登录', ne_close: '关闭', ne_group: '关联服务',
     ne_account: '网易云音乐', ne_account_sub: '同步最近播放、歌单与喜欢的音乐',
     ne_playlists: '歌单', ne_liked: '我喜欢的音乐', ne_songs: '首',
-    ne_recommend: '推荐歌单', ne_charts: '官方榜单', ne_signed: '已登录',
+    ne_signed: '已登录',
     ne_empty: '暂无数据', ne_error: '加载失败',
     ne_qr: '二维码', ne_phone: '手机号', ne_phone_ph: '手机号', ne_pass_ph: '密码',
     ne_qr_hint: '请用网易云音乐 App 扫码', ne_qr_wait: '等待扫码…',
     ne_qr_scanned: '请在手机上确认', ne_qr_expired: '二维码已过期',
     ne_login_ok: '已登录', ne_logout_ok: '已退出登录',
     ne_login_fail: '登录失败', ne_qr_fail: '二维码获取失败（服务端繁忙）', ne_retry: '重试', ne_bound_hint: '已经绑定过了，重新绑定请用带 ?bind_key= 的链接。', ne_cookie_warn: '服务端未接受登录凭证',
-    k_song: '指定曲',
-    il_sub: '放自己画的插画的页面。',
     vi_sub: 'bgm.tv 与 Jellyfin 追番记录墙。',
     vi_watching: '在看',
     vi_recommend: '我推荐的',
@@ -78,14 +69,10 @@ I18N.zh = {
     coming_soon: '正在准备中，请再等一下',
 
     guest: '访客', not_logged: '未登录',
-    login: '登录',
     ac_info: '{name} 的信息', mail: '邮件',
     ac_server: '服务器信息',
     ac_stats: '服务器统计', ac_stats_sub: 'CPU、内存、磁盘、GPU 的运行状态',
 
-
     crumb_server: '服务器信息',
     st_refresh: '刷新',
-
-
 };

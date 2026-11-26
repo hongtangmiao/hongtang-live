@@ -1,6 +1,5 @@
 'use strict';
 // 音乐页：渲染（正在听、最近、排行、歌单、喜欢）
-// 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
 /* ---------------- music（网易云 + 正在听） ---------------- */
 const mxTile = (icon, value, label, cls) => `
   <div class="mx-tile${cls ? ' ' + cls : ''}"><span class="mi">${icon}</span><b>${value}</b><small>${label}</small></div>`;
@@ -211,8 +210,8 @@ function mxColRank(st) {
   </section>`;
 }
 
-/* 第 3 列：プレイリスト（登录=我的歌单，游客=推荐歌单） */
-function mxSoonCol(label) {
+/* 第 3 列：プレイリスト（登录后显示我的歌单，游客显示登录提示） */
+function mxSoonCol() {
   return `<section class="mx-col">
     <span class="mx-src">&nbsp;</span>
     <div class="mx-soon-card">
@@ -224,7 +223,7 @@ function mxSoonCol(label) {
 }
 
 function mxColPlaylists(st) {
-  if (!st.prof) return mxSoonCol(t('mx_playlists'));
+  if (!st.prof) return mxSoonCol();
   const pls = st.playlists || [];
   const first = pls[0] || null;
   const total = pls.reduce((a, p) => a + (p.count || 0), 0);
@@ -233,7 +232,7 @@ function mxColPlaylists(st) {
     <a class="mx-src" href="https://music.163.com/" target="_blank" rel="noreferrer">${t('mx_open_ne')}${ICON.external}</a>
     ${first ? mxHero({
       cover: first.cover ? pic(first.cover, 140) : '', glyph: '♪',
-      labelIcon: ICON.star, label: st.prof ? t('mx_mine') : t('ne_recommend'),
+      labelIcon: ICON.star, label: t('mx_mine'),
       title: esc(first.name), sub: `${t('mx_library')}・${first.count || 0} ${t('ne_songs')}`,
     }) : mxHero({ glyph: '♪', label: t('ne_playlists'), title: '—', sub: '' })}
     <div class="mx-tiles">
@@ -255,69 +254,39 @@ function mxColPlaylists(st) {
   </section>`;
 }
 
-/* 第 4 列：好きな曲（登录=我喜欢的音乐，游客=官方榜单） */
+/* 第 4 列：好きな曲（登录后显示我喜欢的音乐，游客显示登录提示） */
 function mxColFav(st) {
-  if (!st.prof) return mxSoonCol(t('ne_liked'));
-  if (st.prof) {
-    const songs = st.likes || [];
-    const first = songs[0] || null;
-    const artistSet = new Set();
-    songs.forEach(s => (s.ar || []).forEach(a => artistSet.add(a.id || a.name)));
-    return `
-    <section class="mx-col">
-      <a class="mx-src" href="${esc(st.likesHref || 'https://music.163.com/#/my/m/music/playlist')}" target="_blank" rel="noreferrer">${t('mx_open_ne')}${ICON.external}</a>
-      ${first ? mxHero({
-        cover: songCover(first, 140), glyph: '♥',
-        labelIcon: ICON.heart, label: t('mx_first_fav'),
-        title: esc(first.name), sub: esc(songArtists(first)),
-      }) : mxHero({ glyph: '♥', label: t('ne_liked'), title: '—', sub: '' })}
-      <div class="mx-tiles">
-        ${mxTile(ICON.heart, String(st.likesTotal || songs.length), t('mx_likes_total'), 'blue')}
-        ${mxTile(ICON.user, String(artistSet.size), t('mx_artists'))}
-      </div>
-      ${mxSec(ICON.list, t('mx_tracks'))}
-      <div class="mx-card">
-        ${songs.length ? songs.slice(0, 20).map((s, i) => `
-          <div class="mx-row">
-            <span class="n">${i + 1}</span>
-            ${mxThumb(songCover(s))}
-            <div class="b">
-              <div class="t">${esc(s.name || '')}</div>
-              <div class="a">${esc(songArtists(s))}</div>
-            </div>
-            <span class="mx-acts">
-              <span class="on">${ICON.heart}</span>
-              <a href="https://music.163.com/song?id=${s.id}" target="_blank" rel="noreferrer" aria-label="open">${ICON.external}</a>
-            </span>
-          </div>`).join('') : mxEmpty()}
-      </div>
-    </section>`;
-  }
-
-  const charts = st.charts || [];
+  if (!st.prof) return mxSoonCol();
+  const songs = st.likes || [];
+  const first = songs[0] || null;
+  const artistSet = new Set();
+  songs.forEach(s => (s.ar || []).forEach(a => artistSet.add(a.id || a.name)));
   return `
   <section class="mx-col">
-    <a class="mx-src" href="https://music.163.com/#/discover/toplist" target="_blank" rel="noreferrer">${t('mx_open_ne')}${ICON.external}</a>
-    ${charts[0] ? mxHero({
-      cover: charts[0].cover ? pic(charts[0].cover, 140) : '', glyph: '♪',
-      labelIcon: ICON.trend, label: t('ne_charts'),
-      title: esc(charts[0].name), sub: esc(charts[0].sub || ''),
-    }) : mxHero({ glyph: '♪', label: t('ne_charts'), title: '—', sub: '' })}
+    <a class="mx-src" href="${esc(st.likesHref || 'https://music.163.com/#/my/m/music/playlist')}" target="_blank" rel="noreferrer">${t('mx_open_ne')}${ICON.external}</a>
+    ${first ? mxHero({
+      cover: songCover(first, 140), glyph: '♥',
+      labelIcon: ICON.heart, label: t('mx_first_fav'),
+      title: esc(first.name), sub: esc(songArtists(first)),
+    }) : mxHero({ glyph: '♥', label: t('ne_liked'), title: '—', sub: '' })}
     <div class="mx-tiles">
-      ${mxTile(ICON.list, String(charts.length), t('mx_charts_count'), 'blue')}
-      ${mxTile(ICON.disc, charts[0] && charts[0].plays ? fmtCount(charts[0].plays) : '—', t('mx_total_plays'))}
+      ${mxTile(ICON.heart, String(st.likesTotal || songs.length), t('mx_likes_total'), 'blue')}
+      ${mxTile(ICON.user, String(artistSet.size), t('mx_artists'))}
     </div>
-    ${mxSec(ICON.list, t('ne_charts'))}
+    ${mxSec(ICON.list, t('mx_tracks'))}
     <div class="mx-card">
-      ${charts.length ? charts.slice(0, 12).map((c, i) => `
+      ${songs.length ? songs.slice(0, 20).map((s, i) => `
         <div class="mx-row">
           <span class="n">${i + 1}</span>
-          ${mxThumb(c.cover ? pic(c.cover, 80) : '')}
+          ${mxThumb(songCover(s))}
           <div class="b">
-            <div class="t">${esc(c.name)}</div>
-            <div class="a">${esc(c.sub || '')}</div>
+            <div class="t">${esc(s.name || '')}</div>
+            <div class="a">${esc(songArtists(s))}</div>
           </div>
-          <span class="cnt">${c.plays ? fmtCount(c.plays) : ''}</span>
+          <span class="mx-acts">
+            <span class="on">${ICON.heart}</span>
+            <a href="https://music.163.com/song?id=${s.id}" target="_blank" rel="noreferrer" aria-label="open">${ICON.external}</a>
+          </span>
         </div>`).join('') : mxEmpty()}
     </div>
   </section>`;

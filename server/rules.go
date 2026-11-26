@@ -72,7 +72,7 @@ func reSearch(r *regexp2.Regexp, s string) bool {
 	return err == nil && ok
 }
 
-// reSplitFirst：re.split(pattern, s)，返回所有片段
+// reSplit：re.split(pattern, s)，返回所有片段
 func reSplit(r *regexp2.Regexp, s string) []string {
 	var out []string
 	last := 0
@@ -216,22 +216,6 @@ func statusText(app, name, title string, allowHeuristics bool) string {
 }
 
 /* ---------------- 名字 / 分类 ---------------- */
-
-var meowTailsPy = []string{"喵~", "喵", "喵～", "喵~。"}
-
-// pyMeow：给「记录」补一句喵~；已经有就不重复加（Python 的 rstrip 去掉的是 Unicode 空白）
-func pyMeow(text string) string {
-	t := strings.TrimRightFunc(text, isPySpace)
-	if t == "" {
-		return t
-	}
-	for _, tail := range meowTailsPy {
-		if strings.HasSuffix(t, tail) {
-			return t
-		}
-	}
-	return t + "喵~"
-}
 
 func isPySpace(r rune) bool {
 	switch r {
@@ -554,7 +538,6 @@ func buildSample(cfg M, p M) sample {
 		LabelPlain: or(d.Plain, d.Label), Cat: d.Cat, Title: keep, URL: rawURL}
 }
 
-// phoneHint：安卓包名里多半没有分类规则认识的词（B 站是 tv.danmaku.bili），常见的翻成规则里的关键字
 var phoneHints = []struct{ prefix, word string }{
 	{"tv.danmaku.bili", "bilibili"}, {"com.bilibili", "bilibili"}, {"com.ss.android.ugc.aweme", "douyin"},
 	{"com.sina.weibo", "weibo"}, {"com.xingin.xhs", "小红书"}, {"com.zhihu", "知乎"}, {"com.baidu.tieba", "贴吧"},
@@ -566,6 +549,7 @@ var phoneHints = []struct{ prefix, word string }{
 	{"com.adobe.reader", "acrobat"}, {"com.valvesoftware", "steam"},
 }
 
+// phoneHint：安卓包名里多半没有分类规则认识的词（B 站是 tv.danmaku.bili），常见的翻成规则里的关键字
 func phoneHint(pkg string) string {
 	for _, h := range phoneHints {
 		if strings.HasPrefix(pkg, h.prefix) {

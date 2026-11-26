@@ -1,8 +1,6 @@
 'use strict';
 // X2 macOS 窗口化总结内容渲染（由 13-ui-macos.js 调用）
 (function () {
-  const safe = s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-
   function renderSummaries(x2MaxId, zh) {
     const d = (typeof dlState !== 'undefined' && dlState.data && dlState.data.ok) ? dlState.data : null;
     const v = d ? d.view : null;
@@ -14,11 +12,11 @@
         const apps = (d && Array.isArray(d.apps)) ? d.apps.slice(0, 5) : [];
         bNow.innerHTML = !v ? `<div style="color:var(--os-muted)">${zh ? '正在同步实时状态…' : '読み込み中…'}</div>` : `
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <div style="font-size:21px;font-weight:700;background:var(--os-in);padding:8px 12px;border-radius:9px !important;white-space:nowrap">${safe(v.face || 'ฅ^•ﻌ•^ฅ')}</div>
-            <div><div style="font-size:15px;font-weight:700">${safe(v.now || '—')}</div>
-            <div style="color:var(--os-muted);font-size:12px">${safe([v.dur_text, v.cat, d.summary && d.summary.total ? '今日 ' + d.summary.total : ''].filter(Boolean).join(' · '))}</div></div>
+            <div style="font-size:21px;font-weight:700;background:var(--os-in);padding:8px 12px;border-radius:9px !important;white-space:nowrap">${esc(v.face || 'ฅ^•ﻌ•^ฅ')}</div>
+            <div><div style="font-size:15px;font-weight:700">${esc(v.now || '—')}</div>
+            <div style="color:var(--os-muted);font-size:12px">${esc([v.dur_text, v.cat, d.summary && d.summary.total ? '今日 ' + d.summary.total : ''].filter(Boolean).join(' · '))}</div></div>
           </div>
-          ${apps.map(a => `<div class="x2-row"><span><b style="color:${safe(a.color || '#94a3b8')}">■</b> ${safe(a.label || '')}</span><b>${safe(a.total || '')}</b></div>`).join('')}`;
+          ${apps.map(a => `<div class="x2-row"><span><b style="color:${esc(a.color || '#94a3b8')}">■</b> ${esc(a.label || '')}</span><b>${esc(a.total || '')}</b></div>`).join('')}`;
       }
     }
 
@@ -32,10 +30,10 @@
           const hrTxt = h.hr_live != null ? `${h.hr_live} bpm` : (h.hr_last_text || '—');
           const hrSm = h.hr_live == null && String(hrTxt).length > 8 ? ' class="is-sm"' : '';
           bHealth.innerHTML = `<div class="x2-sgrid">
-            <div class="x2-stat"><small>${zh ? '心率' : '心拍数'}</small><b${hrSm}>${safe(hrTxt)}</b></div>
-            <div class="x2-stat"><small>睡眠${h.sleep_score != null ? ' (' + h.sleep_score + ')' : ''}</small><b>${safe(sleepTxt)}</b></div>
-            <div class="x2-stat"><small>${zh ? '压力' : 'ストレス'}</small><b>${h.stress != null ? safe(h.stress) : '—'}</b></div>
-            <div class="x2-stat"><small>${zh ? '血氧' : '血中酸素'}</small><b>${h.spo2 != null ? safe(h.spo2) + '%' : '—'}</b></div>
+            <div class="x2-stat"><small>${zh ? '心率' : '心拍数'}</small><b${hrSm}>${esc(hrTxt)}</b></div>
+            <div class="x2-stat"><small>睡眠${h.sleep_score != null ? ' (' + h.sleep_score + ')' : ''}</small><b>${esc(sleepTxt)}</b></div>
+            <div class="x2-stat"><small>${zh ? '压力' : 'ストレス'}</small><b>${h.stress != null ? esc(h.stress) : '—'}</b></div>
+            <div class="x2-stat"><small>${zh ? '血氧' : '血中酸素'}</small><b>${h.spo2 != null ? esc(h.spo2) + '%' : '—'}</b></div>
           </div>`;
         }
       }
@@ -44,16 +42,16 @@
     if (x2MaxId !== 'music') {
       const bMusic = document.getElementById('x2b-music');
       if (bMusic) {
-        const m = (typeof hmState !== 'undefined' && hmState && hmState.musicNow) || (typeof mxState !== 'undefined' && mxState && mxState.now);
+        const m = currentMusicNow();
         if (!m || !m.title) {
           bMusic.innerHTML = `<div style="color:var(--os-muted)">${zh ? '暂无播放记录' : '再生履歴なし'}</div>`;
         } else {
-          const cov = m.cover && typeof pic === 'function' ? pic(m.cover, 140) : (m.cover || '');
+          const cov = m.cover ? pic(m.cover, 140) : '';
           bMusic.innerHTML = `<div style="display:flex;align-items:center;gap:12px">
-            ${cov ? `<img src="${safe(cov)}" referrerpolicy="no-referrer" style="width:58px;height:58px;border-radius:9px !important;object-fit:cover" alt="">` : '<div style="width:58px;height:58px;border-radius:9px !important;background:var(--os-in);display:grid;place-items:center;font-size:20px"><i class="ti ti-music"></i></div>'}
+            ${cov ? `<img src="${esc(cov)}" referrerpolicy="no-referrer" style="width:58px;height:58px;border-radius:9px !important;object-fit:cover" alt="">` : '<div style="width:58px;height:58px;border-radius:9px !important;background:var(--os-in);display:grid;place-items:center;font-size:20px"><i class="ti ti-music"></i></div>'}
             <div style="min-width:0">
-              <div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${safe(m.title)}</div>
-              <div style="color:var(--os-muted);font-size:12px">${safe(m.sub || '—')}</div>
+              <div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.title)}</div>
+              <div style="color:var(--os-muted);font-size:12px">${esc(m.sub || '—')}</div>
               <div style="color:${m.state === 'playing' ? 'var(--os-green)' : 'var(--os-muted)'};font-size:12px;margin-top:3px">${m.state === 'playing' ? (zh ? '● 正在播放' : '● 再生中') : (zh ? '已暂停' : '一時停止')}</div>
             </div>
           </div>`;
@@ -70,8 +68,8 @@
             const cpu = Math.round(x.cpu || 0), mem = Math.round(x.mem || 0), gpu = x.gpu != null ? Math.round(x.gpu) : null;
             return `<div class="x2-host">
               <div style="display:flex;justify-content:space-between;font-size:12px">
-                <b>${safe(x.name)}</b>
-                <span style="color:${x.online ? 'var(--os-muted)' : '#ef4444'}">${x.online ? safe(x.memText || (zh ? '在线' : 'オンライン')) : (zh ? '离线' : 'オフライン')}</span>
+                <b>${esc(x.name)}</b>
+                <span style="color:${x.online ? 'var(--os-muted)' : '#ef4444'}">${x.online ? esc(x.memText || (zh ? '在线' : 'オンライン')) : (zh ? '离线' : 'オフライン')}</span>
               </div>
               <div class="x2-bars">
                 <div><div class="x2-bar-lbl"><span>CPU</span><b>${cpu}%</b></div><div class="x2-bar-trk"><i style="width:${cpu}%"></i></div></div>
@@ -93,12 +91,12 @@
         bAnime.innerHTML = !items.length ? `<div style="color:var(--os-muted)">${zh ? '正在读取追番列表…' : '読み込み中…'}</div>` :
           `<div class="x2-agrid">${items.map(it => {
             const cov = it.cover || it.fallbackCover || '';
-            const ep = it.epTotal > 0 ? `${it.epWatched || 0}/${it.epTotal}${zh ? '话' : '話'}` : (it.epWatched > 0 ? `${it.epWatched}${zh ? '话' : '話'}` : (it.jfNextEp || ''));
+            const ep = viEpText(it);
             const sc = it.rate > 0 ? `★${it.rate}` : (it.score > 0 ? `★${Number(it.score).toFixed(1)}` : '');
-            return `<a class="x2-vi" href="${safe(it.bgmUrl || '#videos')}" ${it.bgmUrl ? 'target="_blank" rel="noreferrer"' : ''}>
-              ${cov ? `<img src="${safe(cov)}" referrerpolicy="no-referrer" loading="lazy" alt="">` : '<div style="aspect-ratio:2/3;background:var(--os-in);border-radius:7px !important"></div>'}
-              <b>${safe(it.title || '')}</b>
-              <small>${safe([ep, sc].filter(Boolean).join(' · '))}</small>
+            return `<a class="x2-vi" href="${esc(it.bgmUrl || '#videos')}" ${it.bgmUrl ? 'target="_blank" rel="noreferrer"' : ''}>
+              ${cov ? `<img src="${esc(cov)}" referrerpolicy="no-referrer" loading="lazy" alt="">` : '<div style="aspect-ratio:2/3;background:var(--os-in);border-radius:7px !important"></div>'}
+              <b>${esc(it.title || '')}</b>
+              <small>${esc([ep, sc].filter(Boolean).join(' · '))}</small>
             </a>`;
           }).join('')}</div>`;
       }
@@ -168,14 +166,14 @@
     const y = now.getFullYear(), m = now.getMonth(), today = now.getDate();
     const firstDay = new Date(y, m, 1).getDay();
     const days = new Date(y, m + 1, 0).getDate();
-    const wds = zh ? ['日','一','二','三','四','五','六'] : ['日','月','火','水','木','金','土'];
+    const wds = nwWeekdaysSunFirst();
     const cells = wds.map(w => `<span class="hd">${w}</span>`);
     for (let i = 0; i < firstDay; i++) cells.push('<span></span>');
     for (let d = 1; d <= days; d++) cells.push(`<span class="${d === today ? 'today' : ''}">${d}</span>`);
     pop.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:baseline;font-weight:700;font-size:13px">
         <span>${y} 年 ${m + 1} 月</span>
-        <span style="font-size:12px;color:var(--os-muted);font-weight:400">${zh ? '今日' : '今日'} ${m + 1}/${today}</span>
+        <span style="font-size:12px;color:var(--os-muted);font-weight:400">今日 ${m + 1}/${today}</span>
       </div>
       <div class="x2-cal-grid">${cells.join('')}</div>
       <button class="x2-cal-go" type="button" id="x2CalGo">${zh ? '打开今日时间线与日报 →' : '今日のアクティビティ・日報を見る →'}</button>`;

@@ -207,9 +207,6 @@ func pushRing(rings map[string][]M, name string, item M) {
 
 var pcSections = []string{"cpu", "memory", "gpu", "disk", "network", "windows"}
 
-// pcReport：旧接口，写进「pc」槽位
-func pcReport(raw M) (string, int64) { return pcReportTo("pc", raw) }
-
 // pcReportTo：没带的分区（键都没有）沿用上一次的，托盘程序可以只在变化时才发硬件信息这类大块头；
 // 公网 IP 不保存（统计页是公开的）
 func pcReportTo(id string, raw M) (string, int64) {

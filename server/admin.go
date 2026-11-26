@@ -3,13 +3,11 @@ package main
 import (
 	"crypto/hmac"
 	"crypto/pbkdf2"
-	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
 	"errors"
 	"log"
-	"math/big"
 	"net"
 	"net/http"
 	"os"
@@ -65,20 +63,6 @@ var (
 	setupCode string
 )
 
-const setupAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789" // 去掉了 0/O/1/I 这种容易看错的
-
-func newSetupCode() string {
-	var b strings.Builder
-	for i := 0; i < 8; i++ {
-		if i == 4 {
-			b.WriteByte('-')
-		}
-		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(setupAlphabet))))
-		b.WriteByte(setupAlphabet[n.Int64()])
-	}
-	return b.String()
-}
-
 func needsSetup() bool { return conf().Admin.PasswordHash == "" }
 
 // initAdmin：环境变量 HL_ADMIN_PASSWORD 可以直接设好密码（无人值守部署）；否则打印设置码
@@ -99,7 +83,7 @@ func initAdmin() {
 		}
 	}
 	setupMu.Lock()
-	setupCode = newSetupCode()
+	setupCode = randCode()
 	code := setupCode
 	setupMu.Unlock()
 	log.Printf("[admin] ==============================================")

@@ -1,6 +1,5 @@
 'use strict';
-// 底部导航、启动（boot），最后加载
-// 原来是 web/app.js 的一段；index.html 按文件名顺序加载，后面的文件可以用前面的名字。
+// 底部导航、全局事件与启动（boot）
 /* ---------------- bottom nav (mobile) ---------------- */
 function buildBottomNav() {
   const items = [['home', 'nav_home'], ['now', 'nav_now'], ['music', 'nav_music'], ['videos', 'nav_videos']];
@@ -19,17 +18,7 @@ function buildBottomNav() {
 }
 
 /* ---------------- boot ---------------- */
-$$('.nav-item').forEach(a => {
-  const icon = ICON[a.dataset.tab];
-  const slot = a.querySelector('.nav-icon');   // 只有还是占位符的时候才塞 SVG
-  if (icon && slot) slot.innerHTML = icon;
-});
 buildBottomNav();
-$$('.bottom-nav-item').forEach(b => {
-  const icon = ICON[b.dataset.tab];
-  const slot = b.querySelector('.nav-icon');
-  if (icon && slot) slot.innerHTML = icon;
-});
 $$('[data-i18n]').forEach(el => { if (!el.textContent.trim()) el.textContent = t(el.dataset.i18n); });
 
 // 侧栏和手机顶栏各一个切换按钮，行为一样
@@ -74,8 +63,12 @@ let __booted = false;
 async function boot() {
   if (__booted) return;
   __booted = true;
-  await NET.detect();      // 有 server.js 就走同源网关，否则直连上游
+  await NET.detect();      // 有 Go 服务端就走同源网关，否则直连上游
   render(false);
+  // X2 模式在 13-ui-macos.js 同步初始化时 NET.detect() 尚未完成，非 #home 入口需补拉一次音乐状态
+  if (window.HL_UI && window.HL_UI.getMode() === 'x2' && typeof loadHomeMusic === 'function') {
+    loadHomeMusic(true);
+  }
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 else boot();

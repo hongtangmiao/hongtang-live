@@ -1,7 +1,6 @@
 'use strict';
 // X2 macOS 桌面工作台：窗口化显示总结，绿色全屏显示完整详情，Tabler 图标 + 中日切换
 (function () {
-  const safe = s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   const isZh = () => (typeof lang !== 'undefined' ? lang === 'zh' : true);
 
   let x2Z = 20;
@@ -39,8 +38,8 @@
     if (!tray) return;
     const mins = x2Wins.filter(w => x2State[w.id].minimized);
     tray.innerHTML = mins.map(w => `
-      <button class="x2-thumb" type="button" data-thumb="${w.id}" data-id="${w.id}" title="${safe(winTitle(w))}">
-        <span class="x2-thumb-tip">${safe(winTitle(w))}</span>
+      <button class="x2-thumb" type="button" data-thumb="${w.id}" data-id="${w.id}" title="${esc(winTitle(w))}">
+        <span class="x2-thumb-tip">${esc(winTitle(w))}</span>
         <span class="x2-thumb-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span>
         <span class="x2-thumb-body"><s style="width:72%"></s><s style="width:92%"></s><s style="width:55%"></s></span>
         <span class="x2-thumb-badge"><i class="ti ${w.ti}"></i></span>
@@ -50,7 +49,7 @@
   const winTitle = w => (isZh() ? w.zh : w.ja);
 
   function layoutDefault() {
-    if (window.innerWidth <= 860 || x2MaxId || x2Animating) return;
+    if (window.HL_UI.isMobile() || x2MaxId || x2Animating) return;
     const vw = window.innerWidth;
     const pad = 20, gap = 16;
     const maxW = Math.min(1680, vw - pad * 2);
@@ -219,7 +218,7 @@
     rootEl.innerHTML = `
       <header class="x2-menubar">
         <div class="x2-mb-l">
-          <button class="x2-mb-btn x2-mb-app" id="x2OsMenuBtn" type="button">${safe(siteName)} OS</button>
+          <button class="x2-mb-btn x2-mb-app" id="x2OsMenuBtn" type="button">${esc(siteName)} OS</button>
         </div>
         <div class="x2-mb-r">
           <span id="x2MbStatus"><i class="x2-dot"></i></span>
@@ -259,7 +258,7 @@
       win.addEventListener('pointerdown', () => { if (!win.classList.contains('is-max')) win.style.zIndex = ++x2Z; });
       const bar = win.querySelector('.x2-tbar');
       bar.addEventListener('pointerdown', e => {
-        if (e.target.closest('button') || window.innerWidth <= 860 || win.classList.contains('is-max')) return;
+        if (e.target.closest('button') || window.HL_UI.isMobile() || win.classList.contains('is-max')) return;
         win.classList.add('dragging');
         x2UserMoved = true;
         const sx = e.clientX - win.offsetLeft;
@@ -422,9 +421,9 @@
     if (!window.HL_UI || window.HL_UI.getMode() !== 'x2') return;
     ensureDom();
     const zh = isZh();
-    const tone = window.HL_UI.getX2Tone();
     const now = new Date();
-    const wd = (zh ? ['周日','周一','周二','周三','周四','周五','周六'] : ['日','月','火','水','木','金','土'])[now.getDay()];
+    const wds = nwWeekdaysSunFirst();
+    const wd = (zh ? '周' : '') + wds[now.getDay()];
     const tm = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
     const dt = zh ? `${now.getMonth() + 1}月${now.getDate()}日 ${wd} ${tm}` : `${now.getMonth() + 1}月${now.getDate()}日(${wd}) ${tm}`;
     const ck = document.getElementById('x2MbClock');
