@@ -1,57 +1,22 @@
 /* 08-ui-macos.css */
-
-#hlUiBar {
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9990;
+/* 经典像素侧栏里的 JRPG 风格 ▶ OS 彩蛋按钮 */
+.hl-os-egg {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 4px;
-  background: rgba(18, 22, 38, 0.92);
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 10px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28) !important;
-  font: 600 12px/1 -apple-system, "PingFang SC", sans-serif;
-}
-#hlUiBar button {
-  border: 0;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 2px solid var(--px-frame, #9ca8d2);
   background: transparent;
-  color: #aeb5c2;
-  padding: 6px 11px;
-  border-radius: 7px !important;
+  color: var(--px-gold, #ffd23f);
   font: inherit;
-  font-size: 12px !important;
+  font-size: 12px;
   cursor: pointer;
-  transition: background .18s, color .18s;
   white-space: nowrap;
 }
-#hlUiBar button:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
-#hlUiBar button.on { background: #f3f4f6; color: #111318; }
-html[data-ui="x2"] #hlUiBar {
-  top: 2px;
-  left: 50%;
-  bottom: auto;
-  transform: translateX(-50%);
-  padding: 2px;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-}
-html[data-ui="x2"] #hlUiBar button {
-  padding: 4px 10px;
-  border-radius: 6px !important;
-  color: var(--os-muted);
-}
-html[data-ui="x2"] #hlUiBar button:hover { color: var(--os-ink); background: var(--os-in); }
-html[data-ui="x2"] #hlUiBar button.on { background: var(--os-ink); color: var(--os-bar); }
-@media (max-width: 760px) {
-  #hlUiBar { top: auto !important; bottom: 64px !important; left: 50% !important; transform: translateX(-50%) !important; background: rgba(18, 20, 26, 0.92) !important; border: 1px solid rgba(255,255,255,0.16) !important; padding: 4px !important; }
-  html[data-ui="x2"] #hlUiBar { bottom: 82px !important; }
+.hl-os-egg:hover {
+  background: var(--px-gold, #ffd23f);
+  color: var(--px-bg, #0c1533);
+  border-color: var(--px-gold, #ffd23f);
 }
 
 #x2Root { display: none; }

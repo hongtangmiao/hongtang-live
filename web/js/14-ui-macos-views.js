@@ -105,5 +105,85 @@
     }
   }
 
-  window.HL_X2_VIEWS = { renderSummaries };
+  function renderOsPop(zh, resetAll) {
+    const pop = document.getElementById('x2OsPop');
+    if (!pop) return;
+    pop.innerHTML = `
+      <button type="button" data-os-act="reset">${zh ? '还原所有窗口' : 'ウィンドウを初期化'}</button>
+      <div class="x2-os-sep"></div>
+      <button type="button" data-os-act="classic">${zh ? '退出桌面 · 回到像素经典' : 'デスクトップ終了 · ピクセル版へ'}</button>`;
+    pop.onclick = e => {
+      const b = e.target.closest('button[data-os-act]');
+      if (!b) return;
+      pop.classList.remove('open');
+      if (b.dataset.osAct === 'reset') resetAll();
+      if (b.dataset.osAct === 'classic' && window.HL_UI) window.HL_UI.setMode('classic');
+    };
+  }
+
+  function renderCcPop(zh, onLangChanged) {
+    const pop = document.getElementById('x2CcPop');
+    if (!pop || !window.HL_UI) return;
+    const tone = window.HL_UI.getX2Tone();
+    pop.innerHTML = `
+      <div class="x2-cc-blk">
+        <div class="x2-cc-lbl">${zh ? '界面模式' : 'インターフェース'}</div>
+        <div class="x2-seg">
+          <button type="button" class="on" data-cc-ui="x2">${zh ? '桌面 OS' : 'デスクトップ'}</button>
+          <button type="button" data-cc-ui="classic">${zh ? '像素经典' : 'ピクセル'}</button>
+        </div>
+      </div>
+      <div class="x2-cc-blk">
+        <div class="x2-cc-lbl">${zh ? '外观壁纸' : '外観'}</div>
+        <div class="x2-seg">
+          <button type="button" class="${tone === 'dark' ? 'on' : ''}" data-cc-tone="dark">${zh ? '深色' : 'ダーク'}</button>
+          <button type="button" class="${tone === 'light' ? 'on' : ''}" data-cc-tone="light">${zh ? '浅色' : 'ライト'}</button>
+        </div>
+      </div>
+      <div class="x2-cc-blk">
+        <div class="x2-cc-lbl">${zh ? '显示语言' : '言語'}</div>
+        <div class="x2-seg">
+          <button type="button" class="${zh ? 'on' : ''}" data-cc-lang="zh">中文</button>
+          <button type="button" class="${!zh ? 'on' : ''}" data-cc-lang="ja">日本語</button>
+        </div>
+      </div>`;
+    pop.onclick = e => {
+      const uiB = e.target.closest('button[data-cc-ui]');
+      if (uiB) { pop.classList.remove('open'); window.HL_UI.setMode(uiB.dataset.ccUi); return; }
+      const tB = e.target.closest('button[data-cc-tone]');
+      if (tB) { window.HL_UI.setX2Tone(tB.dataset.ccTone); renderCcPop(zh, onLangChanged); return; }
+      const lB = e.target.closest('button[data-cc-lang]');
+      if (lB && ((lB.dataset.ccLang === 'zh') !== zh)) {
+        const btn = document.querySelector('.lang-toggle');
+        if (btn) btn.click();
+        setTimeout(() => { if (onLangChanged) onLangChanged(); }, 30);
+      }
+    };
+  }
+
+  function renderCalPop(zh, onOpenNow) {
+    const pop = document.getElementById('x2CalPop');
+    if (!pop) return;
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth(), today = now.getDate();
+    const firstDay = new Date(y, m, 1).getDay();
+    const days = new Date(y, m + 1, 0).getDate();
+    const wds = zh ? ['日','一','二','三','四','五','六'] : ['日','月','火','水','木','金','土'];
+    const cells = wds.map(w => `<span class="hd">${w}</span>`);
+    for (let i = 0; i < firstDay; i++) cells.push('<span></span>');
+    for (let d = 1; d <= days; d++) cells.push(`<span class="${d === today ? 'today' : ''}">${d}</span>`);
+    pop.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:baseline;font-weight:700;font-size:13px">
+        <span>${y} 年 ${m + 1} 月</span>
+        <span style="font-size:12px;color:var(--os-muted);font-weight:400">${zh ? '今日' : '今日'} ${m + 1}/${today}</span>
+      </div>
+      <div class="x2-cal-grid">${cells.join('')}</div>
+      <button class="x2-cal-go" type="button" id="x2CalGo">${zh ? '打开今日时间线与日报 →' : '今日のアクティビティ・日報を見る →'}</button>`;
+    pop.querySelector('#x2CalGo').addEventListener('click', () => {
+      pop.classList.remove('open');
+      if (onOpenNow) onOpenNow();
+    });
+  }
+
+  window.HL_X2_VIEWS = { renderSummaries, renderOsPop, renderCcPop, renderCalPop };
 })();
