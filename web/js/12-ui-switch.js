@@ -48,11 +48,11 @@
   let x2Z = 20;
   let x2UserMoved = false;
   const x2Wins = [
-    { id: 'now', icon: '◉', title: '此刻状态', x: 24, y: 44, w: 376 },
-    { id: 'health', icon: '♥', title: '身体健康', x: 416, y: 44, w: 420 },
-    { id: 'music', icon: '♪', title: '音乐', x: 852, y: 44, w: 400 },
-    { id: 'hosts', icon: '▤', title: '活动监视器', x: 24, y: 374, w: 376 },
-    { id: 'anime', icon: '✦', title: '追番书架', x: 416, y: 268, w: 836 },
+    { id: 'now', icon: '◉', title: '此刻状态', route: 'now', x: 24, y: 44, w: 376 },
+    { id: 'health', icon: '♥', title: '身体健康', route: 'now', x: 416, y: 44, w: 420 },
+    { id: 'music', icon: '♪', title: '音乐', route: 'music', x: 852, y: 44, w: 400 },
+    { id: 'hosts', icon: '▤', title: '活动监视器', route: 'stats', x: 24, y: 374, w: 376 },
+    { id: 'anime', icon: '✦', title: '追番书架', route: 'videos', x: 416, y: 268, w: 836 },
   ];
   const x2State = {};
   x2Wins.forEach(w => { x2State[w.id] = { open: true, max: false }; });
@@ -116,14 +116,14 @@
     const desk = rootEl.querySelector('#x2Desk');
     desk.innerHTML = x2Wins.map((w, i) => `
       <section class="x2-win" id="x2w-${w.id}" style="left:${w.x}px;top:${w.y}px;width:${w.w}px;z-index:${i + 1}">
-        <div class="x2-tbar">
+        <div class="x2-tbar" data-dbl="${w.id}">
           <div class="x2-lights">
             <button class="x2-l-r" type="button" data-act="close" data-id="${w.id}" title="关闭"></button>
             <button class="x2-l-y" type="button" data-act="min" data-id="${w.id}" title="最小化"></button>
             <button class="x2-l-g" type="button" data-act="max" data-id="${w.id}" title="缩放"></button>
           </div>
           <span class="x2-wtitle">${w.title}</span>
-          <span style="width:42px"></span>
+          <button class="x2-wact" type="button" data-open-route="${w.route}" title="在完整页中打开">展开 ↗</button>
         </div>
         <div class="x2-body" id="x2b-${w.id}"></div>
       </section>`).join('');
@@ -155,7 +155,25 @@
       });
     });
 
+    desk.addEventListener('dblclick', e => {
+      const tb = e.target.closest('.x2-tbar[data-dbl]');
+      if (!tb || e.target.closest('button')) return;
+      const id = tb.dataset.dbl;
+      const win = document.getElementById('x2w-' + id);
+      x2State[id].max = !x2State[id].max;
+      win.classList.toggle('is-max', x2State[id].max);
+      win.style.zIndex = ++x2Z;
+    });
+
     desk.addEventListener('click', e => {
+      const goBtn = e.target.closest('button[data-open-route]');
+      if (goBtn) {
+        ui = 'ac';
+        localStorage.setItem(K_UI, ui);
+        location.hash = '#' + goBtn.dataset.openRoute;
+        applyUi();
+        return;
+      }
       const b = e.target.closest('button[data-act]');
       if (!b) return;
       const id = b.dataset.id, act = b.dataset.act;
@@ -277,15 +295,25 @@
       }
     }
 
-    // 4. 活动监视器窗
+    // 4. 活动监视器窗（带真实进度条）
     const bHosts = document.getElementById('x2b-hosts');
     if (bHosts) {
       const hosts = (typeof hmState !== 'undefined' && hmState.sys && Array.isArray(hmState.sys.hosts)) ? hmState.sys.hosts : [];
       bHosts.innerHTML = !hosts.length ? '<div style="color:var(--os-muted)">正在读取设备状态…</div>' :
-        hosts.map(x => `<div class="x2-row">
-          <span><b>${safe(x.name)}</b></span>
-          <span style="color:var(--os-muted)">${x.online ? `CPU ${Math.round(x.cpu || 0)}% · MEM ${Math.round(x.mem || 0)}%${x.gpu != null ? ' · GPU ' + Math.round(x.gpu) + '%' : ''}` : '离线'}</span>
-        </div>`).join('');
+        hosts.map(x => {
+          const cpu = Math.round(x.cpu || 0), mem = Math.round(x.mem || 0), gpu = x.gpu != null ? Math.round(x.gpu) : null;
+          return `<div class="x2-host">
+            <div style="display:flex;justify-content:space-between;font-size:12px">
+              <b>${safe(x.name)}</b>
+              <span style="color:${x.online ? 'var(--os-muted)' : '#ef4444'}">${x.online ? safe(x.memText || '在线') : '离线'}</span>
+            </div>
+            <div class="x2-bars">
+              <div><div class="x2-bar-lbl"><span>CPU</span><b>${cpu}%</b></div><div class="x2-bar-trk"><i style="width:${cpu}%"></i></div></div>
+              <div><div class="x2-bar-lbl"><span>MEM</span><b>${mem}%</b></div><div class="x2-bar-trk"><i style="width:${mem}%"></i></div></div>
+              <div><div class="x2-bar-lbl"><span>GPU</span><b>${gpu != null ? gpu + '%' : '—'}</b></div><div class="x2-bar-trk"><i style="width:${gpu || 0}%"></i></div></div>
+            </div>
+          </div>`;
+        }).join('');
     }
 
     // 5. 追番书架窗

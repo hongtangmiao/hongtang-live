@@ -1,9 +1,9 @@
 /* =========================================================
-   07-ui-ac.css — AC 融合版（A2 全圆角矩形暖纸布局 + C2 右侧弹簧导航、镜面反光与深石墨暗色）
+   07-ui-ac.css — AC 融合版（A2 全圆角矩形 Bento 暖纸布局 + C2 右侧弹簧导航、镜面反光与深石墨暗色）
    只在 html[data-ui="ac"] 时生效，不影响像素经典模式
    ========================================================= */
 
-/* ---------- 临时 3-UI 切换浮条（不遮挡侧栏底栏、不遮挡卡片） ---------- */
+/* ---------- 临时 3-UI 切换浮条（随模式自适应配色，零遮挡） ---------- */
 #hlUiBar {
   position: fixed;
   top: 10px;
@@ -12,21 +12,48 @@
   z-index: 9990;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   padding: 4px;
-  background: rgba(18, 20, 26, 0.88);
+  background: rgba(18, 22, 38, 0.92);
   backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 10px !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28) !important;
   font: 600 12px/1 -apple-system, "PingFang SC", sans-serif;
 }
-html[data-ui="x2"] #hlUiBar {
-  top: auto;
-  left: 16px;
-  bottom: 16px;
-  transform: none;
+html[data-ui="ac"] #hlUiBar {
+  background: var(--ac-card) !important;
+  border-color: var(--ac-line-hi) !important;
+  box-shadow: var(--ac-shadow) !important;
 }
+html[data-ui="ac"] #hlUiBar button { color: var(--ac-muted); }
+html[data-ui="ac"] #hlUiBar button:hover { color: var(--ac-ink); background: var(--ac-card-2); }
+html[data-ui="ac"] #hlUiBar button.on { background: var(--ac-ink); color: var(--ac-bg); }
+html[data-ui="ac"] #hlUiBar .hl-ui-sep { background: var(--ac-line-hi); }
+html[data-ui="ac"] #hlUiBar .hl-ui-sub { color: var(--ac-ink); border-color: var(--ac-line-hi); }
+
+/* X2 模式下直接融入顶部 macOS 菜单栏正中 */
+html[data-ui="x2"] #hlUiBar {
+  top: 2px;
+  left: 50%;
+  bottom: auto;
+  transform: translateX(-50%);
+  padding: 2px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+html[data-ui="x2"] #hlUiBar button {
+  padding: 4px 10px;
+  border-radius: 6px !important;
+  color: var(--os-muted);
+}
+html[data-ui="x2"] #hlUiBar button:hover { color: var(--os-ink); background: var(--os-in); }
+html[data-ui="x2"] #hlUiBar button.on { background: var(--os-ink); color: var(--os-bar); }
+html[data-ui="x2"] #hlUiBar .hl-ui-sub,
+html[data-ui="x2"] #hlUiBar .hl-ui-sep { display: none; }
+
 #hlUiBar button {
   border: 0;
   background: transparent;
@@ -43,15 +70,16 @@ html[data-ui="x2"] #hlUiBar {
 #hlUiBar button.on { background: #f3f4f6; color: #111318; }
 #hlUiBar .hl-ui-sep { width: 1px; height: 15px; background: rgba(255, 255, 255, 0.14); margin: 0 2px; }
 #hlUiBar .hl-ui-sub { color: #d8dee9; border: 1px solid rgba(255, 255, 255, 0.18); }
+
 @media (max-width: 760px) {
-  #hlUiBar { top: auto; bottom: 64px; left: 50%; transform: translateX(-50%); }
-  html[data-ui="x2"] #hlUiBar { left: 50%; transform: translateX(-50%); bottom: 82px; }
+  #hlUiBar { top: auto !important; bottom: 64px !important; left: 50% !important; transform: translateX(-50%) !important; background: rgba(18, 20, 26, 0.92) !important; border: 1px solid rgba(255,255,255,0.16) !important; padding: 4px !important; }
+  html[data-ui="x2"] #hlUiBar { bottom: 82px !important; }
 }
 
 /* ---------- AC 融合版变量（暖纸日间 / 深石墨夜间） ---------- */
 html[data-theme][data-ui="ac"] {
   --ac-bg: #f4f0e7;
-  --ac-card: rgba(252, 250, 245, 0.92);
+  --ac-card: rgba(252, 250, 245, 0.94);
   --ac-card-2: #eee8db;
   --ac-ink: #221f1b;
   --ac-muted: #665e53;
@@ -96,7 +124,7 @@ html[data-theme][data-ui="ac"] {
 
 html[data-theme][data-ui="ac"][data-ac-tone="graphite"] {
   --ac-bg: #0b0c0f;
-  --ac-card: rgba(25, 27, 32, 0.8);
+  --ac-card: rgba(25, 27, 32, 0.82);
   --ac-card-2: rgba(255, 255, 255, 0.055);
   --ac-ink: #f3f4f6;
   --ac-muted: #98a0ad;
@@ -105,7 +133,7 @@ html[data-theme][data-ui="ac"][data-ac-tone="graphite"] {
   --ac-accent: #f3f4f6;
   --ac-green: #30d158;
   --ac-sheen: rgba(255, 255, 255, 0.075);
-  --ac-rail: rgba(22, 24, 29, 0.86);
+  --ac-rail: rgba(22, 24, 29, 0.88);
   --ac-rail-pill: rgba(255, 255, 255, 0.16);
   --ac-rail-on: #ffffff;
   --ac-shadow: 0 14px 36px rgba(0, 0, 0, 0.36);
@@ -113,7 +141,6 @@ html[data-theme][data-ui="ac"][data-ac-tone="graphite"] {
   color-scheme: dark;
 }
 
-/* 消除内嵌悬空滚动条：让整个页面自然滚动 */
 html[data-theme][data-ui="ac"],
 html[data-theme][data-ui="ac"] body {
   height: auto !important;
@@ -170,32 +197,17 @@ html[data-theme][data-ui="ac"] .sidebar .brand {
 html[data-theme][data-ui="ac"] .sidebar .brand-text,
 html[data-theme][data-ui="ac"] .sidebar .side-foot { display: none !important; }
 html[data-theme][data-ui="ac"] .sidebar .brand-avatar {
-  width: 36px !important;
-  height: 36px !important;
-  margin: 0 !important;
-  border: 0 !important;
-  background: transparent !important;
-  border-radius: 8px !important;
-  overflow: hidden !important;
+  width: 36px !important; height: 36px !important; margin: 0 !important;
+  border: 0 !important; background: transparent !important; border-radius: 8px !important; overflow: hidden !important;
 }
 html[data-theme][data-ui="ac"] .sidebar .brand-avatar img {
-  width: 36px !important;
-  height: 36px !important;
-  object-fit: cover !important;
-  border-radius: 8px !important;
+  width: 36px !important; height: 36px !important; object-fit: cover !important; border-radius: 8px !important;
 }
 html[data-theme][data-ui="ac"] .sidebar .nav-item {
-  position: relative !important;
-  z-index: 1;
-  width: 42px !important;
-  height: 42px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  border: 0 !important;
-  background: transparent !important;
-  border-radius: 10px !important;
+  position: relative !important; z-index: 1;
+  width: 42px !important; height: 42px !important; padding: 0 !important; margin: 0 !important;
+  display: grid !important; place-items: center !important;
+  border: 0 !important; background: transparent !important; border-radius: 10px !important;
   color: var(--ac-muted) !important;
 }
 html[data-theme][data-ui="ac"] .sidebar .nav-item::before,
@@ -206,38 +218,23 @@ html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="now"]::after { conte
 html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="music"]::after { content: "♪"; }
 html[data-theme][data-ui="ac"] .sidebar .nav-item[data-tab="videos"]::after { content: "✦"; }
 html[data-theme][data-ui="ac"] .sidebar .nav-item span {
-  position: absolute !important;
-  right: 54px !important;
-  top: 50% !important;
+  position: absolute !important; right: 54px !important; top: 50% !important;
   transform: translate(6px, -50%);
-  background: var(--ac-ink) !important;
-  color: var(--ac-bg) !important;
-  padding: 4px 10px !important;
-  border-radius: 8px !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  white-space: nowrap !important;
-  opacity: 0;
-  pointer-events: none;
+  background: var(--ac-ink) !important; color: var(--ac-bg) !important;
+  padding: 4px 10px !important; border-radius: 8px !important;
+  font-size: 12px !important; font-weight: 600 !important; white-space: nowrap !important;
+  opacity: 0; pointer-events: none;
   transition: opacity .14s, transform .2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 html[data-theme][data-ui="ac"] .sidebar .nav-item:hover span { opacity: 1; transform: translate(0, -50%); }
 html[data-theme][data-ui="ac"] .sidebar .nav-item.active { color: var(--ac-rail-on) !important; }
 html[data-theme][data-ui="ac"] .ac-rail-pill {
-  position: absolute;
-  left: 8px;
-  top: 8px;
-  width: 42px;
-  height: 42px;
-  border-radius: 10px !important;
-  background: var(--ac-rail-pill);
-  border: 1px solid var(--ac-line-hi);
-  transition: transform .42s cubic-bezier(0.32, 1.14, 0.38, 1);
-  pointer-events: none;
-  z-index: 0;
+  position: absolute; left: 8px; top: 8px; width: 42px; height: 42px;
+  border-radius: 10px !important; background: var(--ac-rail-pill); border: 1px solid var(--ac-line-hi);
+  transition: transform .42s cubic-bezier(0.32, 1.14, 0.38, 1); pointer-events: none; z-index: 0;
 }
 
-/* ---------- 主内容区：无内嵌滚动条 ---------- */
+/* ---------- 主内容区：真正的宽幅 Bento 排版 ---------- */
 html[data-theme][data-ui="ac"] .main {
   margin: 0 auto !important;
   max-width: 1180px !important;
@@ -245,55 +242,77 @@ html[data-theme][data-ui="ac"] .main {
   overflow: visible !important;
   padding: 12px 86px 56px 24px !important;
 }
-html[data-theme][data-ui="ac"] .view {
-  height: auto !important;
-  overflow: visible !important;
-  padding-right: 0 !important;
+html[data-theme][data-ui="ac"] .view { height: auto !important; overflow: visible !important; padding-right: 0 !important; }
+html[data-theme][data-ui="ac"] .topbar { background: transparent !important; border: 0 !important; padding: 10px 4px 16px !important; }
+html[data-theme][data-ui="ac"] .topbar-title { font-size: 22px !important; font-weight: 800 !important; letter-spacing: -0.02em !important; color: var(--ac-ink) !important; }
+html[data-theme][data-ui="ac"] .lang-toggle { border: 1px solid var(--ac-line) !important; background: var(--ac-card) !important; border-radius: 8px !important; padding: 2px !important; }
+html[data-theme][data-ui="ac"] .lang-toggle span { border-radius: 6px !important; padding: 3px 7px !important; font-size: 12px !important; }
+
+/* 行 1：紧凑横向个人卡 + 健康卡（彻底消灭健康卡顶部大片留白） */
+html[data-theme][data-ui="ac"] .home-grid {
+  grid-template-columns: 260px minmax(0, 1fr) !important;
+  gap: 16px !important;
+  align-items: stretch !important;
 }
-html[data-theme][data-ui="ac"] .topbar {
-  background: transparent !important;
-  border: 0 !important;
-  padding: 10px 4px 14px !important;
+html[data-theme][data-ui="ac"] .profile-card {
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 18px 20px !important;
 }
-html[data-theme][data-ui="ac"] .topbar-title {
-  font-size: 22px !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.02em !important;
-  color: var(--ac-ink) !important;
+html[data-theme][data-ui="ac"] .profile-avatar,
+html[data-theme][data-ui="ac"] .profile-avatar img { width: 64px !important; height: 64px !important; border-radius: 12px !important; }
+html[data-theme][data-ui="ac"] .profile-name { font-size: 20px !important; font-weight: 800 !important; margin: 0 !important; }
+html[data-theme][data-ui="ac"] .hm-health { justify-content: flex-start !important; padding: 18px 20px !important; }
+html[data-theme][data-ui="ac"] .hm-stat-v.is-sm { white-space: normal !important; font-size: 13px !important; line-height: 1.4 !important; }
+
+/* 行 2-4：12 列宽幅 Bento（不再挤成 3 窄列，番剧全宽展示不压扁） */
+html[data-theme][data-ui="ac"] .home-showcase {
+  grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+  gap: 16px !important;
 }
-html[data-theme][data-ui="ac"] .lang-toggle {
-  border: 1px solid var(--ac-line) !important;
-  background: var(--ac-card) !important;
-  border-radius: 8px !important;
-  padding: 2px !important;
+html[data-theme][data-ui="ac"] #hmNowBox { grid-column: span 7 !important; }
+html[data-theme][data-ui="ac"] #hmMusicBox { grid-column: span 5 !important; }
+html[data-theme][data-ui="ac"] #hmSysBox { grid-column: span 12 !important; }
+html[data-theme][data-ui="ac"] .hm-sys-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: 12px !important;
 }
-html[data-theme][data-ui="ac"] .lang-toggle span {
-  border-radius: 6px !important;
-  padding: 3px 7px !important;
-  font-size: 12px !important;
+html[data-theme][data-ui="ac"] .hm-anime-pair {
+  grid-column: 1 / -1 !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+}
+html[data-theme][data-ui="ac"] .hm-vi-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+html[data-theme][data-ui="ac"] .hm-app-pill b { max-width: none !important; }
+html[data-theme][data-ui="ac"] .hm-mx-title,
+html[data-theme][data-ui="ac"] .hm-mx-sub {
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
-/* ---------- A2 全圆角矩形卡片 + C2 鼠标镜面反光 ---------- */
+/* ---------- 卡片材质 + 鼠标镜面反光 ---------- */
 html[data-theme][data-ui="ac"] .card,
 html[data-theme][data-ui="ac"] .mx-col,
 html[data-theme][data-ui="ac"] .stats-wrap .panel {
-  position: relative;
-  overflow: hidden;
-  background: var(--ac-card) !important;
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--ac-line) !important;
-  border-radius: 18px !important;
+  position: relative; overflow: hidden;
+  background: var(--ac-card) !important; backdrop-filter: blur(20px);
+  border: 1px solid var(--ac-line) !important; border-radius: 18px !important;
   box-shadow: var(--ac-shadow) !important;
   transition: border-color .22s ease, transform .26s cubic-bezier(0.22, 1, 0.36, 1);
 }
 html[data-theme][data-ui="ac"] .card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  content: ""; position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(360px circle at var(--mx, -220px) var(--my, -220px), var(--ac-sheen), transparent 60%);
-  opacity: 0;
-  transition: opacity .24s ease;
+  opacity: 0; transition: opacity .24s ease;
 }
 html[data-theme][data-ui="ac"] .card:hover::after { opacity: 1; }
 html[data-theme][data-ui="ac"] .card:hover { border-color: var(--ac-line-hi) !important; }
@@ -306,10 +325,7 @@ html[data-theme][data-ui="ac"] .hm-card-title,
 html[data-theme][data-ui="ac"] .hm-health-title,
 html[data-theme][data-ui="ac"] .dl-card-title,
 html[data-theme][data-ui="ac"] .mx-sec-t {
-  color: var(--ac-ink) !important;
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0 !important;
+  color: var(--ac-ink) !important; font-size: 14px !important; font-weight: 700 !important; letter-spacing: 0 !important;
 }
 html[data-theme][data-ui="ac"] .hm-stat-v,
 html[data-theme][data-ui="ac"] .dl-now-title,
@@ -328,30 +344,17 @@ html[data-theme][data-ui="ac"] .vi-card {
   border: 1px solid var(--ac-line) !important;
   border-radius: 10px !important;
 }
-/* 修复 #now 列表右侧贴边 & 补齐内边距 */
 html[data-theme][data-ui="ac"] .dl-app-row { padding: 10px 14px !important; }
 
-/* 修复暖纸/石墨模式下 评分徽标 & BGM/JF 标签对比度 + 统一 >=12px */
-html[data-theme][data-ui="ac"] .vi-rate {
-  background: var(--ac-card) !important;
-  color: var(--ac-ink) !important;
-  border: 1px solid var(--ac-line-hi) !important;
-  border-radius: 6px !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  padding: 1px 7px !important;
+/* 番剧评分与来源标签高对比度 + 统一 >=12px */
+html[data-theme][data-ui="ac"] .vi-rate,
+html[data-theme][data-ui="ac"] .vi-src-tag {
+  background: var(--ac-card) !important; color: var(--ac-ink) !important;
+  border: 1px solid var(--ac-line-hi) !important; border-radius: 6px !important;
+  font-size: 12px !important; font-weight: 700 !important; padding: 1px 7px !important;
 }
 html[data-theme][data-ui="ac"] .vi-rate .vi-r.all { color: var(--ac-ink) !important; }
 html[data-theme][data-ui="ac"] .vi-rate .vi-r.mine { color: var(--ac-accent) !important; }
-html[data-theme][data-ui="ac"] .vi-src-tag {
-  background: var(--ac-card) !important;
-  color: var(--ac-ink) !important;
-  border: 1px solid var(--ac-line-hi) !important;
-  border-radius: 5px !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  padding: 1px 6px !important;
-}
 html[data-theme][data-ui="ac"] .vi-ep,
 html[data-theme][data-ui="ac"] .vi-orig,
 html[data-theme][data-ui="ac"] .hm-stat-k,
@@ -361,36 +364,24 @@ html[data-theme][data-ui="ac"] .hm-bar-lbl { font-size: 12px !important; }
 html[data-theme][data-ui="ac"] .vi-poster,
 html[data-theme][data-ui="ac"] .vi-poster img,
 html[data-theme][data-ui="ac"] .hm-mx-cover,
-html[data-theme][data-ui="ac"] .profile-avatar img,
 html[data-theme][data-ui="ac"] .mx-cover,
 html[data-theme][data-ui="ac"] .dl-pill,
 html[data-theme][data-ui="ac"] .pill,
 html[data-theme][data-ui="ac"] .mx-chip,
 html[data-theme][data-ui="ac"] .btn { border-radius: 8px !important; }
 
-html[data-theme][data-ui="ac"] .vi-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--ac-line-hi) !important;
-}
+html[data-theme][data-ui="ac"] .vi-card:hover { transform: translateY(-3px); border-color: var(--ac-line-hi) !important; }
 html[data-theme][data-ui="ac"] .hm-bar-trk,
-html[data-theme][data-ui="ac"] .nw-hbar {
-  height: 6px !important;
-  border: 0 !important;
-  border-radius: 4px !important;
-  background: var(--ac-line) !important;
-}
+html[data-theme][data-ui="ac"] .nw-hbar { height: 6px !important; border: 0 !important; border-radius: 4px !important; background: var(--ac-line) !important; }
 html[data-theme][data-ui="ac"] .hm-bar-trk i,
-html[data-theme][data-ui="ac"] .nw-hbar i {
-  border-radius: 4px !important;
-  background: var(--ac-ink) !important;
-}
+html[data-theme][data-ui="ac"] .nw-hbar i { border-radius: 4px !important; background: var(--ac-ink) !important; }
 
-@media (max-width: 820px) {
+@media (max-width: 860px) {
   html[data-theme][data-ui="ac"] .sidebar { display: none !important; }
   html[data-theme][data-ui="ac"] .main { padding: 8px 14px 120px !important; }
-  html[data-theme][data-ui="ac"] .bottom-nav {
-    background: var(--ac-rail) !important;
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--ac-line) !important;
-  }
+  html[data-theme][data-ui="ac"] .home-grid,
+  html[data-theme][data-ui="ac"] #hmNowBox,
+  html[data-theme][data-ui="ac"] #hmMusicBox { grid-template-columns: 1fr !important; grid-column: span 12 !important; }
+  html[data-theme][data-ui="ac"] .hm-vi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  html[data-theme][data-ui="ac"] .bottom-nav { background: var(--ac-rail) !important; backdrop-filter: blur(20px); border-top: 1px solid var(--ac-line) !important; }
 }
