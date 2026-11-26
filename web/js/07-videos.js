@@ -57,13 +57,12 @@ function viCardHtml(it, preferMine = false) {
     rating = `<span class="vi-rate dim" title="${esc(scoreLabel + ' ' + scoreTxt)}">★ ${scoreTxt}</span>`;
   }
 
+  // 观看集数以 BGM 为准，没有的保底才用 JF 的
   let epText = '';
   if (it.status === 'watching') {
-    const parts = [];
-    if (it.epTotal > 0) parts.push(`${it.epWatched || 0}/${it.epTotal}${t('vi_ep')}`);
-    else if (it.epWatched > 0) parts.push(`${it.epWatched}${t('vi_ep')}`);
-    if (it.jfNextEp) parts.push(it.jfNextEp);
-    epText = parts.join(' · ');
+    if (it.epTotal > 0) epText = `${it.epWatched || 0}/${it.epTotal}${t('vi_ep')}`;
+    else if (it.epWatched > 0) epText = `${it.epWatched}${t('vi_ep')}`;
+    else if (it.jfNextEp) epText = it.jfNextEp;
   } else if (it.epTotal > 0) {
     epText = `${it.epTotal}${t('vi_ep')}`;
   }

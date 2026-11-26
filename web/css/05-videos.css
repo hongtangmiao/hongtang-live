@@ -216,11 +216,12 @@ a.vi-card:hover {
   min-width: 0;
   flex: 1 1 auto;        /* 吃掉卡片剩下的高度，让标签行贴到底 */
 }
-/* 一行：标题 + 进度 */
+/* 标题独占整行，绝不为集数让路；观看集数排在下一行 */
 .vi-head {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
   min-width: 0;
 }
 .vi-title {

@@ -93,7 +93,7 @@
         bAnime.innerHTML = !items.length ? `<div style="color:var(--os-muted)">${zh ? '正在读取追番列表…' : '読み込み中…'}</div>` :
           `<div class="x2-agrid">${items.map(it => {
             const cov = it.cover || it.fallbackCover || '';
-            const ep = it.epTotal > 0 ? `${it.epWatched || 0}/${it.epTotal}${zh ? '话' : '話'}` : '';
+            const ep = it.epTotal > 0 ? `${it.epWatched || 0}/${it.epTotal}${zh ? '话' : '話'}` : (it.epWatched > 0 ? `${it.epWatched}${zh ? '话' : '話'}` : (it.jfNextEp || ''));
             const sc = it.rate > 0 ? `★${it.rate}` : (it.score > 0 ? `★${Number(it.score).toFixed(1)}` : '');
             return `<a class="x2-vi" href="${safe(it.bgmUrl || '#videos')}" ${it.bgmUrl ? 'target="_blank" rel="noreferrer"' : ''}>
               ${cov ? `<img src="${safe(cov)}" referrerpolicy="no-referrer" loading="lazy" alt="">` : '<div style="aspect-ratio:2/3;background:var(--os-in);border-radius:7px !important"></div>'}
