@@ -7,6 +7,7 @@
   let x2Z = 20;
   let x2UserMoved = false;
   let x2MaxId = null;
+  let x2Animating = false;
 
   const x2Wins = [
     { id: 'now',    ti: 'ti-clock',     zh: '此刻状态',   ja: 'いまの活動',     route: 'now',    x: 24,  y: 44,  w: 376 },
@@ -21,7 +22,7 @@
   const winTitle = w => (isZh() ? w.zh : w.ja);
 
   function layoutDefault() {
-    if (window.innerWidth <= 860 || x2MaxId) return;
+    if (window.innerWidth <= 860 || x2MaxId || x2Animating) return;
     const vw = window.innerWidth;
     const pad = 20, gap = 16;
     const maxW = Math.min(1680, vw - pad * 2);
@@ -123,7 +124,6 @@
     returnStatsToHold();
 
     if (entering) {
-      // 先锁定当前像素高度，保证从窗口态到放大态的 width/height/left/top 全程丝滑插值动画
       win.style.height = win.offsetHeight + 'px';
       void win.offsetWidth;
       x2MaxId = id;
@@ -135,11 +135,17 @@
       if (rootEl) rootEl.classList.add('has-max');
       mountDetail(id);
     } else {
+      // 退出放大动画期间锁住 layoutDefault，防止把下方窗口按动画中高度推到底部
+      x2Animating = true;
       x2MaxId = null;
       if (rootEl) rootEl.classList.remove('has-max');
       win.classList.remove('is-max');
-      setTimeout(() => { if (!x2State[id].max) win.style.height = ''; }, 390);
       paint();
+      setTimeout(() => {
+        x2Animating = false;
+        if (!x2State[id].max) win.style.height = '';
+        if (!x2UserMoved && !x2MaxId) layoutDefault();
+      }, 400);
     }
     updateTitlebarLabels();
     syncDots();
