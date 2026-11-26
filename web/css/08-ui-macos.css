@@ -177,20 +177,24 @@ html[data-theme][data-ui="x2"] .x2-win.is-flipping {
   backdrop-filter: none !important;
   pointer-events: none;
 }
-/* 放大 / 还原时的遮罩层（中间居中图标，淡入淡出，彻底遮住缩放形变与重排） */
+/* 放大 / 还原时的遮罩层（深浅色自适应，居中图标，柔和淡入淡出） */
 html[data-theme][data-ui="x2"] .x2-veil {
   position: absolute;
   inset: 36px 0 0 0;
   z-index: 20;
   display: grid;
   place-items: center;
-  background: rgba(250, 251, 253, 0.94);
-  color: #1d1d1f;
+  background: #16181e;
+  color: #e5e7eb;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .18s ease;
+  transition: opacity .28s ease;
 }
-html[data-theme][data-ui="x2"] .x2-veil .ti { font-size: 42px; opacity: 0.85; }
+html[data-theme][data-ui="x2"][data-x2-tone="light"] .x2-veil {
+  background: #f6f7fa;
+  color: #1d1d1f;
+}
+html[data-theme][data-ui="x2"] .x2-veil .ti { font-size: 42px; opacity: 0.82; }
 html[data-theme][data-ui="x2"] .x2-win.is-veiled .x2-veil { opacity: 1; }
 html[data-theme][data-ui="x2"] .x2-win.is-veiled .x2-body { visibility: hidden; }
 html[data-theme][data-ui="x2"] .x2-win.is-closed {
@@ -208,21 +212,22 @@ html[data-theme][data-ui="x2"] .x2-win.is-minimized {
 @media (prefers-reduced-motion: reduce) {
   html[data-theme][data-ui="x2"] .x2-win,
   html[data-theme][data-ui="x2"] .x2-win.is-minimized,
-  html[data-theme][data-ui="x2"] .x2-win.is-closed { transition: none !important; }
+  html[data-theme][data-ui="x2"] .x2-win.is-closed,
+  html[data-theme][data-ui="x2"] .x2-veil { transition: none !important; }
 }
-/* macOS 放大窗口：留出顶部菜单栏和底部 Dock 栏，关掉全屏大面积 blur 防掉帧 */
+/* macOS 放大窗口：完全不透明底色防止底下窗口透出 + 露出顶部菜单栏与底部 Dock */
 html[data-theme][data-ui="x2"] .x2-win.is-max {
   left: 12px !important;
   top: 38px !important;
   width: calc(100vw - 24px) !important;
   height: calc(100vh - 124px) !important;
   border-radius: 14px !important;
-  background: rgba(24, 26, 32, 0.96);
+  background: #16181e !important;
   backdrop-filter: none !important;
   z-index: 880 !important;
 }
 html[data-theme][data-ui="x2"][data-x2-tone="light"] .x2-win.is-max {
-  background: rgba(248, 249, 252, 0.96);
+  background: #f6f7fa !important;
 }
 html[data-theme][data-ui="x2"] .x2-detail {
   animation: x2FadeIn .18s ease-out both;
@@ -286,7 +291,13 @@ html[data-theme][data-ui="x2"] .x2-detail .mx-tile {
   border: 1px solid var(--os-stroke) !important;
   border-radius: 12px !important;
 }
-html[data-theme][data-ui="x2"] .x2-detail .mx-col { padding: 14px !important; }
+html[data-theme][data-ui="x2"] .x2-detail .mx-col { padding: 16px !important; }
+html[data-theme][data-ui="x2"] .x2-detail .card { padding: 18px 20px !important; }
+html[data-theme][data-ui="x2"] .x2-detail .hm-stat { padding: 14px 16px !important; }
+html[data-theme][data-ui="x2"] .x2-detail .dl-app-row { padding: 10px 14px !important; }
+html[data-theme][data-ui="x2"] .x2-detail .mx-hero,
+html[data-theme][data-ui="x2"] .x2-detail .mx-tile { padding: 12px 14px !important; }
+html[data-theme][data-ui="x2"] .x2-detail .vi-card { padding: 10px !important; gap: 8px !important; }
 html[data-theme][data-ui="x2"] .x2-detail .vi-poster,
 html[data-theme][data-ui="x2"] .x2-detail .vi-poster img { border-radius: 7px !important; }
 html[data-theme][data-ui="x2"] .x2-detail .vi-rate,
@@ -372,11 +383,6 @@ html[data-theme][data-ui="x2"] .x2-bars { display: grid; grid-template-columns: 
 html[data-theme][data-ui="x2"] .x2-bar-lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--os-muted); margin-bottom: 3px; }
 html[data-theme][data-ui="x2"] .x2-bar-trk { height: 5px !important; border: 0 !important; background: var(--os-stroke) !important; border-radius: 4px !important; overflow: hidden; }
 html[data-theme][data-ui="x2"] .x2-bar-trk i { display: block; height: 100% !important; background: var(--os-ink) !important; border-radius: 4px !important; }
-html[data-theme][data-ui="x2"] .x2-wact {
-  border: 0; background: transparent; color: var(--os-muted); font: 600 12px inherit;
-  cursor: pointer; padding: 2px 6px; border-radius: 5px !important;
-}
-html[data-theme][data-ui="x2"] .x2-wact:hover { color: var(--os-ink); background: var(--os-in); }
 
 html[data-theme][data-ui="x2"] .x2-agrid {
   display: grid;

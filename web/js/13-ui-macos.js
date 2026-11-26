@@ -129,14 +129,12 @@
 
   function updateTitlebarLabels() {
     x2Wins.forEach(w => {
-      const btn = document.querySelector(`#x2w-${w.id} .x2-wact`);
       const ttl = document.querySelector(`#x2w-${w.id} .x2-wtitle`);
       if (ttl) ttl.textContent = winTitle(w);
-      if (btn) btn.textContent = x2State[w.id].max ? (isZh() ? '退出全屏' : '戻る') : (isZh() ? '全屏详情' : '詳細');
     });
   }
 
-  /* 遮罩淡入 + GPU FLIP 滑行 + 遮罩淡出（零文字拉伸、零重排掉帧） */
+  /* 柔和遮罩淡入 + GPU FLIP 滑行 + 遮罩淡出（缩小时先切回轻量总结再量尺寸，零闪现） */
   function flipWindow(win, mutate, onSwap, onDone) {
     win.classList.add('is-veiled');
     const first = win.getBoundingClientRect();
@@ -155,11 +153,11 @@
     setTimeout(() => {
       win.classList.remove('is-flipping');
       if (onSwap) onSwap();
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         win.classList.remove('is-veiled');
         if (onDone) onDone();
-      });
-    }, 320);
+      }, 90);
+    }, 330);
   }
 
   function toggleFullscreen(id) {
@@ -199,11 +197,11 @@
       x2MaxId = null;
       x2State[id].max = false;
       if (rootEl) rootEl.classList.remove('has-max');
+      // 关键：在遮罩盖住状态下先切回总结 DOM 再移去 is-max，这样 last 就是真实小窗高度，彻底消灭结尾闪现
       flipWindow(win, () => {
-        win.classList.remove('is-max');
-      }, () => {
         paint();
-      }, () => {
+        win.classList.remove('is-max');
+      }, null, () => {
         x2Animating = false;
         if (!x2UserMoved && !x2MaxId) layoutDefault();
       });
@@ -246,7 +244,7 @@
             <button class="x2-l-g" type="button" data-act="max" data-id="${w.id}" title="全屏详情 / 还原总结"></button>
           </div>
           <span class="x2-wtitle">${winTitle(w)}</span>
-          <button class="x2-wact" type="button" data-act="max" data-id="${w.id}"></button>
+          <span style="width:42px"></span>
         </div>
         <div class="x2-veil" aria-hidden="true"><i class="ti ${w.ti}"></i></div>
         <div class="x2-body" id="x2b-${w.id}"></div>
