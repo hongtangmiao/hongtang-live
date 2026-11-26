@@ -19,15 +19,16 @@
   const x2State = {};
   x2Wins.forEach(w => { x2State[w.id] = { open: true, minimized: false, max: false }; });
 
-  /* 计算窗口飞缩到 Dock 对应缩略图（或图标）的纯 GPU transform 偏移 */
+  /* 精确计算窗口（transform-origin: top left）飞缩到 Dock 对应缩略图正中心的偏移 */
   function setDockVector(id, win) {
     const target = document.querySelector(`#x2DockTray .x2-thumb[data-id="${id}"]`)
       || document.querySelector(`#x2Dock .x2-ditem[data-id="${id}"]`);
     if (!target || !win) return;
     const wr = win.getBoundingClientRect();
     const ir = target.getBoundingClientRect();
-    const dx = Math.round((ir.left + ir.width / 2) - (wr.left + wr.width / 2));
-    const dy = Math.round((ir.top + ir.height / 2) - (wr.top + wr.height / 2));
+    const s = 0.08;
+    const dx = Math.round((ir.left + ir.width / 2) - wr.left - (wr.width * s) / 2);
+    const dy = Math.round((ir.top + ir.height / 2) - wr.top - (wr.height * s) / 2);
     win.style.setProperty('--min-x', dx + 'px');
     win.style.setProperty('--min-y', dy + 'px');
   }
@@ -135,8 +136,9 @@
     });
   }
 
-  /* 纯 GPU FLIP 动画（只动画 transform，零重排；动画结束后再挂载重 DOM 详情，彻底消除掉帧） */
-  function flipWindow(win, mutate, onDone) {
+  /* 遮罩淡入 + GPU FLIP 滑行 + 遮罩淡出（零文字拉伸、零重排掉帧） */
+  function flipWindow(win, mutate, onSwap, onDone) {
+    win.classList.add('is-veiled');
     const first = win.getBoundingClientRect();
     mutate();
     const last = win.getBoundingClientRect();
@@ -152,8 +154,12 @@
     win.style.transform = '';
     setTimeout(() => {
       win.classList.remove('is-flipping');
-      if (onDone) onDone();
-    }, 330);
+      if (onSwap) onSwap();
+      requestAnimationFrame(() => {
+        win.classList.remove('is-veiled');
+        if (onDone) onDone();
+      });
+    }, 320);
   }
 
   function toggleFullscreen(id) {
@@ -166,7 +172,7 @@
       if (w.id !== id && x2State[w.id].max) {
         x2State[w.id].max = false;
         const el = document.getElementById('x2w-' + w.id);
-        if (el) el.classList.remove('is-max');
+        if (el) el.classList.remove('is-max', 'is-veiled');
       }
     });
     returnStatsToHold();
@@ -184,18 +190,19 @@
         win.classList.remove('is-closed', 'is-minimized');
         win.classList.add('is-max');
       }, () => {
-        x2Animating = false;
         if (x2MaxId === id) mountDetail(id);
+      }, () => {
+        x2Animating = false;
       });
     } else {
       x2Animating = true;
       x2MaxId = null;
       x2State[id].max = false;
       if (rootEl) rootEl.classList.remove('has-max');
-      // 先切回轻量总结内容再跑 FLIP 缩小，零重 DOM 卡顿
-      paint();
       flipWindow(win, () => {
         win.classList.remove('is-max');
+      }, () => {
+        paint();
       }, () => {
         x2Animating = false;
         if (!x2UserMoved && !x2MaxId) layoutDefault();
@@ -241,6 +248,7 @@
           <span class="x2-wtitle">${winTitle(w)}</span>
           <button class="x2-wact" type="button" data-act="max" data-id="${w.id}"></button>
         </div>
+        <div class="x2-veil" aria-hidden="true"><i class="ti ${w.ti}"></i></div>
         <div class="x2-body" id="x2b-${w.id}"></div>
       </section>`).join('');
 

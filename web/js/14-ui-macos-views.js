@@ -86,8 +86,9 @@
     if (x2MaxId !== 'anime') {
       const bAnime = document.getElementById('x2b-anime');
       if (bAnime) {
+        const limit = window.innerWidth >= 1440 ? 6 : 4;
         const items = (typeof viState !== 'undefined' && viState.data && Array.isArray(viState.data.items))
-          ? viState.data.items.filter(x => x.status === 'watching').slice(0, 4)
+          ? viState.data.items.filter(x => x.status === 'watching').slice(0, limit)
           : [];
         bAnime.innerHTML = !items.length ? `<div style="color:var(--os-muted)">${zh ? '正在读取追番列表…' : '読み込み中…'}</div>` :
           `<div class="x2-agrid">${items.map(it => {
@@ -95,7 +96,7 @@
             const ep = it.epTotal > 0 ? `${it.epWatched || 0}/${it.epTotal}${zh ? '话' : '話'}` : '';
             const sc = it.rate > 0 ? `★${it.rate}` : (it.score > 0 ? `★${Number(it.score).toFixed(1)}` : '');
             return `<a class="x2-vi" href="${safe(it.bgmUrl || '#videos')}" ${it.bgmUrl ? 'target="_blank" rel="noreferrer"' : ''}>
-              ${cov ? `<img src="${safe(cov)}" referrerpolicy="no-referrer" loading="lazy" alt="">` : '<div style="height:196px;background:var(--os-in);border-radius:7px !important"></div>'}
+              ${cov ? `<img src="${safe(cov)}" referrerpolicy="no-referrer" loading="lazy" alt="">` : '<div style="aspect-ratio:2/3;background:var(--os-in);border-radius:7px !important"></div>'}
               <b>${safe(it.title || '')}</b>
               <small>${safe([ep, sc].filter(Boolean).join(' · '))}</small>
             </a>`;
