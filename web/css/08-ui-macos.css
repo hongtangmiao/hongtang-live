@@ -180,8 +180,8 @@ html[data-theme][data-ui="x2"] .x2-host {
 html[data-theme][data-ui="x2"] .x2-host:last-child { margin-bottom: 0; }
 html[data-theme][data-ui="x2"] .x2-bars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 7px; }
 html[data-theme][data-ui="x2"] .x2-bar-lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--os-muted); margin-bottom: 3px; }
-html[data-theme][data-ui="x2"] .x2-bar-trk { height: 5px; background: var(--os-stroke); border-radius: 4px !important; overflow: hidden; }
-html[data-theme][data-ui="x2"] .x2-bar-trk i { display: block; height: 100%; background: var(--os-ink); border-radius: 4px !important; }
+html[data-theme][data-ui="x2"] .x2-bar-trk { height: 5px !important; border: 0 !important; background: var(--os-stroke) !important; border-radius: 4px !important; overflow: hidden; }
+html[data-theme][data-ui="x2"] .x2-bar-trk i { display: block; height: 100% !important; background: var(--os-ink) !important; border-radius: 4px !important; }
 html[data-theme][data-ui="x2"] .x2-wact {
   border: 0; background: transparent; color: var(--os-muted); font: 600 12px inherit;
   cursor: pointer; padding: 2px 6px; border-radius: 5px !important;
