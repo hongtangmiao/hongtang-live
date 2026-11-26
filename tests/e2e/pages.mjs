@@ -53,9 +53,15 @@ async function viewNotEmpty(name) {
   return len;
 }
 
-step = '打开首页';
+step = '打开首页（桌面默认 X2）';
 await page.goto(`${BASE}/?lang=ja#home`, { waitUntil: 'load', timeout: 30000 });
 await page.waitForTimeout(SETTLE_MS);
+const x2Len = await page.evaluate(() => (document.getElementById('x2Root')?.innerText || '').trim().length);
+if (x2Len === 0) fails.push('[x2] 桌面默认 X2 视图 #x2Root 是空的');
+await shot('x2-desktop');
+console.log(`桌面默认 X2：正文 ${x2Len} 字`);
+await page.evaluate(() => { if (window.HL_UI) window.HL_UI.setMode('classic'); });
+await page.waitForTimeout(400);
 const scripts = await page.evaluate(() => [...document.scripts].map(s => s.getAttribute('src')).filter(Boolean));
 console.log('页面加载的脚本：', scripts.join(' '));
 const sheets = await page.evaluate(() => [...document.querySelectorAll('link[rel=stylesheet]')].map(l => l.getAttribute('href')));
