@@ -240,13 +240,13 @@ html[data-theme][data-ui="ac"] .ac-rail-pill {
   transition: transform .42s cubic-bezier(0.32, 1.14, 0.38, 1); pointer-events: none; z-index: 0;
 }
 
-/* ---------- 主内容区：真正的宽幅 Bento 排版 ---------- */
+/* ---------- 主内容区：充分利用宽屏空间 ---------- */
 html[data-theme][data-ui="ac"] .main {
   margin: 0 auto !important;
-  max-width: 1180px !important;
+  max-width: min(1680px, 100%) !important;
   height: auto !important;
   overflow: visible !important;
-  padding: 12px 86px 56px 24px !important;
+  padding: 12px 88px 56px 28px !important;
 }
 html[data-theme][data-ui="ac"] .view { height: auto !important; overflow: visible !important; padding-right: 0 !important; }
 html[data-theme][data-ui="ac"] .topbar { background: transparent !important; border: 0 !important; padding: 10px 4px 16px !important; }
@@ -275,12 +275,19 @@ html[data-theme][data-ui="ac"] .lang-toggle span.on {
   background: var(--ac-ink) !important;
   color: var(--ac-bg) !important;
 }
-/* 音乐页改为宽松 2 列，不再 4 列挤成一团 */
+/* 音乐页：宽屏 4 列并排充分利用空间，中屏 2 列，窄屏 1 列 */
 html[data-theme][data-ui="ac"] .mx-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   gap: 18px !important;
 }
+@media (max-width: 1519px) {
+  html[data-theme][data-ui="ac"] .mx-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
 html[data-theme][data-ui="ac"] .mx-col { padding: 16px !important; }
+html[data-theme][data-ui="ac"] .mx-hero { padding: 12px 14px !important; }
+html[data-theme][data-ui="ac"] .mx-tile { padding: 12px 14px !important; }
 
 /* 行 1：紧凑横向个人卡 + 健康卡（彻底消灭健康卡顶部大片留白） */
 html[data-theme][data-ui="ac"] .home-grid {
@@ -379,7 +386,20 @@ html[data-theme][data-ui="ac"] .vi-card {
   border: 1px solid var(--ac-line) !important;
   border-radius: 10px !important;
 }
+/* 彻底解决框与文字贴边挤压：显式补足四边内边距 */
+html[data-theme][data-ui="ac"] .hm-card,
+html[data-theme][data-ui="ac"] .hm-health { padding: 20px 22px !important; }
+html[data-theme][data-ui="ac"] .hm-stat { padding: 14px 16px !important; }
+html[data-theme][data-ui="ac"] .hm-sys-host { padding: 12px 15px !important; }
+html[data-theme][data-ui="ac"] .hm-app-pills { gap: 8px !important; }
+html[data-theme][data-ui="ac"] .hm-app-pill {
+  padding: 8px 14px !important;
+  gap: 10px !important;
+  line-height: 1.4 !important;
+}
 html[data-theme][data-ui="ac"] .dl-app-row { padding: 10px 14px !important; }
+html[data-theme][data-ui="ac"] .dl-pill { padding: 3px 10px !important; }
+html[data-theme][data-ui="ac"] .vi-card { padding: 10px !important; gap: 8px !important; }
 
 /* 番剧评分与来源标签高对比度 + 统一 >=12px */
 html[data-theme][data-ui="ac"] .vi-rate,
