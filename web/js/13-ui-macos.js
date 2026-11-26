@@ -17,7 +17,19 @@
     { id: 'anime',  ti: 'ti-device-tv', zh: '追番书架',   ja: 'アニメ',         route: 'videos', x: 416, y: 268, w: 836 },
   ];
   const x2State = {};
-  x2Wins.forEach(w => { x2State[w.id] = { open: true, max: false }; });
+  x2Wins.forEach(w => { x2State[w.id] = { open: true, minimized: false, max: false }; });
+
+  /* 计算窗口飞缩到对应 Dock 图标中心的纯 GPU transform 偏移 */
+  function setDockVector(id, win) {
+    const icon = document.querySelector(`#x2Dock .x2-ditem[data-id="${id}"]`);
+    if (!icon || !win) return;
+    const wr = win.getBoundingClientRect();
+    const ir = icon.getBoundingClientRect();
+    const dx = Math.round((ir.left + ir.width / 2) - (wr.left + wr.width / 2));
+    const dy = Math.round((ir.top + ir.height / 2) - (wr.top + wr.height / 2));
+    win.style.setProperty('--min-x', dx + 'px');
+    win.style.setProperty('--min-y', dy + 'px');
+  }
 
   const winTitle = w => (isZh() ? w.zh : w.ja);
 
@@ -128,8 +140,9 @@
       void win.offsetWidth;
       x2MaxId = id;
       x2State[id].open = true;
+      x2State[id].minimized = false;
       x2State[id].max = true;
-      win.classList.remove('is-hidden');
+      win.classList.remove('is-closed', 'is-minimized');
       win.classList.add('is-max');
       win.style.zIndex = ++x2Z;
       if (rootEl) rootEl.classList.add('has-max');
@@ -228,10 +241,20 @@
       if (!b) return;
       const id = b.dataset.id, act = b.dataset.act;
       const win = document.getElementById('x2w-' + id);
-      if (act === 'close' || act === 'min') {
+      if (act === 'close') {
         if (x2State[id].max) toggleFullscreen(id);
         x2State[id].open = false;
-        win.classList.add('is-hidden');
+        x2State[id].minimized = false;
+        win.classList.remove('is-minimized');
+        win.classList.add('is-closed');
+        syncDots();
+      } else if (act === 'min') {
+        if (x2State[id].max) toggleFullscreen(id);
+        setDockVector(id, win);
+        x2State[id].open = true;
+        x2State[id].minimized = true;
+        win.classList.remove('is-closed');
+        win.classList.add('is-minimized');
         syncDots();
       } else if (act === 'max') {
         toggleFullscreen(id);
@@ -245,12 +268,17 @@
       const id = it.dataset.id;
       const win = document.getElementById('x2w-' + id);
       if (x2MaxId && x2MaxId !== id) {
-        // 当前有窗口放大时，点 Dock 里的其他图标直接切到那个窗口的放大详情
         toggleFullscreen(id);
         return;
       }
-      x2State[id].open = true;
-      win.classList.remove('is-hidden');
+      if (x2State[id].minimized) {
+        // 从 Dock 对应图标位置丝滑弹回原位
+        x2State[id].minimized = false;
+        win.classList.remove('is-minimized');
+      } else if (!x2State[id].open) {
+        x2State[id].open = true;
+        win.classList.remove('is-closed');
+      }
       win.style.zIndex = ++x2Z;
       syncDots();
     });
@@ -272,7 +300,8 @@
     x2Wins.forEach(w => {
       const el = document.querySelector(`#x2Dock .x2-ditem[data-id="${w.id}"]`);
       if (el) {
-        el.classList.toggle('open', !!x2State[w.id].open);
+        el.classList.toggle('open', !!x2State[w.id].open && !x2State[w.id].minimized);
+        el.classList.toggle('minimized', !!x2State[w.id].minimized);
         const sp = el.querySelector('span');
         if (sp) sp.textContent = winTitle(w);
       }
@@ -283,10 +312,10 @@
     if (x2MaxId) toggleFullscreen(x2MaxId);
     x2UserMoved = false;
     x2Wins.forEach((w, i) => {
-      x2State[w.id] = { open: true, max: false };
+      x2State[w.id] = { open: true, minimized: false, max: false };
       const win = document.getElementById('x2w-' + w.id);
       if (!win) return;
-      win.classList.remove('is-hidden', 'is-max');
+      win.classList.remove('is-closed', 'is-minimized', 'is-max');
       win.style.zIndex = i + 1;
     });
     layoutDefault();

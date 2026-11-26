@@ -178,10 +178,22 @@ html[data-theme][data-ui="x2"] .x2-win {
     opacity .24s var(--os-spring),
     transform .28s var(--os-spring);
 }
-html[data-theme][data-ui="x2"] .x2-win.is-hidden {
+html[data-theme][data-ui="x2"] .x2-win.is-closed {
   opacity: 0;
-  transform: scale(0.86) translateY(36px);
+  transform: scale(0.92);
   pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+}
+html[data-theme][data-ui="x2"] .x2-win.is-minimized {
+  opacity: 0;
+  transform: translate(var(--min-x, 0px), var(--min-y, 260px)) scale(0.08);
+  pointer-events: none;
+  transition: transform .34s cubic-bezier(0.4, 0, 0.2, 1), opacity .28s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme][data-ui="x2"] .x2-win,
+  html[data-theme][data-ui="x2"] .x2-win.is-minimized,
+  html[data-theme][data-ui="x2"] .x2-win.is-closed { transition: none !important; }
 }
 /* macOS 放大窗口：留出顶部菜单栏和底部 Dock 栏 */
 html[data-theme][data-ui="x2"] .x2-win.is-max {
@@ -380,9 +392,10 @@ html[data-theme][data-ui="x2"] .x2-ditem span {
 html[data-theme][data-ui="x2"] .x2-ditem:hover span { opacity: 1; }
 html[data-theme][data-ui="x2"] .x2-ditem::after {
   content: ""; position: absolute; bottom: -6px; width: 4px; height: 4px;
-  border-radius: 50% !important; background: var(--os-ink); opacity: 0;
+  border-radius: 50% !important; background: var(--os-ink); opacity: 0; transition: opacity .2s, background .2s;
 }
 html[data-theme][data-ui="x2"] .x2-ditem.open::after { opacity: 0.85; }
+html[data-theme][data-ui="x2"] .x2-ditem.minimized::after { opacity: 0.9; background: #febc2e; }
 html[data-theme][data-ui="x2"] .x2-dsep { width: 1px; height: 34px; background: var(--os-stroke); align-self: center; }
 
 @media (max-width: 860px) {
