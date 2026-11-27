@@ -30,7 +30,7 @@ const I18N = {
   ja: {
     nav_home: 'ホーム', nav_music: '音楽',
     nav_videos: 'アニメ',
-    nav_account: 'アカウント', nav_stats: 'サーバー統計',
+    nav_account: 'アカウント', nav_stats: 'サーバー統計', nav_status: 'サービス状態',
 
     /* いま */
     nav_now: 'いま', nw_sub: 'いま何をしているか・今日使ったアプリ',
@@ -104,6 +104,15 @@ const I18N = {
     ac_info: '{name} の情報', mail: 'メール',
     ac_server: 'サーバー情報',
     ac_stats: 'サーバー統計', ac_stats_sub: 'CPU・メモリ・ディスク・GPU の稼働状況',
+    ac_status: 'サービス状態', ac_status_sub: '公開サイト・各種サービスの稼働状況',
+
+    /* uptime status */
+    up_sub: '公開サービス・サイトの稼働監視',
+    up_all_ok: 'すべて正常', up_degraded: '一部障害', up_down: '障害発生', up_maint: 'メンテナンス中',
+    up_unconfigured: '監視サービスは未設定です', up_empty: '監視項目がありません',
+    up_err: 'ステータスを取得できませんでした',
+    up_up: '正常', up_off: '停止', up_pending: '確認中',
+    up_open: '元ページを開く', up_online_cnt: '{up}/{total} 稼働中',
 
     /* stats */
     crumb_server: 'サーバー情報',

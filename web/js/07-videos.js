@@ -271,5 +271,6 @@ function pageAccount() {
   <div class="acct-label">${t('ac_server')}</div>
   <div class="acct-list">
     ${acctCard({ icon: 'info', title: t('ac_stats'), sub: t('ac_stats_sub'), trail: ICON.chevron, route: 'stats' })}
+    ${acctCard({ icon: 'globe', title: t('ac_status'), sub: t('ac_status_sub'), trail: ICON.chevron, route: 'status' })}
   </div>`;
 }

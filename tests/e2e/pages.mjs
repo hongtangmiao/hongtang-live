@@ -12,7 +12,7 @@ import path from 'node:path';
 
 const BASE = (process.argv[2] || 'http://127.0.0.1:8091').replace(/\/$/, '');
 const OUT = process.argv[3] || path.join(path.dirname(new URL(import.meta.url).pathname), 'screenshots');
-const ROUTES = ['home', 'now', 'music', 'videos', 'account', 'stats'];
+const ROUTES = ['home', 'now', 'music', 'videos', 'status', 'account', 'stats'];
 const SETTLE_MS = 2500;
 
 fs.mkdirSync(OUT, { recursive: true });

@@ -31,6 +31,6 @@ async function loadDaylog(force = false) {
 /* 从后台切回来时立刻刷新一次，不用等下一个 20 秒 */
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) return;
-  if (hmTimer && document.getElementById('hmHealthBox')) { loadDaylog(true); loadHomeMusic(true); loadHomeSys(true); }
+  if (hmTimer && document.getElementById('hmHealthBox')) { loadDaylog(true); loadHomeMusic(true); loadHomeSys(true); if (typeof loadUptime === 'function') loadUptime(true); }
 });
 

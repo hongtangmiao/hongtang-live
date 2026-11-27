@@ -40,6 +40,7 @@ func redactedConfig() M {
 		"netease":   M{"api": c.NetEase.API, "refresh_hours": c.NetEase.RefreshHours},
 		"bangumi":   M{"user": c.Bangumi.User},
 		"jellyfin":  M{"url": c.Jellyfin.URL, "user": c.Jellyfin.User},
+		"uptime":    M{"url": c.Uptime.URL, "slug": c.Uptime.Slug, "public_url": c.Uptime.PublicURL},
 		"daylog_db": c.DaylogDB,
 		"stats": M{"pc_name": c.Stats.PCName, "server_id": c.Stats.ServerID, "server_name": c.Stats.ServerName,
 			"host_proc": c.Stats.HostProc, "host_root": c.Stats.HostRoot, "disks": c.Stats.Disks},
@@ -75,7 +76,7 @@ func adminStatus() M {
 		pcLast = isoUTC(time.UnixMilli(pcAt))
 	}
 	_, ext := customAvatar()
-	return M{"netease": ne, "anime": anime, "daylog_ready": daylogDB() != nil,
+	return M{"netease": ne, "anime": anime, "uptime": uptimeStatus(), "daylog_ready": daylogDB() != nil,
 		"pc": M{"online": hostAlive("pc"), "last": pcLast}, "custom_avatar": ext != ""}
 }
 
@@ -93,7 +94,12 @@ type configPatch struct {
 		} `json:"netease"`
 		Bangumi  *struct{ User string }      `json:"bangumi"`
 		Jellyfin *struct{ URL, User string } `json:"jellyfin"`
-		DaylogDB *string                     `json:"daylog_db"`
+		Uptime   *struct {
+			URL       string `json:"url"`
+			Slug      string `json:"slug"`
+			PublicURL string `json:"public_url"`
+		} `json:"uptime"`
+		DaylogDB *string `json:"daylog_db"`
 		Stats    *struct {
 			PCName     string `json:"pc_name"`
 			ServerID   string `json:"server_id"`
@@ -195,6 +201,17 @@ func applyPatch(c *Config, p *configPatch) error {
 		}
 		c.Jellyfin.User, _ = limit(j.User, 60, "")
 	}
+	if u := p.Config.Uptime; u != nil {
+		if c.Uptime.URL, err = httpURL(u.URL, "Uptime Kuma 地址"); err != nil {
+			return err
+		}
+		if c.Uptime.Slug, err = limit(strings.Trim(strings.TrimSpace(u.Slug), "/"), 60, "状态页 Slug"); err != nil {
+			return err
+		}
+		if c.Uptime.PublicURL, err = httpURL(u.PublicURL, "公开状态页链接"); err != nil {
+			return err
+		}
+	}
 	if d := p.Config.DaylogDB; d != nil {
 		v := strings.TrimSpace(*d)
 		if v != "" && !filepath.IsAbs(v) {
@@ -271,6 +288,9 @@ func afterConfigChange(old, c *Config) {
 		wallMu.Lock()
 		wallData, wallAt = nil, time.Time{}
 		wallMu.Unlock()
+	}
+	if old.Uptime != c.Uptime {
+		resetUptimeCache()
 	}
 	if old.DaylogDB != c.DaylogDB {
 		resetDaylogDB()

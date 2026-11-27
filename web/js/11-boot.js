@@ -66,8 +66,9 @@ async function boot() {
   await NET.detect();      // 有 Go 服务端就走同源网关，否则直连上游
   render(false);
   // X2 模式在 13-ui-macos.js 同步初始化时 NET.detect() 尚未完成，非 #home 入口需补拉一次音乐状态
-  if (window.HL_UI && window.HL_UI.getMode() === 'x2' && typeof loadHomeMusic === 'function') {
-    loadHomeMusic(true);
+  if (window.HL_UI && window.HL_UI.getMode() === 'x2') {
+    if (typeof loadHomeMusic === 'function') loadHomeMusic(true);
+    if (typeof loadUptime === 'function') loadUptime();
   }
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

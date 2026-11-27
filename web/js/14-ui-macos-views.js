@@ -81,6 +81,13 @@
       }
     }
 
+    if (x2MaxId !== 'status') {
+      const bStatus = document.getElementById('x2b-status');
+      if (bStatus && typeof x2UptimeSummaryHtml === 'function') {
+        bStatus.innerHTML = x2UptimeSummaryHtml(zh);
+      }
+    }
+
     if (x2MaxId !== 'anime') {
       const bAnime = document.getElementById('x2b-anime');
       if (bAnime) {

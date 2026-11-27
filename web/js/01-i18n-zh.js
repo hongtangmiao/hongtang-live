@@ -3,7 +3,7 @@
 I18N.zh = {
     nav_home: '首页', nav_music: '音乐',
     nav_videos: '番剧',
-    nav_account: '账户', nav_stats: '服务器统计',
+    nav_account: '账户', nav_stats: '服务器统计', nav_status: '服务状态',
 
     nav_now: '此刻', nw_sub: '此刻在干嘛 · 今天用过的应用',
     nw_today: '今天', nw_that_day: '当天', nw_apps: '应用', nw_last: '最后活动',
@@ -72,6 +72,14 @@ I18N.zh = {
     ac_info: '{name} 的信息', mail: '邮件',
     ac_server: '服务器信息',
     ac_stats: '服务器统计', ac_stats_sub: 'CPU、内存、磁盘、GPU 的运行状态',
+    ac_status: '服务状态', ac_status_sub: '网站与各项服务的在线状态与延迟',
+
+    up_sub: '网站与自托管服务在线监控',
+    up_all_ok: '全部正常', up_degraded: '部分异常', up_down: '服务中断', up_maint: '维护中',
+    up_unconfigured: '尚未在设置页配置 Uptime Kuma', up_empty: '暂无监控项目',
+    up_err: '服务状态拉取失败',
+    up_up: '在线', up_off: '离线', up_pending: '检测中',
+    up_open: '打开原状态页', up_online_cnt: '{up}/{total} 在线',
 
     crumb_server: '服务器信息',
     st_refresh: '刷新',

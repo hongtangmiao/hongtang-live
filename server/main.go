@@ -132,6 +132,7 @@ func route(w http.ResponseWriter, r *http.Request) {
 		for k, v := range videosStatus() {
 			out[k] = v
 		}
+		out["uptimeReady"] = uptimeReady()
 		writeJSON(w, 200, out)
 
 	case p == "/admin" || p == "/admin/":
@@ -222,6 +223,12 @@ func route(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		writeJSON(w, 200, getWall(r.URL.Query().Get("refresh") == "1"))
+
+	case p == "/api/uptime":
+		if denied() {
+			return
+		}
+		handleUptime(w, r)
 
 	case strings.HasPrefix(p, "/api/videos/jf-img/"):
 		if denied() {

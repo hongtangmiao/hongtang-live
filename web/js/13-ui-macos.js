@@ -13,6 +13,7 @@
     { id: 'health', ti: 'ti-heartbeat', zh: '身体健康',   ja: 'ヘルスケア',     route: 'now',    x: 416, y: 44,  w: 420 },
     { id: 'music',  ti: 'ti-music',     zh: '音乐',       ja: '音楽',           route: 'music',  x: 852, y: 44,  w: 400 },
     { id: 'hosts',  ti: 'ti-cpu',       zh: '活动监视器', ja: 'システムリソース', route: 'stats',  x: 24,  y: 374, w: 376 },
+    { id: 'status', ti: 'ti-server-2',  zh: '服务状态',   ja: 'サービス状態',   route: 'status', x: 24,  y: 590, w: 376 },
     { id: 'anime',  ti: 'ti-device-tv', zh: '追番书架',   ja: 'アニメ',         route: 'videos', x: 416, y: 268, w: 836 },
   ];
   const x2State = {};
@@ -78,6 +79,9 @@
       wMusic ? (44 + wMusic.offsetHeight + gap) : 250
     );
     setBox('hosts', ox, leftY, leftW);
+    const wHosts = document.getElementById('x2w-hosts');
+    const leftY2 = wHosts ? (leftY + wHosts.offsetHeight + gap) : (leftY + 210);
+    setBox('status', ox, leftY2, leftW);
     setBox('anime', ox + leftW + gap, rightY, rightW);
   }
 
@@ -123,6 +127,11 @@
     if (rt === 'videos' && typeof pageVideos === 'function') {
       body.innerHTML = `<div class="x2-detail">${pageVideos()}</div>`;
       if (typeof loadVideos === 'function') loadVideos();
+      return;
+    }
+    if (rt === 'status' && typeof pageStatus === 'function') {
+      body.innerHTML = `<div class="x2-detail">${pageStatus()}</div>`;
+      if (typeof loadUptime === 'function') loadUptime();
     }
   }
 

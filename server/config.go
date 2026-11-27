@@ -52,6 +52,11 @@ type Config struct {
 		Key  string `json:"key"`
 		User string `json:"user"`
 	} `json:"jellyfin"`
+	Uptime struct {
+		URL       string `json:"url"`
+		Slug      string `json:"slug"`
+		PublicURL string `json:"public_url"`
+	} `json:"uptime"`
 	DaylogDB     string `json:"daylog_db"`
 	DaylogRoot   string `json:"daylog_root"` // daylog 数据目录（inbox/raw/reports/logs），空则用 env DAYLOG_ROOT
 	DaylogWriter bool   `json:"daylog_writer"`
@@ -204,6 +209,9 @@ func configFromEnv() *Config {
 	c.Jellyfin.URL = strings.TrimRight(c.Jellyfin.URL, "/")
 	c.Jellyfin.Key = g("JF_KEY")
 	c.Jellyfin.User = g("JF_USER")
+	c.Uptime.URL = strings.TrimRight(g("UPTIME_URL"), "/")
+	c.Uptime.Slug = g("UPTIME_SLUG")
+	c.Uptime.PublicURL = strings.TrimRight(g("UPTIME_PUBLIC_URL"), "/")
 	c.DaylogDB = g("DAYLOG_DB")
 	c.DaylogRoot = g("DAYLOG_ROOT")
 	dw := strings.ToLower(g("DAYLOG_WRITER"))

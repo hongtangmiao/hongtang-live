@@ -83,6 +83,23 @@ function renderSettings(cfg, st) {
       secretField('Jellyfin API Key', 'jellyfin.key', set['jellyfin.key'], 'Jellyfin 控制台 → API 密钥'),
       f('Jellyfin 用户名', 'jf_user', cfg.jellyfin.user, { hint: '留空就用第一个用户' })));
 
+  /* 服务状态（Uptime Kuma） */
+  const upCfg = cfg.uptime || {};
+  const upSt = st.uptime || {};
+  const upSum = upSt.summary || null;
+  const upLine = !upSt.ready ? h('span', { class: 'muted', text: '没配置' })
+    : upSt.error ? h('span', { class: 'bad', text: '拉取失败：' + upSt.error })
+    : upSum ? h('span', { class: upSum.down > 0 ? 'bad' : 'ok', text: `正常，${upSum.up || 0}/${upSum.total || 0} 在线` })
+    : h('span', { text: '已配置（还没拉取过）' });
+  const uptime = h('section', { class: 'win' },
+    h('h2', { text: '服务状态（Uptime Kuma）' }),
+    h('p', { class: 'hint', text: '同机 / 同 Docker 网络建议填内网地址（如 http://uptime-kuma:3001），避免经过 Cloudflare 盾拦截。' }),
+    h('div', { class: 'status' }, 'Uptime Kuma：', upLine),
+    h('div', { class: 'grid' },
+      f('Uptime Kuma 地址', 'up_url', upCfg.url || '', { placeholder: 'http://uptime-kuma:3001' }),
+      f('状态页 Slug', 'up_slug', upCfg.slug || '', { placeholder: 'web', hint: '/status/ 后面那一段，留空默认 web' }),
+      f('公开状态页链接（可选）', 'up_pub', upCfg.public_url || '', { placeholder: 'https://state.7120721.xyz/status/web', full: true, hint: '填了以后前端会显示「打开原状态页」按钮' })));
+
   /* 系统资源 / daylog */
   const disks = h('div', { class: 'list' }, (cfg.stats.disks || []).map(diskRow));
   const pcLine = st.pc && st.pc.last
@@ -135,6 +152,7 @@ function renderSettings(cfg, st) {
         netease: { api: v.ne_api.value, refresh_hours: Number(v.ne_hours.value) || 0 },
         bangumi: { user: v.bgm_user.value },
         jellyfin: { url: v.jf_url.value, user: v.jf_user.value },
+        uptime: { url: v.up_url.value, slug: v.up_slug.value, public_url: v.up_pub.value },
         daylog_db: v.daylog_db.value,
         stats: { pc_name: v.pc_name.value, server_id: v.server_id.value, server_name: v.server_name.value,
           disks: [...disks.children].map(r => r._get()) },
@@ -155,7 +173,7 @@ function renderSettings(cfg, st) {
     finally { save.disabled = false; }
   });
   const bar = h('div', { class: 'savebar' }, h('div', { class: 'in' }, msg, save));
-  const forms = h('div', {}, site, netease, anime, stats, daylog);
+  const forms = h('div', {}, site, netease, anime, uptime, stats, daylog);
   forms.addEventListener('input', () => { msg.textContent = '有改动还没保存'; msg.className = 'msg gold'; });
   const dlBox = h('div', {}, h('p', { class: 'muted', text: 'daylog 设置加载中…' }));
   const devBox = h('div', {}, h('p', { class: 'muted', text: '设备加载中…' }));

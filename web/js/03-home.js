@@ -286,6 +286,8 @@ function paintHomeCards() {
   if (mb) mb.innerHTML = homeMusicCardHtml();
   const sb = $('#hmSysBox');
   if (sb) sb.innerHTML = homeSysCardHtml();
+  const ub = $('#hmUptimeBox');
+  if (ub && typeof homeUptimeCardHtml === 'function') ub.innerHTML = homeUptimeCardHtml();
   const vb = $('#hmAnimeBox');
   if (vb) {
     vb.innerHTML = homeAnimeCardHtml();
@@ -377,6 +379,7 @@ function loadHome() {
   loadDaylog();
   loadHomeMusic();
   loadHomeSys();
+  if (typeof loadUptime === 'function') loadUptime();
   if (!viState.data && !viState.loading) {
     loadVideos().then(() => paintHomeCards());
   }
@@ -390,6 +393,7 @@ function loadHome() {
     loadDaylog(true);
     loadHomeMusic(true);
     loadHomeSys(true);
+    if (typeof loadUptime === 'function') loadUptime(true);
   }, 20000);
 }
 
@@ -406,6 +410,7 @@ function pageHome() {
     <div id="hmNowBox" class="hm-slot">${homeNowCardHtml()}</div>
     <div id="hmMusicBox" class="hm-slot">${homeMusicCardHtml()}</div>
     <div id="hmSysBox" class="hm-slot">${homeSysCardHtml()}</div>
+    <div id="hmUptimeBox" class="hm-slot is-wide">${typeof homeUptimeCardHtml === 'function' ? homeUptimeCardHtml() : ''}</div>
     <div class="hm-anime-pair">
       <div id="hmAnimeBox" class="hm-slot">${homeAnimeCardHtml()}</div>
       <div id="hmRecAnimeBox" class="hm-slot">${homeRecAnimeCardHtml()}</div>
