@@ -112,3 +112,41 @@ func TestUptimeUnconfigured(t *testing.T) {
 		t.Fatalf("expected configured=false")
 	}
 }
+
+func TestUptimeErrorSanitizedAndBackoff(t *testing.T) {
+	hits := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits++
+		w.WriteHeader(502)
+	}))
+	defer srv.Close()
+
+	oldCfg := cfgv
+	defer func() {
+		cfgv = oldCfg
+		resetUptimeCache()
+	}()
+	c := &Config{}
+	c.Uptime.URL = srv.URL
+	c.Uptime.Slug = "web"
+	cfgv = c
+	resetUptimeCache()
+
+	d := getUptime(false)
+	if ok, _ := d["ok"].(bool); ok {
+		t.Fatalf("expected ok=false on upstream 502")
+	}
+	if got := toStr(d["error"]); got != "upstream unavailable" {
+		t.Errorf("public error = %q, want %q (must not leak internal URL)", got, "upstream unavailable")
+	}
+	firstHits := hits
+	// 退避期内再次请求不应穿透上游
+	_ = getUptime(false)
+	if hits != firstHits {
+		t.Errorf("expected failure backoff to prevent upstream hit, got %d -> %d", firstHits, hits)
+	}
+	// 管理员状态仍保留详细错误便于排查
+	if stErr := toStr(uptimeStatus()["error"]); stErr == "" {
+		t.Errorf("expected detailed error in admin uptimeStatus()")
+	}
+}

@@ -13,6 +13,7 @@ function upOverallMeta(overall) {
   if (overall === 'up') return { dot: 'is-up', pill: 'is-up', key: 'up_all_ok' };
   if (overall === 'down') return { dot: 'is-down', pill: 'is-down', key: 'up_down' };
   if (overall === 'maintenance') return { dot: 'is-maint', pill: 'is-maint', key: 'up_maint' };
+  if (overall === 'empty') return { dot: '', pill: '', key: 'up_empty' };
   return { dot: 'is-warn', pill: 'is-warn', key: 'up_degraded' };
 }
 
@@ -124,9 +125,10 @@ function pageStatusInnerHtml() {
       <section class="card up-group"><div class="mu-skel" style="height:120px;width:100%"></div></section>
     </div>`;
   }
-  const pubUrl = (d && d.publicUrl) || '';
+  const rawPub = (d && d.publicUrl) || '';
+  const pubUrl = /^https?:\/\//i.test(rawPub) ? rawPub : '';
   const actionsHtml = `<div class="up-hero-actions">
-    <button class="up-btn" type="button" id="upRefreshBtn">${ICON.refresh}<span>${t('st_refresh')}</span></button>
+    <button class="up-btn up-refresh-btn" type="button">${ICON.refresh}<span>${t('st_refresh')}</span></button>
     ${pubUrl ? `<a class="up-btn" href="${esc(pubUrl)}" target="_blank" rel="noopener noreferrer">${ICON.external}<span>${t('up_open')}</span></a>` : ''}
   </div>`;
 
@@ -205,17 +207,20 @@ function pageStatusInnerHtml() {
 }
 
 function pageStatus() {
-  return `<div id="upRoot">${pageStatusInnerHtml()}</div>`;
+  return `<div class="up-root">${pageStatusInnerHtml()}</div>`;
 }
 
 function paintUptimeViews() {
   const hb = document.getElementById('hmUptimeBox');
   if (hb) hb.innerHTML = homeUptimeCardHtml();
-  const rootEl = document.getElementById('upRoot');
-  if (rootEl) {
-    rootEl.innerHTML = pageStatusInnerHtml();
-    const btn = document.getElementById('upRefreshBtn');
-    if (btn) btn.addEventListener('click', () => loadUptime('refresh'));
+  const roots = document.querySelectorAll('.up-root');
+  if (roots.length) {
+    const html = pageStatusInnerHtml();
+    roots.forEach(el => {
+      el.innerHTML = html;
+      const btn = el.querySelector('.up-refresh-btn');
+      if (btn) btn.addEventListener('click', () => loadUptime('refresh'));
+    });
   }
   if (window.HL_UI && window.HL_UI.getMode() === 'x2' && window.HL_X2) {
     window.HL_X2.paint();
@@ -234,7 +239,9 @@ async function loadUptime(force = false) {
   paintUptimeViews();
   try {
     const r = await fetch(hard ? 'api/uptime?refresh=1' : 'api/uptime', { credentials: 'same-origin', cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
+    if (!d || typeof d !== 'object') throw new Error('invalid response');
     upState.data = d;
     upState.at = Date.now();
   } catch (e) {

@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	uptimeCacheTTL   = 30 * time.Second
-	uptimeRefreshMin = 5 * time.Second
-	uptimeMaxBeats   = 30
+	uptimeCacheTTL    = 30 * time.Second
+	uptimeRefreshMin  = 5 * time.Second
+	uptimeFailBackoff = 10 * time.Second
+	uptimeMaxBeats    = 30
 )
 
 type uptimeBeat struct {
@@ -42,15 +43,19 @@ type uptimeGroup struct {
 
 var (
 	uptimeMu      sync.Mutex
+	uptimeGen     uint64
 	uptimeData    M
 	uptimeAt      time.Time
+	uptimeFailAt  time.Time
 	uptimeLastErr string
 )
 
 func resetUptimeCache() {
 	uptimeMu.Lock()
+	uptimeGen++
 	uptimeData = nil
 	uptimeAt = time.Time{}
+	uptimeFailAt = time.Time{}
 	uptimeLastErr = ""
 	uptimeMu.Unlock()
 }
@@ -118,12 +123,29 @@ func getUptime(force bool) M {
 	}
 
 	uptimeMu.Lock()
+	gen := uptimeGen
 	if uptimeData != nil {
 		age := time.Since(uptimeAt)
 		if (!force && age < uptimeCacheTTL) || (force && age < uptimeRefreshMin) {
 			d := uptimeData
 			uptimeMu.Unlock()
 			return d
+		}
+	}
+	if !uptimeFailAt.IsZero() {
+		fage := time.Since(uptimeFailAt)
+		if (!force && fage < uptimeFailBackoff) || (force && fage < uptimeRefreshMin) {
+			d := uptimeData
+			uptimeMu.Unlock()
+			if d != nil {
+				return d
+			}
+			return M{
+				"ok":         false,
+				"configured": true,
+				"publicUrl":  pubURL,
+				"error":      "upstream unavailable",
+			}
 		}
 	}
 	prev := uptimeData
@@ -133,20 +155,26 @@ func getUptime(force bool) M {
 	uptimeMu.Lock()
 	defer uptimeMu.Unlock()
 	if err != nil {
-		uptimeLastErr = err.Error()
-		if prev != nil {
+		if gen == uptimeGen {
+			uptimeLastErr = err.Error()
+			uptimeFailAt = time.Now()
+		}
+		if prev != nil && gen == uptimeGen {
 			return prev
 		}
 		return M{
 			"ok":         false,
 			"configured": true,
 			"publicUrl":  pubURL,
-			"error":      err.Error(),
+			"error":      "upstream unavailable",
 		}
 	}
-	uptimeData = fresh
-	uptimeAt = time.Now()
-	uptimeLastErr = ""
+	if gen == uptimeGen {
+		uptimeData = fresh
+		uptimeAt = time.Now()
+		uptimeFailAt = time.Time{}
+		uptimeLastErr = ""
+	}
 	return fresh
 }
 
