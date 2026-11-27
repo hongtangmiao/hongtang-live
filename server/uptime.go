@@ -62,7 +62,11 @@ func resetUptimeCache() {
 
 // parseUptimeTarget 允许用户把根地址（http://uptime-kuma:3001）或完整状态页链接（.../status/web）填进 url
 func parseUptimeTarget(rawURL, slug string) (baseURL, resolvedSlug string) {
-	u := strings.TrimRight(strings.TrimSpace(rawURL), "/")
+	u := strings.TrimSpace(rawURL)
+	if i := strings.IndexAny(u, "?#"); i >= 0 {
+		u = u[:i]
+	}
+	u = strings.TrimRight(u, "/")
 	s := strings.Trim(strings.TrimSpace(slug), "/")
 	if idx := strings.Index(u, "/status/"); idx > 0 {
 		tail := strings.Trim(u[idx+len("/status/"):], "/")
@@ -262,7 +266,10 @@ func fetchUptimeData(baseURL, slug, pubURL string) (M, error) {
 					if bm == nil {
 						continue
 					}
-					st := int(toNum(bm["status"]))
+					st := 2
+					if bm["status"] != nil {
+						st = int(toNum(bm["status"]))
+					}
 					ping := toNum(bm["ping"])
 					tm := strings.TrimSpace(toStr(bm["time"]))
 					m.Beats = append(m.Beats, uptimeBeat{S: st, P: ping, T: tm})

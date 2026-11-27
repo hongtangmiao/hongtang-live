@@ -15,6 +15,7 @@ func TestParseUptimeTarget(t *testing.T) {
 		{"http://uptime-kuma:3001", "", "http://uptime-kuma:3001", "web"},
 		{"https://state.7120721.xyz/status/web", "", "https://state.7120721.xyz", "web"},
 		{"https://state.7120721.xyz/status/web/", "custom", "https://state.7120721.xyz", "custom"},
+		{"https://state.7120721.xyz/status/web?foo=1#top", "", "https://state.7120721.xyz", "web"},
 	}
 	for _, tc := range cases {
 		b, s := parseUptimeTarget(tc.inURL, tc.inSlug)
@@ -53,16 +54,16 @@ func TestUptimeFetchAndAggregate(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	oldCfg := cfgv
+	oldCfg := conf()
 	defer func() {
-		cfgv = oldCfg
+		setConfig(oldCfg)
 		resetUptimeCache()
 	}()
 	c := &Config{}
 	c.Uptime.URL = srv.URL
 	c.Uptime.Slug = "web"
 	c.Uptime.PublicURL = "https://state.7120721.xyz/status/web"
-	cfgv = c
+	setConfig(c)
 	resetUptimeCache()
 
 	d := getUptime(true)
@@ -96,12 +97,12 @@ func TestUptimeFetchAndAggregate(t *testing.T) {
 }
 
 func TestUptimeUnconfigured(t *testing.T) {
-	oldCfg := cfgv
+	oldCfg := conf()
 	defer func() {
-		cfgv = oldCfg
+		setConfig(oldCfg)
 		resetUptimeCache()
 	}()
-	cfgv = &Config{}
+	setConfig(&Config{})
 	resetUptimeCache()
 
 	d := getUptime(false)
@@ -121,15 +122,15 @@ func TestUptimeErrorSanitizedAndBackoff(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	oldCfg := cfgv
+	oldCfg := conf()
 	defer func() {
-		cfgv = oldCfg
+		setConfig(oldCfg)
 		resetUptimeCache()
 	}()
 	c := &Config{}
 	c.Uptime.URL = srv.URL
 	c.Uptime.Slug = "web"
-	cfgv = c
+	setConfig(c)
 	resetUptimeCache()
 
 	d := getUptime(false)
