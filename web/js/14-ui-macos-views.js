@@ -91,7 +91,11 @@
     if (x2MaxId !== 'anime') {
       const bAnime = document.getElementById('x2b-anime');
       if (bAnime) {
-        const limit = window.innerWidth >= 1440 ? 6 : 4;
+        const cs = getComputedStyle(bAnime);
+        const innerW = bAnime.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+        const limit = innerW > 0
+          ? Math.max(2, Math.floor((innerW + 12) / (144 + 12)))
+          : (window.innerWidth >= 1440 ? 6 : 4);
         const items = (typeof viState !== 'undefined' && viState.data && Array.isArray(viState.data.items))
           ? viState.data.items.filter(x => x.status === 'watching').slice(0, limit)
           : [];

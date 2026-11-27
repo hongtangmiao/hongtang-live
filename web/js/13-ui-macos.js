@@ -451,6 +451,7 @@
     const hrEl = document.getElementById('x2MbHr');
     if (hrEl) hrEl.textContent = (h && h.hr_live != null) ? `${h.hr_live} bpm` : '';
 
+    if (!x2UserMoved && !x2MaxId) layoutDefault();
     if (window.HL_X2_VIEWS) window.HL_X2_VIEWS.renderSummaries(x2MaxId, zh);
     if (!x2UserMoved && !x2MaxId) requestAnimationFrame(layoutDefault);
   }
@@ -458,7 +459,7 @@
   window.HL_X2 = {
     paint,
     exitFullscreen: () => { if (x2MaxId) toggleFullscreen(x2MaxId); },
-    onResize: () => { if (!x2UserMoved && !x2MaxId) layoutDefault(); },
+    onResize: () => { if (!x2UserMoved && !x2MaxId) paint(); },
   };
 
   window.addEventListener('keydown', e => {
