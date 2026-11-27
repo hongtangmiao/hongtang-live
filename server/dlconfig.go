@@ -22,10 +22,10 @@ const dlDefaultsJSON = `{
  "report": {"title_max_chars": 80, "max_timeline_rows": 300, "max_payload_chars": 26000, "top_apps": 15,
    "top_domains": 15, "max_sessions": 25, "ocr_chars_per_screen": 240, "max_screens": 400},
  "privacy": {
-   "secret_apps": ["1password", "bitwarden", "keepass", "lastpass", "keepassxc", "网银", "银行", "支付宝", "微信支付", "证券", "券商",
-     "authenticator", "验证器", "身份证", "密码"],
+   "secret_apps": ["1password", "bitwarden", "keepass", "lastpass", "keepassxc", "网银", "银行", "支付宝", "微信支付", "云闪付", "证券", "券商",
+     "icbcebank", "mwicbc", "authenticator", "验证器", "身份证", "密码"],
    "hide_title_apps": ["wechat", "微信", "qq", "tim", "feishu", "飞书", "dingtalk", "钉钉", "outlook", "thunderbird", "foxmail", "mail",
-     "telegram", "discord"],
+     "telegram", "unigram", "discord", "quicklook", "bandizip"],
    "browser_apps": ["chrome", "msedge", "edge", "firefox", "brave", "arc", "vivaldi", "opera", "chromium", "librewolf", "zen", "floorp", "safari"]},
  "live": {"enabled": true, "public_show_title": false, "stale_sec": 180, "poll_sec": 10, "segment_gap_sec": 120, "token": "", "max_rows": 60},
  "telegram": {"enabled": false, "bot_token": "", "chat_id": "", "send_daily": true, "send_weekly": false},
@@ -36,14 +36,22 @@ const dlDefaultsJSON = `{
    "qq": "QQ", "potplayermini64": "PotPlayer", "photoshop": "Photoshop", "bilibili": "哔哩哔哩"},
  "categories": [
    {"name": "写代码", "patterns": [
-     "(?im)^code(\\.exe)?$|visual studio code|vscode|cursor|pycharm|intellij|webstorm|goland|sublime|notepad\\+\\+",
-     "(?i)powershell|cmd\\.exe|windowsterminal|windows terminal|mintty|wsl|putty|tabby",
-     "(?i)github|gitlab|stack overflow|\\.py\\b|\\.ts\\b|\\.rs\\b|\\.go\\b|\\.java\\b|\\.ps1\\b|\\.json\\b|\\.toml\\b"]},
-   {"name": "创作", "patterns": ["(?i)photoshop|illustrator|indesign|blender|premiere|after effects|davinci|figma|clip studio|krita|sai2|aseprite|obs\\b|audition"]},
-   {"name": "沟通", "patterns": ["(?i)wechat|微信|qq\\.exe|telegram|discord|feishu|飞书|dingtalk|钉钉|slack|outlook|thunderbird|foxmail|邮件|收件箱|inbox|(?<![a-z])mail(?![a-z])"]},
-   {"name": "娱乐", "patterns": ["(?i)bilibili|youtube|netflix|twitch|steam|epicgames|原神|崩坏|星穹|抖音|douyin|tiktok|weibo|微博|贴吧|reddit|小红书|知乎"]},
-   {"name": "读资料", "patterns": ["(?i)acrobat|sumatrapdf|pdf|obsidian|notion|zotero|calibre|epub|kindle|readwise"]},
-   {"name": "浏览", "patterns": ["(?i)chrome|msedge|edge|firefox|brave|arc\\.exe|opera|vivaldi"]}
+     "(?im)^code(\\.exe)?$|visual studio code|vscode|cursor|pycharm|intellij|webstorm|goland|sublime|notepad\\+\\+|antigravity|deepseek harness|workbuddy|amazon quick|aws quick|gemini|千问|chatgpt",
+     "(?i)powershell|cmd\\.exe|windowsterminal|windows terminal|mintty|wsl|putty|tabby|mobaxterm",
+     "(?i)github|gitlab|stack overflow|cloudflare|fnos|astrbot|nginx proxy manager|openclash|activitywatch|\\.py\\b|\\.ts\\b|\\.rs\\b|\\.go\\b|\\.java\\b|\\.ps1\\b|\\.json\\b|\\.toml\\b"]},
+   {"name": "游戏", "patterns": [
+     "(?i)三角洲|deltaforce|delta_force|鼠鼠工具|异环|htgame|ntegame|neverness|starrail|崩坏|星穹|绝区零|zenless|生死狙击|hallclient|ssjj2|原神|genshin",
+     "(?i)steam|wegame|starward|米哈游启动器|epicgames|ace-helper|ace-tray|zfgamebrowser|betopgame|controllermeta"]},
+   {"name": "听歌", "patterns": ["(?i)mygo|folia|cloudmusic|网易云音乐|spotify|qq音乐|酷狗"]},
+   {"name": "创作", "patterns": ["(?i)photoshop|illustrator|indesign|blender|premiere|after effects|davinci|figma|clip studio|krita|sai2|aseprite|obs64|obs\\b|vtube studio|audition"]},
+   {"name": "沟通", "patterns": ["(?im)wechat|微信|qq\\.exe|^qq$|telegram|unigram|discord|feishu|飞书|dingtalk|钉钉|slack|outlook|thunderbird|foxmail|(?<![a-z])gmail(?![a-z])|qq邮箱|邮件|收件箱|inbox|(?<![a-z])mail(?![a-z])|短信|^信息$"]},
+   {"name": "娱乐", "patterns": ["(?im)bilibili|哔哩哔哩|huya|虎牙|jellyfin|potplayer|youtube|netflix|twitch|抖音|douyin|tiktok|^x$|(?<![a-z0-9-])x\\.com|twitter|weibo|微博|贴吧|reddit|小红书|知乎|米游社"]},
+   {"name": "工具", "patterns": [
+     "(?im)explorer|文件管理器|文件极客|^文件$|livecaptions|sokuji|mtool|renpythief|notepad|备忘录|winword|quicklook|snippingtool|bandizip|计算器",
+     "(?i)idman|misterdownloadmanager|fn-sync-client|腕连闪传|云空间|phoneexperiencehost|nvidia app|gpu-z|msiafterburner|lghub|steelseries|macrodeck|hp smart|打印队列|wallpaperui",
+     "(?im)taskmgr|任务管理器|searchhost|shellhost|shellexperiencehost|hibituninstaller|windowssandbox|zadig|spacedesk|flclash|shizuku|出境易|遥测组件清理|音频管家|^设置$|acrobat|sumatrapdf|pdf|obsidian|notion|zotero|calibre|epub|kindle"]},
+   {"name": "生活", "patterns": ["(?im)美团|淘宝闪购|必胜客|饿了么|京东|淘宝|拼多多|aliexpress|google play|华为应用市场|microsoft store|华为运动健康|华为创新研究|我的华为|intervals\\.icu|gadgetbridge|高德地图|中国移动|网上国网|^photos$|^图库$"]},
+   {"name": "浏览", "patterns": ["(?im)chrome|msedge|edge|firefox|brave|arc\\.exe|opera|vivaldi|夸克|^google$"]}
  ]
 }`
 

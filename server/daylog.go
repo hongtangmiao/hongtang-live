@@ -89,7 +89,8 @@ func resetDaylogDB() {
 
 // 像素主题：与 daylog 同一套 8-bit 调色板
 var catColors = map[string]string{
-	"写代码": "#ffd23f", "创作": "#c0b6ff", "沟通": "#ffa94d", "娱乐": "#ff9ec4",
+	"写代码": "#ffd23f", "游戏": "#ff6b9d", "听歌": "#63e6be", "创作": "#c0b6ff",
+	"沟通": "#ffa94d", "娱乐": "#ff9ec4", "工具": "#74c0fc", "生活": "#b2f2bb",
 	"读资料": "#8ce99a", "浏览": "#8fd3ff", "其他": "#7c86b0", "私密": "#4a5890",
 }
 var fallbackColors = []string{"#ff9ec4", "#c0b6ff", "#ffa94d", "#8fd3ff", "#8ce99a"}

@@ -43,7 +43,7 @@ func eq(t *testing.T, name string, got, want any) {
 func TestGameNames(t *testing.T) {
 	setupDL(t, true)
 	for app, want := range map[string]string{"DeltaForceClient-Win64-Shipping.exe": "三角洲行动", "StarRail.exe": "崩坏：星穹铁道",
-		"ZenlessZoneZero.exe": "绝区零", "ntegame.exe": "异环"} {
+		"ZenlessZoneZero.exe": "绝区零", "ntegame.exe": "异环", "HTGame.exe": "异环", "hallclient.exe": "生死狙击2"} {
 		eq(t, app, appLabel(dlCfg(), app), want)
 	}
 }
@@ -51,11 +51,25 @@ func TestGameNames(t *testing.T) {
 func TestIdentityNotOverwritten(t *testing.T) {
 	setupDL(t, true)
 	stMu.Lock()
-	saved := stTexts.Heuristics
+	savedH := stTexts.Heuristics
+	savedN := stTexts.Names["TestGame"]
 	stTexts.Heuristics = []any{[]any{"游戏|game|steam", "i", "在打游戏"}}
+	stTexts.Names["TestGame"] = "某定名游戏"
 	stMu.Unlock()
-	defer func() { stMu.Lock(); stTexts.Heuristics = saved; stMu.Unlock() }()
-	eq(t, "异环 保留身份", describe(dlCfg(), "NTEGame.exe", "异环", "").Label, "在用 异环")
+	defer func() {
+		stMu.Lock()
+		stTexts.Heuristics = savedH
+		if savedN == nil {
+			delete(stTexts.Names, "TestGame")
+		} else {
+			stTexts.Names["TestGame"] = savedN
+		}
+		stMu.Unlock()
+	}()
+	eq(t, "已定名无文案的应用保留身份", describe(dlCfg(), "TestGame.exe", "某定名游戏", "").Label, "在用 某定名游戏")
+	if got := describe(dlCfg(), "NTEGame.exe", "异环", "").Label; !strings.HasSuffix(got, "喵~") || got == "在打游戏" {
+		t.Errorf("异环 走精确文案不走启发式: %s", got)
+	}
 	eq(t, "未知游戏仍可用启发式", describe(dlCfg(), "WeirdGame.exe", "Whatever", "").Label, "在打游戏")
 }
 
@@ -67,7 +81,22 @@ func TestCategories(t *testing.T) {
 	if got := describe(c, "chrome.exe", "某篇文章 contact a@b.com", "https://example.com/x").Cat; got == "沟通" {
 		t.Errorf("普通含邮箱网页不算邮件: %s", got)
 	}
-	eq(t, "游戏归娱乐", describe(c, "StarRail.exe", "崩坏：星穹铁道", "").Cat, "娱乐")
+	eq(t, "星铁归游戏", describe(c, "StarRail.exe", "崩坏：星穹铁道", "").Cat, "游戏")
+	eq(t, "异环归游戏", describe(c, "HTGame.exe", "异环", "").Cat, "游戏")
+	eq(t, "MyGo 归听歌", describe(c, "MyGo 云音乐.exe", "MyGo 云音乐", "").Cat, "听歌")
+	eq(t, "Antigravity 归写代码且不被 live 误伤", describe(c, "Antigravity.exe", "hongtang-live", "").Cat, "写代码")
+	if got := describe(c, "Antigravity.exe", "hongtang-live", "").Label; strings.Contains(got, "直播") {
+		t.Errorf("Antigravity 不该被 live 误伤成直播: %s", got)
+	}
+	eq(t, "云闪付归私密", describe(c, "云闪付", "", "").Cat, "私密")
+	eq(t, "私密应用走自定义文案", describe(c, "云闪付", "", "").Label, "正在干点机密大事（嘘）喵~")
+	eq(t, "x.com 归娱乐", describe(c, "chrome.exe", "主页", "https://x.com/home").Cat, "娱乐")
+	eq(t, "X 应用归娱乐", describe(c, "X", "", "").Cat, "娱乐")
+	for _, dom := range []string{"https://dropbox.com/home", "https://linux.com/", "https://nginx.com/", "https://xbox.com/"} {
+		if got := describe(c, "chrome.exe", "首页", dom).Cat; got == "娱乐" {
+			t.Errorf("%s 不该被 x.com 误判为娱乐", dom)
+		}
+	}
 	// (?<![a-z])mail(?![a-z]) 这种 Python 写法要能用
 	eq(t, "lookbehind 正则", categoryOf(c, "Mail", "", ""), "沟通")
 	if got := categoryOf(c, "gmailer", "", ""); got == "沟通" {
@@ -254,15 +283,24 @@ func TestFmtAgoMeow(t *testing.T) {
 func TestUWPTitle(t *testing.T) {
 	setupDL(t, true)
 	c := dlCfg()
-	asM(c["privacy"])["hide_title_apps"] = []any{"Unigram", "telegram"}
 	d := describe(c, "ApplicationFrameHost.exe", "红糖server通知 @ 红 糖 \u200e- Unigram", "")
-	eq(t, "只显示应用名", d.Label, "在用 Unigram")
+	eq(t, "UWP Unigram 归沟通", d.Cat, "沟通")
+	if !strings.HasSuffix(d.Label, "喵~") || strings.Contains(d.Label, "通知") {
+		t.Errorf("UWP Unigram 走自定义文案且不漏标题: %s", d.Label)
+	}
 	eq(t, "标题不下发", d.Title, "")
 	if l := describe(c, "ApplicationFrameHost.exe", "某个群聊 - Unigram", "").Label; strings.Contains(l, "群聊") {
 		t.Errorf("会话名不出现: %s", l)
 	}
-	eq(t, "无分隔符时用标题当名字", describe(c, "ApplicationFrameHost.exe", "计算器", "").Label, "在用 计算器")
-	eq(t, "hide_title_apps 命中标题也隐藏", describe(c, "Telegram.exe", "Alice: 你好呀", "").Label, "在用 Telegram")
+	eq(t, "无分隔符 UWP 走自定义文案", describe(c, "ApplicationFrameHost.exe", "计算器", "").Label, "正在按计算器盘算一笔大账喵~")
+	eq(t, "未知 UWP 仍显示应用名", describe(c, "ApplicationFrameHost.exe", "某个未知应用", "").Label, "在用 某个未知应用")
+	for _, tc := range [][2]string{{"Telegram.exe", "Alice: 你好呀"}, {"WeChat.exe", "某群聊"}, {"QuickLook.exe", "secret.png"}, {"Bandizip.exe", "private.7z"}} {
+		got := describe(c, tc[0], tc[1], "")
+		if strings.Contains(got.Label, tc[1]) || !strings.HasSuffix(got.Label, "喵~") {
+			t.Errorf("%s 命中 hide_title_apps 时应走文案且不露标题: %s", tc[0], got.Label)
+		}
+		eq(t, tc[0]+" 标题不入库", got.Title, "")
+	}
 }
 
 func TestSegments(t *testing.T) {

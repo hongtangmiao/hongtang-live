@@ -97,7 +97,6 @@ type statusTexts struct {
 	Exact      map[string]any
 	Heuristics []any
 	Names      map[string]any
-	Default    string
 }
 
 var (
@@ -126,9 +125,6 @@ func loadStatusTexts() {
 			merged.Names[k] = v
 		}
 		merged.Heuristics = append(merged.Heuristics, asA(d["heuristics"])...)
-		if truthy(d["default"]) {
-			merged.Default = toStr(d["default"])
-		}
 	}
 	apply(builtinStatusTexts, "builtin")
 	var newest time.Time
@@ -290,7 +286,7 @@ var builtinRules = []struct {
 	pats []string
 }{
 	{"写代码", []string{`(?i)cloudflare|dash\.cloudflare\.com|workers\.dev|pages\.dev`}},
-	{"娱乐", []string{`(?i)三角洲|deltaforce|starrail|崩坏|星穹|绝区零|zenless|异环|ntegame|neverness|原神|genshin`}},
+	{"游戏", []string{`(?i)三角洲|deltaforce|delta_force|starrail|崩坏|星穹|绝区零|zenless|异环|htgame|ntegame|neverness|原神|genshin|生死狙击|hallclient|ssjj2`}},
 	{"沟通", []string{`(?i)mail\.google\.com|outlook\.(?:com|office\.com|live\.com)|mail\.(?:qq|163|126|sina)\.com` +
 		`|inbox|收件箱|撰写邮件|foxmail|thunderbird|网易邮箱`}},
 }
@@ -321,7 +317,7 @@ var uwpHosts = map[string]bool{"applicationframehost": true, "wwahost": true, "r
 // 这些进程名对人没意义，换成看得懂的名字（空串表示用窗口标题当名字）
 var hostNames = map[string]string{
 	"shellexperiencehost": "系统界面", "startmenuexperiencehost": "开始菜单", "searchapp": "搜索", "searchhost": "搜索",
-	"textinputhost": "输入法", "lockapp": "锁屏", "sihost": "系统界面",
+	"shellhost": "快速设置", "textinputhost": "输入法", "lockapp": "锁屏", "sihost": "系统界面",
 	"applicationframehost": "", "wwahost": "", "runtimebroker": "",
 }
 
@@ -398,13 +394,17 @@ func describe(cfg M, app, title, rawURL string) described {
 	showTitle := dTruthy(cfg, "live", "public_show_title")
 	hide := dList(cfg, "privacy", "hide_title_apps")
 	if hitAny(dList(cfg, "privacy", "secret_apps"), app+" "+title) {
-		return described{Label: "私密应用", Cat: "私密", Secret: true, Plain: "私密应用"}
+		lbl := or(statusText("", "私密应用", "", false), "私密应用")
+		return described{Label: lbl, Cat: "私密", Secret: true, Plain: lbl}
 	}
 	cat := categoryOf(cfg, app, title, rawURL)
 	name := appLabel(cfg, app)
 	key := strings.ToLower(appKey(app))
 
 	if friendly := hostNames[key]; friendly != "" {
+		if custom := statusText(app, friendly, "", false); custom != "" {
+			return described{Label: custom, Cat: cat, Plain: custom}
+		}
 		return described{Label: "在用 " + friendly, Cat: cat, Plain: "在用 " + friendly}
 	}
 	if uwpHosts[key] && title == "" {
@@ -446,6 +446,9 @@ func describe(cfg M, app, title, rawURL string) described {
 		if guess != "" {
 			cat = categoryOf(cfg, guess, "", "")
 			shown := or(customName(guess), guess)
+			if custom := statusText(guess, shown, "", false); custom != "" {
+				return described{Label: custom, Cat: cat, Plain: custom}
+			}
 			return described{Label: "在用 " + shown, Cat: cat, Plain: "在用 " + shown}
 		}
 	}
@@ -453,7 +456,7 @@ func describe(cfg M, app, title, rawURL string) described {
 	plain := "在用 " + name
 	if custom != "" {
 		t := ""
-		if showTitle {
+		if showTitle && !hitAny(hide, app) && !hitAny(hide, title) {
 			t = title
 		}
 		return described{Label: custom, Cat: cat, Title: t, Plain: custom}
